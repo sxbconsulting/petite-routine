@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Petite Routine</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --card:#ffffff;
@@ -122,6 +123,44 @@
     display:flex;flex-direction:column;align-items:center;gap:1px}
   .edit-wheel-btn .ew-hint{font-family:'Nunito',sans-serif;font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
   .edit-wheel-btn:active{transform:scale(.95)}
+  .bank-view .edit-wheel-btn{align-self:center;margin-top:16px}
+
+  /* ── Tirelire ── */
+  body.bank{background:linear-gradient(180deg,#ffe3ba 0%,#ffd1dc 50%,#d9ecff 100%)}
+  .bank-view{display:none;flex-direction:column;margin-top:12px}
+  .bank-view.show{display:flex}
+  .piggy-card{background:var(--card);border-radius:var(--radius);padding:20px;text-align:center;
+    box-shadow:0 8px 24px rgba(58,46,82,.14)}
+  .piggy{font-size:64px;animation:float 4s ease-in-out infinite}
+  .piggy-balance{font-size:44px;font-weight:700;color:var(--ink);line-height:1.1;margin-top:4px}
+  .piggy-balance .piggy-star{font-size:32px}
+  .piggy-balance.spend{animation:spendPop .6s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes spendPop{0%{transform:scale(1)}35%{transform:scale(1.18);color:#c0392b}100%{transform:scale(1)}}
+  .piggy-caption{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+  .rewards-title{font-family:'Nunito',sans-serif;font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin:18px 2px 10px}
+  .rewards{display:flex;flex-direction:column;gap:12px}
+  .reward{display:flex;align-items:center;gap:14px;background:var(--card);border:none;border-radius:22px;
+    padding:14px 16px;cursor:pointer;box-shadow:0 6px 18px rgba(58,46,82,.12);text-align:left;width:100%;
+    transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+  .reward:active{transform:scale(.97)}
+  .reward .r-emoji{font-size:40px;flex-shrink:0}
+  .reward .r-body{flex:1;min-width:0}
+  .reward .r-label{font-size:17px;font-weight:600;color:var(--ink)}
+  .reward .r-progress{height:8px;border-radius:6px;background:#efeaf8;margin-top:6px;overflow:hidden}
+  .reward .r-progress i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#ffd66b,#ffb830)}
+  .reward .r-need{font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;color:var(--ink-soft);margin-top:4px}
+  .reward .r-cost{flex-shrink:0;font-family:'Fredoka',sans-serif;font-weight:700;font-size:16px;
+    background:#f3f0fa;color:var(--ink-soft);border-radius:14px;padding:8px 12px}
+  .reward.can{outline:3px solid var(--gold)}
+  .reward.can .r-cost{background:var(--gold);color:#4a3200}
+  .reward.can .r-need{color:#1e8a5a}
+  .buy-confirm{margin-top:26px;border:none;border-radius:24px;padding:16px 30px;font-family:'Fredoka',sans-serif;
+    font-size:17px;font-weight:600;background:var(--mint);color:#fff;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.25);
+    position:relative;overflow:hidden}
+  .buy-confirm .hold-fill{position:absolute;inset:0;width:0%;background:rgba(255,255,255,.3)}
+  .buy-confirm span{position:relative}
+  .buy-cancel{margin-top:12px;border:none;border-radius:20px;padding:12px 26px;font-family:'Fredoka',sans-serif;
+    font-size:15px;font-weight:600;background:rgba(255,255,255,.25);color:#fff;cursor:pointer}
 
   /* ── Semaine ── */
   .week{margin-top:auto;padding-top:24px}
@@ -171,6 +210,50 @@
   .edit-row input.em{width:64px;text-align:center;font-size:22px;border:2px solid #e8e3f4;border-radius:12px;padding:10px 4px}
   .edit-row input.lb{flex:1;border:2px solid #e8e3f4;border-radius:12px;padding:10px 12px;font-family:'Fredoka',sans-serif;font-size:16px}
   .edit-row .del{border:none;background:#ffe3e3;color:#c0392b;border-radius:12px;width:42px;height:42px;font-size:17px;cursor:pointer;flex-shrink:0}
+  .edit-row input.cost{width:64px;text-align:center;font-family:'DM Mono','Fredoka',monospace;font-size:16px;border:2px solid #e8e3f4;border-radius:12px;padding:10px 4px}
+  .hist-row{display:flex;align-items:center;gap:10px;background:#faf8ff;border-radius:14px;padding:10px 12px;margin-bottom:6px}
+  .hist-row .h-emoji{font-size:22px}
+  .hist-row .h-label{flex:1;font-size:14px;font-weight:600;color:var(--ink)}
+  .hist-row .h-cost{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;color:#c0392b}
+  .hist-row .h-refund{border:none;background:#eef7f1;border-radius:10px;width:36px;height:36px;font-size:15px;cursor:pointer}
+  .hist-empty{font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;color:var(--ink-soft);padding:4px 2px}
+
+  /* ── Synchro famille ── */
+  .child-chip{margin-top:10px;border:none;border-radius:16px;padding:8px 14px;font-family:'Fredoka',sans-serif;
+    font-size:14px;font-weight:600;background:rgba(255,255,255,.55);color:var(--ink);cursor:pointer}
+  body.evening .child-chip{background:rgba(255,255,255,.16);color:#f3efff}
+  .onb{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:20px;
+    background:linear-gradient(180deg,#ffe9b3,#ffd1dc 55%,#bfe3ff);overflow-y:auto}
+  .onb.show{display:flex}
+  .onb-card{background:#fff;border-radius:30px;padding:30px 24px;max-width:400px;width:100%;text-align:center;
+    box-shadow:0 20px 60px rgba(58,46,82,.25)}
+  .onb-emoji{font-size:52px}
+  .onb-card h2{font-size:26px;color:var(--ink);margin-top:8px}
+  .onb-sub{font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;color:var(--ink-soft);margin:10px 0 14px;line-height:1.5}
+  .onb-btn{display:block;width:100%;border:2px solid #e8e3f4;background:#fff;border-radius:18px;padding:15px;
+    font-family:'Fredoka',sans-serif;font-size:17px;font-weight:600;color:var(--ink);cursor:pointer;margin-bottom:10px}
+  .onb-btn.primary{background:var(--gold);border-color:var(--gold);color:#4a3200}
+  .onb-btn:active{transform:scale(.97)}
+  .onb-link{border:none;background:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;
+    color:var(--ink-soft);cursor:pointer;text-decoration:underline;margin-top:4px}
+  .onb-input{width:100%;border:2px solid #e8e3f4;border-radius:16px;padding:14px;font-family:'Fredoka',sans-serif;
+    font-size:18px;color:var(--ink);text-align:center;margin-bottom:12px}
+  .onb-input.code{font-size:24px;letter-spacing:.2em;text-transform:uppercase}
+  .onb-code-display{font-size:34px;font-weight:700;letter-spacing:.15em;color:var(--ink);background:#faf8ff;
+    border:3px dashed var(--gold);border-radius:18px;padding:16px;margin:8px 0 4px}
+  .onb-msg{font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;color:#c0392b;min-height:18px;margin-top:6px}
+  .onb-child{display:flex;align-items:center;gap:10px;width:100%;border:2px solid #e8e3f4;background:#fff;
+    border-radius:16px;padding:13px 16px;font-family:'Fredoka',sans-serif;font-size:17px;font-weight:600;
+    color:var(--ink);cursor:pointer;margin-bottom:8px;text-align:left}
+  .onb-child:active{transform:scale(.97)}
+  .fam-info{background:#faf8ff;border-radius:16px;padding:12px 14px;margin-bottom:14px;
+    font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;color:var(--ink-soft)}
+  .fam-info b{font-family:'Fredoka',sans-serif;font-size:18px;letter-spacing:.12em;color:var(--ink)}
+  .fam-info .fam-leave{border:none;background:#ffe3e3;color:#c0392b;border-radius:10px;padding:7px 10px;
+    font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;cursor:pointer;margin-top:8px}
+  .sync-dot{position:fixed;top:12px;left:12px;z-index:6;font-family:'Nunito',sans-serif;font-weight:800;font-size:10px;
+    letter-spacing:.06em;padding:5px 9px;border-radius:10px;background:rgba(255,255,255,.6);color:var(--ink-soft);display:none}
+  .sync-dot.show{display:block}
   .add-btn{border:2px dashed #cfc7e6;background:none;border-radius:14px;padding:11px;width:100%;font-family:'Fredoka',sans-serif;font-size:15px;font-weight:600;color:var(--ink-soft);cursor:pointer;margin-top:2px}
   .edit-wheel-item{background:#faf8ff;border-radius:16px;padding:10px 10px 12px;margin-bottom:10px;transition:opacity .2s}
   .edit-wheel-item.off{opacity:.55}
@@ -198,12 +281,14 @@
 <body class="morning">
 
 <div class="sky" id="sky"></div>
+<div class="sync-dot" id="syncDot"></div>
 
 <div class="app">
   <header>
     <div class="day-label" id="dayLabel"></div>
     <h1 id="greeting">Bonjour&nbsp;!</h1>
     <div class="subtitle" id="subtitle">C'est l'heure de la routine du matin</div>
+    <button class="child-chip" id="childChip" onclick="openChildPicker()" style="display:none">👧 <span id="childChipName"></span> ▾</button>
   </header>
 
   <div class="tabs">
@@ -211,6 +296,7 @@
     <button class="tab" id="tab-afternoon" onclick="switchView('afternoon')"><span class="ic">⛅</span>Aprem</button>
     <button class="tab" id="tab-evening" onclick="switchView('evening')"><span class="ic">🌙</span>Soir</button>
     <button class="tab" id="tab-wheel" onclick="switchView('wheel')"><span class="ic">🎡</span>La roue</button>
+    <button class="tab" id="tab-bank" onclick="switchView('bank')"><span class="ic">🐷</span>Tirelire</button>
   </div>
 
   <div class="progress-wrap" id="progressWrap">
@@ -230,6 +316,17 @@
     <button class="edit-wheel-btn" id="editWheelBtn">✏️ Modifier les activités <span class="ew-hint">appui long — parents</span></button>
   </div>
 
+  <div class="bank-view" id="bankView">
+    <div class="piggy-card">
+      <div class="piggy">🐷</div>
+      <div class="piggy-balance"><span id="bankBalance">0</span> <span class="piggy-star">⭐</span></div>
+      <div class="piggy-caption">dans ma tirelire</div>
+    </div>
+    <div class="rewards-title">Mes cadeaux 🎁</div>
+    <div class="rewards" id="rewards"></div>
+    <button class="edit-wheel-btn" id="editRewardsBtn">✏️ Modifier les cadeaux <span class="ew-hint">appui long — parents</span></button>
+  </div>
+
   <div class="week">
     <div class="week-title">Mes étoiles de la semaine</div>
     <div class="week-row" id="weekRow"></div>
@@ -245,10 +342,65 @@
   <button onclick="closeCelebrate()" id="celebrateBtn">Youpi&nbsp;! 🎉</button>
 </div>
 
+<div class="celebrate" id="buySheet">
+  <div class="big-star" id="buyEmoji">🎁</div>
+  <h2 id="buyTitle">Cadeau</h2>
+  <p id="buyText">Prix : 5 ⭐</p>
+  <button class="buy-confirm" id="buyConfirm">👨‍👩‍👧 Parent : appui long pour offrir</button>
+  <button class="buy-cancel" onclick="closeBuy()">Pas maintenant</button>
+</div>
+
+<div class="onb" id="onb">
+  <div class="onb-card">
+    <div class="onb-step" id="onb-home">
+      <div class="onb-emoji">🐷⭐</div>
+      <h2>Petite Routine</h2>
+      <p class="onb-sub">Les routines, la roue et la tirelire de vos enfants — synchronisées entre les téléphones des parents.</p>
+      <button class="onb-btn primary" onclick="onbShow('create')">🏠 Créer notre famille</button>
+      <button class="onb-btn" onclick="onbShow('join')">🔑 J'ai un code famille</button>
+      <button class="onb-link" onclick="skipSync()">Essayer sans synchronisation</button>
+    </div>
+    <div class="onb-step" id="onb-create" style="display:none">
+      <h2>Créer la famille 🏠</h2>
+      <p class="onb-sub">Prénom (ou surnom) de votre enfant :</p>
+      <input class="onb-input" id="onbChildName" placeholder="Prénom" maxlength="20">
+      <button class="onb-btn primary" id="onbCreateBtn" onclick="createFamily()">C'est parti ! 🚀</button>
+      <button class="onb-link" onclick="onbShow('home')">← Retour</button>
+    </div>
+    <div class="onb-step" id="onb-join" style="display:none">
+      <h2>Rejoindre 🔑</h2>
+      <p class="onb-sub">Saisissez le code famille (ex. PR-K4TZ) :</p>
+      <input class="onb-input code" id="onbCode" placeholder="PR-XXXX" maxlength="7" autocapitalize="characters">
+      <button class="onb-btn primary" id="onbJoinBtn" onclick="joinFamily()">Rejoindre</button>
+      <button class="onb-link" onclick="onbShow('home')">← Retour</button>
+    </div>
+    <div class="onb-step" id="onb-children" style="display:none">
+      <h2>Qui est-ce ? 👧👦</h2>
+      <p class="onb-sub">Choisissez l'enfant ou ajoutez-en un :</p>
+      <div id="onbChildList"></div>
+      <input class="onb-input" id="onbNewChild" placeholder="Ajouter un enfant (prénom)" maxlength="20">
+      <button class="onb-btn" onclick="addChild()">➕ Ajouter</button>
+    </div>
+    <div class="onb-step" id="onb-done" style="display:none">
+      <div class="onb-emoji">🎉</div>
+      <h2>Famille créée !</h2>
+      <p class="onb-sub">Votre code famille :</p>
+      <div class="onb-code-display" id="onbCodeDisplay">PR-XXXX</div>
+      <p class="onb-sub">Partagez-le avec l'autre parent : il saisira ce code sur son téléphone pour voir les mêmes données.</p>
+      <button class="onb-btn primary" onclick="finishOnb()">Ouvrir l'app ⭐</button>
+    </div>
+    <div class="onb-msg" id="onbMsg"></div>
+  </div>
+</div>
+
 <div class="sheet" id="sheet">
   <div class="sheet-inner">
     <h3>Espace parents 👋</h3>
     <div class="hint">Modifiez les routines et la roue, puis touchez Enregistrer.</div>
+    <div class="fam-info" id="famInfo" style="display:none">
+      Code famille à partager avec l'autre parent :<br><b id="famCode">—</b><br>
+      <button class="fam-leave" onclick="leaveFamily()">Quitter la famille sur cet appareil</button>
+    </div>
     <div class="field">
       <label>Prénom de l'enfant</label>
       <input type="text" id="childName" placeholder="Prénom">
@@ -272,6 +424,15 @@
       <div class="field"><label>La roue des activités 🎡</label></div>
       <div id="edit-wheel"></div>
       <button class="add-btn" onclick="addTask('wheelItems')">+ Ajouter une activité</button>
+    </div>
+    <div class="edit-section">
+      <div class="field"><label>Les cadeaux de la tirelire 🐷</label></div>
+      <div id="edit-rewards"></div>
+      <button class="add-btn" onclick="addTask('rewards')">+ Ajouter un cadeau</button>
+    </div>
+    <div class="edit-section">
+      <div class="field"><label>Derniers cadeaux offerts 🎁</label></div>
+      <div id="purchase-history"></div>
     </div>
     <div class="sheet-actions">
       <button class="btn-reset" onclick="resetToday()">Remettre à zéro aujourd'hui</button>
@@ -319,6 +480,13 @@ const DEFAULT_CONFIG = {
     {emoji:"🎨", label:"Dessiner ou colorier", weight:2, enabled:true},
     {emoji:"🍪", label:"Faire à manger", weight:2, enabled:true},
     {emoji:"🌳", label:"Une activité dehors", weight:2, enabled:true}
+  ],
+  rewards: [
+    {emoji:"🍬", label:"Une petite surprise", cost:3},
+    {emoji:"🍦", label:"Une glace", cost:5},
+    {emoji:"🎠", label:"Un tour de manège", cost:8},
+    {emoji:"🧸", label:"Un petit jouet", cost:15},
+    {emoji:"🎁", label:"Un gros cadeau", cost:30}
   ]
 };
 const ROUTINES = ["morning","afternoon","evening"];
@@ -353,6 +521,7 @@ function loadConfig(){
         if(typeof t.weight !== "number") t.weight = 2;
         if(typeof t.enabled !== "boolean") t.enabled = true;
       });
+      if(!c.rewards) c.rewards = JSON.parse(JSON.stringify(DEFAULT_CONFIG.rewards));
       return c;
     }catch(e){}
   }
@@ -391,6 +560,25 @@ function loadStars(){
 let stars = loadStars();
 function saveStars(){ sSet("pr_stars", JSON.stringify(stars)); }
 
+/* ── Tirelire : solde = étoiles gagnées (historique) − étoiles dépensées ── */
+function loadBank(){
+  const raw = sGet("pr_bank");
+  if(raw){ try{ return JSON.parse(raw); }catch(e){} }
+  return { spent:0, purchases:[] };
+}
+let bank = loadBank();
+function saveBank(){ sSet("pr_bank", JSON.stringify(bank)); }
+function totalEarned(){
+  let n = 0;
+  Object.values(stars).forEach(d=>{
+    if(d.morning) n++;
+    if(d.afternoon) n++;
+    if(d.evening) n++;
+  });
+  return n;
+}
+function bankBalance(){ return Math.max(0, totalEarned() - (bank.spent||0)); }
+
 /* ───────────── RENDU ───────────── */
 const DAYS_FR = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 const DAYS_SHORT = ["D","L","M","M","J","V","S"];
@@ -402,19 +590,26 @@ function render(){
   const name = config.name ? " "+config.name : "";
 
   document.body.className = view;
-  ["morning","afternoon","evening","wheel"].forEach(v=>{
+  ["morning","afternoon","evening","wheel","bank"].forEach(v=>{
     document.getElementById("tab-"+v).classList.toggle("active", view===v);
   });
 
   const isWheel = (view==="wheel");
-  document.getElementById("progressWrap").style.display = isWheel ? "none" : "flex";
-  document.getElementById("tasks").style.display = isWheel ? "none" : "flex";
+  const isBank = (view==="bank");
+  const isRoutine = !isWheel && !isBank;
+  document.getElementById("progressWrap").style.display = isRoutine ? "flex" : "none";
+  document.getElementById("tasks").style.display = isRoutine ? "flex" : "none";
   document.getElementById("wheelView").classList.toggle("show", isWheel);
+  document.getElementById("bankView").classList.toggle("show", isBank);
 
   if(isWheel){
     document.getElementById("greeting").textContent = "On joue"+name+" ? 🎉";
     document.getElementById("subtitle").textContent = "Tourne la roue pour choisir une activité";
     renderWheel();
+  } else if(isBank){
+    document.getElementById("greeting").textContent = "Ma tirelire"+name+" 🐷";
+    document.getElementById("subtitle").textContent = "Gagne des étoiles et économise pour tes cadeaux !";
+    renderBank();
   } else {
     const meta = ROUTINE_META[view];
     document.getElementById("greeting").textContent = meta.greet+name+" !";
@@ -425,6 +620,7 @@ function render(){
   }
   renderSky();
   renderWeek();
+  if(typeof renderChildChip === "function") renderChildChip();
 }
 
 function renderSky(){
@@ -438,10 +634,15 @@ function renderSky(){
     const pos = [[8,12],[20,70],[14,40],[30,20],[38,85],[48,8],[55,60],[26,55]];
     pos.forEach((p,i)=>{ s += '<span class="star-bg" style="top:'+(p[0]*8)+'px;left:'+p[1]+'%;animation-delay:'+(i*0.4)+'s;font-size:'+(10+(i%3)*4)+'px">✦</span>'; });
     sky.innerHTML = s;
-  } else {
+  } else if(view==="wheel"){
     let s = '';
     const b = [["🎈",10,0],["🎈",70,5],["🎀",40,9]];
     b.forEach((x,i)=>{ s += '<span class="balloon" style="left:'+x[1]+'%;animation-delay:'+x[2]+'s">'+x[0]+'</span>'; });
+    sky.innerHTML = s;
+  } else {
+    let s = '';
+    const b = [["⭐",12,0],["🪙",65,4],["✨",35,8],["⭐",85,11]];
+    b.forEach((x,i)=>{ s += '<span class="balloon" style="left:'+x[1]+'%;animation-delay:'+x[2]+'s;font-size:26px">'+x[0]+'</span>'; });
     sky.innerHTML = s;
   }
 }
@@ -580,6 +781,81 @@ function showWheelResult(item){
   confetti();
 }
 
+/* ── Tirelire : rendu + achat ── */
+function renderBank(){
+  document.getElementById("bankBalance").textContent = bankBalance();
+  const wrap = document.getElementById("rewards");
+  wrap.innerHTML = "";
+  const balance = bankBalance();
+  config.rewards.forEach((r,i)=>{
+    const can = balance >= r.cost;
+    const card = document.createElement("button");
+    card.className = "reward"+(can ? " can" : "");
+    const pct = Math.min(100, Math.round(balance/r.cost*100));
+    const need = r.cost - balance;
+    card.innerHTML =
+      '<span class="r-emoji">'+r.emoji+'</span>'+
+      '<span class="r-body">'+
+        '<span class="r-label">'+r.label+'</span>'+
+        '<span class="r-progress"><i style="width:'+pct+'%"></i></span>'+
+        '<span class="r-need">'+(can ? "Je peux l'avoir ! 🎉" : "Encore "+need+" ⭐")+'</span>'+
+      '</span>'+
+      '<span class="r-cost">'+r.cost+' ⭐</span>';
+    card.onclick = ()=>openBuy(i);
+    wrap.appendChild(card);
+  });
+}
+
+let pendingReward = null;
+function openBuy(i){
+  const r = config.rewards[i];
+  const balance = bankBalance();
+  pendingReward = r;
+  document.getElementById("buyEmoji").textContent = r.emoji;
+  document.getElementById("buyTitle").textContent = r.label;
+  if(balance >= r.cost){
+    document.getElementById("buyText").textContent = "Prix : "+r.cost+" ⭐ — il t'en restera "+(balance-r.cost)+" après";
+    document.getElementById("buyConfirm").style.display = "inline-block";
+  } else {
+    document.getElementById("buyText").textContent = "Il te manque encore "+(r.cost-balance)+" ⭐ — continue tes routines !";
+    document.getElementById("buyConfirm").style.display = "none";
+  }
+  document.getElementById("buySheet").classList.add("show");
+}
+function closeBuy(){
+  document.getElementById("buySheet").classList.remove("show");
+  pendingReward = null;
+}
+function confirmBuy(){
+  if(!pendingReward) return;
+  const r = pendingReward;
+  bank.spent = (bank.spent||0) + r.cost;
+  bank.purchases.push({emoji:r.emoji, label:r.label, cost:r.cost, date:todayKey()});
+  saveBank();
+  closeBuy();
+  document.getElementById("celebrateEmoji").textContent = r.emoji;
+  const name = config.name ? " "+config.name : "";
+  document.getElementById("celebrateTitle").textContent = "Bravo"+name+" !";
+  document.getElementById("celebrateText").textContent = "Tu as économisé "+r.cost+" ⭐ pour : "+r.label+" 🎉";
+  document.getElementById("celebrateBtn").textContent = "Merci ! 💛";
+  document.getElementById("celebrate").classList.add("show");
+  confetti();
+  renderBank();
+  const bal = document.querySelector(".piggy-balance");
+  bal.classList.remove("spend"); void bal.offsetWidth; bal.classList.add("spend");
+}
+
+/* Validation parentale : appui long 1,5s sur le bouton d'achat */
+const buyConfirmBtn = document.getElementById("buyConfirm");
+let buyTimer = null;
+function buyStart(){ buyTimer = setTimeout(confirmBuy, 1500); }
+function buyCancel(){ clearTimeout(buyTimer); }
+buyConfirmBtn.addEventListener("touchstart", buyStart);
+buyConfirmBtn.addEventListener("touchend", buyCancel);
+buyConfirmBtn.addEventListener("mousedown", buyStart);
+buyConfirmBtn.addEventListener("mouseup", buyCancel);
+buyConfirmBtn.addEventListener("mouseleave", buyCancel);
+
 /* ───────────── ACTIONS ───────────── */
 function switchView(v){ view = v; render(); }
 
@@ -660,15 +936,17 @@ parentBtn.addEventListener("mousedown", startPress);
 parentBtn.addEventListener("mouseup", cancelPress);
 parentBtn.addEventListener("mouseleave", cancelPress);
 
-function openParent(scrollToWheel){
+function openParent(scrollTarget){
   editState = JSON.parse(JSON.stringify(config));
   document.getElementById("childName").value = editState.name || "";
   renderEdit();
   document.getElementById("storageNote").classList.toggle("show", !storageOK);
   document.getElementById("sheet").classList.add("show");
-  if(scrollToWheel===true){
+  const targetId = (scrollTarget===true || scrollTarget==="wheel") ? "edit-wheel"
+                 : (scrollTarget==="rewards") ? "edit-rewards" : null;
+  if(targetId){
     setTimeout(()=>{
-      document.getElementById("edit-wheel").scrollIntoView({behavior:"smooth", block:"start"});
+      document.getElementById(targetId).scrollIntoView({behavior:"smooth", block:"start"});
     }, 120);
   }
 }
@@ -676,13 +954,24 @@ function openParent(scrollToWheel){
 /* Bouton "Modifier les activités" sous la roue — même protection appui long */
 const editWheelBtn = document.getElementById("editWheelBtn");
 let ewTimer = null;
-function ewStart(){ ewTimer = setTimeout(()=>openParent(true), 1500); }
+function ewStart(){ ewTimer = setTimeout(()=>openParent("wheel"), 1500); }
 function ewCancel(){ clearTimeout(ewTimer); }
 editWheelBtn.addEventListener("touchstart", ewStart);
 editWheelBtn.addEventListener("touchend", ewCancel);
 editWheelBtn.addEventListener("mousedown", ewStart);
 editWheelBtn.addEventListener("mouseup", ewCancel);
 editWheelBtn.addEventListener("mouseleave", ewCancel);
+
+/* Bouton "Modifier les cadeaux" sous la tirelire — même protection */
+const editRewardsBtn = document.getElementById("editRewardsBtn");
+let erTimer = null;
+function erStart(){ erTimer = setTimeout(()=>openParent("rewards"), 1500); }
+function erCancel(){ clearTimeout(erTimer); }
+editRewardsBtn.addEventListener("touchstart", erStart);
+editRewardsBtn.addEventListener("touchend", erCancel);
+editRewardsBtn.addEventListener("mousedown", erStart);
+editRewardsBtn.addEventListener("mouseup", erCancel);
+editRewardsBtn.addEventListener("mouseleave", erCancel);
 document.getElementById("sheet").addEventListener("click", (e)=>{
   if(e.target.id==="sheet") document.getElementById("sheet").classList.remove("show");
 });
@@ -724,6 +1013,7 @@ function renderEdit(){
       '</div>';
     wrap.appendChild(row);
   });
+  renderRewardsEdit();
 }
 function toggleWheelItem(i){
   editState.wheelItems[i].enabled = !(editState.wheelItems[i].enabled !== false);
@@ -733,8 +1023,50 @@ function setWeight(i,w){
   editState.wheelItems[i].weight = w;
   renderEdit();
 }
+function renderRewardsEdit(){
+  const wrap = document.getElementById("edit-rewards");
+  wrap.innerHTML = "";
+  editState.rewards.forEach((r,i)=>{
+    const row = document.createElement("div");
+    row.className = "edit-row";
+    row.innerHTML =
+      '<input class="em" value="'+r.emoji+'" maxlength="4" onchange="editState.rewards['+i+'].emoji=this.value">'+
+      '<input class="lb" value="'+r.label.replace(/"/g,"&quot;")+'" onchange="editState.rewards['+i+'].label=this.value">'+
+      '<input class="cost" type="number" min="1" max="999" value="'+r.cost+'" onchange="editState.rewards['+i+'].cost=Math.max(1,parseInt(this.value)||1)">'+
+      '<button class="del" onclick="removeTask(\'rewards\','+i+')">🗑️</button>';
+    wrap.appendChild(row);
+  });
+  const hist = document.getElementById("purchase-history");
+  const purchases = (bank.purchases||[]).slice(-5).reverse();
+  if(purchases.length===0){
+    hist.innerHTML = '<div class="hist-empty">Aucun cadeau offert pour l\'instant.</div>';
+  } else {
+    hist.innerHTML = "";
+    purchases.forEach((p)=>{
+      const idx = bank.purchases.lastIndexOf(p);
+      const row = document.createElement("div");
+      row.className = "hist-row";
+      row.innerHTML =
+        '<span class="h-emoji">'+p.emoji+'</span>'+
+        '<span class="h-label">'+p.label+'</span>'+
+        '<span class="h-cost">−'+p.cost+' ⭐</span>'+
+        '<button class="h-refund" onclick="refundPurchase('+idx+')" title="Annuler / rembourser">↩️</button>';
+      hist.appendChild(row);
+    });
+  }
+}
+function refundPurchase(idx){
+  const p = bank.purchases[idx];
+  if(!p) return;
+  bank.spent = Math.max(0, (bank.spent||0) - p.cost);
+  bank.purchases.splice(idx,1);
+  saveBank();
+  renderRewardsEdit();
+}
 function addTask(r){
-  editState[r].push(r==="wheelItems" ? {emoji:"🎲", label:"Nouvelle activité", weight:2, enabled:true} : {emoji:"⭐", label:"Nouvelle étape"});
+  if(r==="rewards"){ editState.rewards.push({emoji:"🎁", label:"Nouveau cadeau", cost:10}); }
+  else if(r==="wheelItems"){ editState[r].push({emoji:"🎲", label:"Nouvelle activité", weight:2, enabled:true}); }
+  else { editState[r].push({emoji:"⭐", label:"Nouvelle étape"}); }
   renderEdit();
 }
 function removeTask(r,i){ editState[r].splice(i,1); renderEdit(); }
@@ -758,8 +1090,254 @@ function resetToday(){
   render();
 }
 
+/* ═══════════════════════════════════════════
+   SYNCHRO SUPABASE — patron "code famille"
+   1) Remplis les 2 constantes ci-dessous
+   2) Exécute le SQL du guide dans Supabase
+   Sans configuration, l'app reste 100% locale.
+═══════════════════════════════════════════ */
+const SUPABASE_URL = "https://xkdymodyzktowuixpbzo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhrZHltb2R5emt0b3d1aXhwYnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5NTk4MzIsImV4cCI6MjEwMDUzNTgzMn0.P7_hvtsU9xlxvQr1399IzdTsmRunV6aQM8pQG5KjcJ0";
+
+let sb = null;            /* client supabase */
+let syncInfo = null;      /* {familyId, code, childId, childName} */
+let remoteDays = {};      /* historique des jours (14 derniers) */
+let pushTimer = null;
+let lastPushedJson = "";
+let pendingFamily = null; /* pendant l'onboarding */
+
+function loadSyncInfo(){ try{ return JSON.parse(sGet("pr_sync")||"null"); }catch(e){ return null; } }
+function saveSyncInfo(){ sSet("pr_sync", JSON.stringify(syncInfo)); }
+function cloudOn(){ return !!(sb && syncInfo && syncInfo.childId); }
+function onbMsg(t){ document.getElementById("onbMsg").textContent = t||""; }
+function onbShow(step){
+  ["home","create","join","children","done"].forEach(s=>{
+    document.getElementById("onb-"+s).style.display = (s===step) ? "block" : "none";
+  });
+  onbMsg("");
+}
+
+function makeCode(){
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let c = "";
+  for(let i=0;i<4;i++) c += chars[Math.floor(Math.random()*chars.length)];
+  return "PR-"+c;
+}
+
+/* Les données locales actuelles → paquet cloud (migration incluse) */
+function localSnapshot(){
+  remoteDays[todayKey()] = dayState;
+  return { config: config, stars: stars, bank: bank, days: remoteDays };
+}
+
+/* Paquet cloud → variables locales */
+function hydrate(data){
+  if(!data) return;
+  if(data.config){
+    const c = data.config;
+    if(!c.afternoon) c.afternoon = JSON.parse(JSON.stringify(DEFAULT_CONFIG.afternoon));
+    if(!c.wheelItems) c.wheelItems = JSON.parse(JSON.stringify(DEFAULT_CONFIG.wheelItems));
+    c.wheelItems.forEach(t=>{
+      if(typeof t.weight !== "number") t.weight = 2;
+      if(typeof t.enabled !== "boolean") t.enabled = true;
+    });
+    if(!c.rewards) c.rewards = JSON.parse(JSON.stringify(DEFAULT_CONFIG.rewards));
+    config = c;
+  }
+  stars = data.stars || {};
+  bank = data.bank || {spent:0, purchases:[]};
+  remoteDays = data.days || {};
+  dayState = remoteDays[todayKey()] || emptyDay();
+  if(!dayState.afternoon) dayState.afternoon = {done:[],celebrated:false};
+}
+
+/* Envoi (debounce 800ms) — élagage aux 14 derniers jours */
+function scheduleCloudSave(){
+  if(!cloudOn()) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(pushChild, 800);
+}
+async function pushChild(){
+  if(!cloudOn()) return;
+  const snap = localSnapshot();
+  const keys = Object.keys(snap.days).sort();
+  while(keys.length > 14){ delete snap.days[keys.shift()]; }
+  lastPushedJson = JSON.stringify(snap);
+  setSyncDot("⟳");
+  const { error } = await sb.from("pr_children")
+    .update({ data: snap, updated_at: new Date().toISOString() })
+    .eq("id", syncInfo.childId);
+  setSyncDot(error ? "⚠︎ hors ligne" : "✓ synchro");
+}
+
+async function pullChild(){
+  const { data, error } = await sb.from("pr_children")
+    .select("id,name,data,pr_families(code)")
+    .eq("id", syncInfo.childId).single();
+  if(error || !data){ setSyncDot("⚠︎ hors ligne"); return; }
+  syncInfo.childName = data.name;
+  if(data.pr_families) syncInfo.code = data.pr_families.code;
+  saveSyncInfo();
+  hydrate(data.data);
+  setSyncDot("✓ synchro");
+}
+
+function subscribeChild(){
+  sb.channel("child-"+syncInfo.childId)
+    .on("postgres_changes",
+      { event:"UPDATE", schema:"public", table:"pr_children", filter:"id=eq."+syncInfo.childId },
+      (payload)=>{
+        const incoming = JSON.stringify(payload.new.data);
+        if(incoming === lastPushedJson) return; /* écho de notre propre envoi */
+        hydrate(payload.new.data);
+        render();
+      })
+    .subscribe();
+}
+
+function setSyncDot(t){
+  const el = document.getElementById("syncDot");
+  el.textContent = t; el.classList.add("show");
+  if(t.startsWith("✓")) setTimeout(()=>el.classList.remove("show"), 1600);
+}
+
+/* ── Onboarding ── */
+function showOnboarding(){ document.getElementById("onb").classList.add("show"); onbShow("home"); }
+function hideOnboarding(){ document.getElementById("onb").classList.remove("show"); }
+function skipSync(){ sSet("pr_sync_skip","1"); hideOnboarding(); }
+
+async function createFamily(){
+  const childName = document.getElementById("onbChildName").value.trim();
+  if(!childName){ onbMsg("Indique un prénom 🙂"); return; }
+  document.getElementById("onbCreateBtn").disabled = true;
+  onbMsg("Création…");
+  try{
+    const code = makeCode();
+    const { data: fam, error: e1 } = await sb.from("pr_families")
+      .insert({ code: code }).select().single();
+    if(e1) throw e1;
+    const { data: child, error: e2 } = await sb.from("pr_children")
+      .insert({ family_id: fam.id, name: childName, data: (config.name = config.name || childName, localSnapshot()) })
+      .select().single();
+    if(e2) throw e2;
+    syncInfo = { familyId: fam.id, code: code, childId: child.id, childName: childName };
+    saveSyncInfo(); saveConfig();
+    subscribeChild();
+    document.getElementById("onbCodeDisplay").textContent = code;
+    onbShow("done");
+  }catch(err){
+    onbMsg("Oups, réessaie (connexion ?)");
+    document.getElementById("onbCreateBtn").disabled = false;
+  }
+}
+
+async function joinFamily(){
+  const code = document.getElementById("onbCode").value.trim().toUpperCase();
+  if(code.length < 6){ onbMsg("Code invalide"); return; }
+  document.getElementById("onbJoinBtn").disabled = true;
+  onbMsg("Recherche…");
+  const { data: fam, error } = await sb.from("pr_families")
+    .select("id,code").eq("code", code).single();
+  document.getElementById("onbJoinBtn").disabled = false;
+  if(error || !fam){ onbMsg("Code introuvable — vérifie avec l'autre parent"); return; }
+  pendingFamily = fam;
+  await showChildrenStep();
+}
+
+async function showChildrenStep(){
+  const famId = pendingFamily ? pendingFamily.id : syncInfo.familyId;
+  const { data: kids } = await sb.from("pr_children")
+    .select("id,name").eq("family_id", famId).order("created_at");
+  const list = document.getElementById("onbChildList");
+  list.innerHTML = "";
+  (kids||[]).forEach(k=>{
+    const b = document.createElement("button");
+    b.className = "onb-child";
+    b.innerHTML = "👧 <span>"+k.name+"</span>";
+    b.onclick = ()=>selectChild(k);
+    list.appendChild(b);
+  });
+  onbShow("children");
+}
+
+async function selectChild(k){
+  const famId = pendingFamily ? pendingFamily.id : syncInfo.familyId;
+  const code = pendingFamily ? pendingFamily.code : syncInfo.code;
+  syncInfo = { familyId: famId, code: code, childId: k.id, childName: k.name };
+  saveSyncInfo();
+  pendingFamily = null;
+  await pullChild();
+  subscribeChild();
+  hideOnboarding();
+  render();
+}
+
+async function addChild(){
+  const name = document.getElementById("onbNewChild").value.trim();
+  if(!name){ onbMsg("Indique un prénom 🙂"); return; }
+  const famId = pendingFamily ? pendingFamily.id : syncInfo.familyId;
+  const fresh = { config: (()=>{ const c = JSON.parse(JSON.stringify(DEFAULT_CONFIG)); c.name = name; return c; })(),
+                  stars: {}, bank: {spent:0,purchases:[]}, days: {} };
+  const { data: child, error } = await sb.from("pr_children")
+    .insert({ family_id: famId, name: name, data: fresh }).select().single();
+  if(error){ onbMsg("Oups, réessaie"); return; }
+  document.getElementById("onbNewChild").value = "";
+  await selectChild(child);
+}
+
+function openChildPicker(){
+  if(!cloudOn()) return;
+  pendingFamily = null;
+  showOnboarding();
+  showChildrenStep();
+}
+function finishOnb(){ hideOnboarding(); render(); }
+
+function leaveFamily(){
+  syncInfo = null;
+  sSet("pr_sync","null");
+  document.getElementById("sheet").classList.remove("show");
+  location.reload();
+}
+
+function renderChildChip(){
+  const chip = document.getElementById("childChip");
+  if(cloudOn()){
+    chip.style.display = "inline-block";
+    document.getElementById("childChipName").textContent = syncInfo.childName || "";
+  } else {
+    chip.style.display = "none";
+  }
+  const fi = document.getElementById("famInfo");
+  if(fi){
+    fi.style.display = cloudOn() ? "block" : "none";
+    if(cloudOn()) document.getElementById("famCode").textContent = syncInfo.code || "—";
+  }
+}
+
+/* Brancher la synchro sur toutes les sauvegardes locales */
+const _saveConfig = saveConfig, _saveDay = saveDay, _saveStars = saveStars, _saveBank = saveBank;
+saveConfig = function(){ _saveConfig(); scheduleCloudSave(); };
+saveDay    = function(){ _saveDay();    scheduleCloudSave(); };
+saveStars  = function(){ _saveStars();  scheduleCloudSave(); };
+saveBank   = function(){ _saveBank();   scheduleCloudSave(); };
+
+async function initSync(){
+  if(!SUPABASE_URL.startsWith("https://") || !window.supabase){ return; } /* non configuré → mode local */
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  syncInfo = loadSyncInfo();
+  if(syncInfo && syncInfo.childId){
+    await pullChild();
+    subscribeChild();
+    render();
+  } else if(sGet("pr_sync_skip") !== "1"){
+    showOnboarding();
+  }
+}
+
 /* ── Démarrage ── */
 render();
+initSync();
 </script>
 </body>
 </html>
