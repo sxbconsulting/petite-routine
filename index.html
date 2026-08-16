@@ -171,7 +171,19 @@
   body.evening .wd{background:rgba(255,255,255,.12)}
   .wd .n{font-family:'Nunito',sans-serif;font-weight:800;font-size:11px;color:var(--ink-soft)}
   body.evening .wd .n{color:#cfc4f2}
+  .wd{border:none;cursor:pointer;font-family:'Fredoka',sans-serif}
   .wd.today{outline:3px solid var(--gold);outline-offset:2px}
+  .wd.sel{background:#fff;box-shadow:0 4px 14px rgba(58,46,82,.2);transform:scale(1.06)}
+  body.evening .wd.sel{background:#fff}
+  body.evening .wd.sel .n{color:var(--ink-soft)}
+  .wk-tip{font-weight:700;opacity:.7;text-transform:none;letter-spacing:0}
+  .past-banner{display:none;align-items:center;gap:10px;background:rgba(255,255,255,.75);border-radius:18px;
+    padding:10px 12px;margin-top:12px;font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;color:var(--ink)}
+  .past-banner.show{display:flex}
+  body.evening .past-banner{background:rgba(255,255,255,.18);color:#f3efff}
+  .past-banner span{flex:1}
+  .past-banner button{border:none;background:var(--gold);color:#4a3200;border-radius:12px;padding:8px 12px;
+    font-family:'Fredoka',sans-serif;font-weight:600;font-size:13px;cursor:pointer}
   .wd .s{font-size:12px;display:block;margin-top:3px;min-height:16px;letter-spacing:-1px}
 
   /* ── Bouton parent ── */
@@ -209,6 +221,11 @@
   .edit-row{display:flex;gap:8px;margin-bottom:8px;align-items:center}
   .edit-row input.em{width:64px;text-align:center;font-size:22px;border:2px solid #e8e3f4;border-radius:12px;padding:10px 4px}
   .edit-row input.lb{flex:1;border:2px solid #e8e3f4;border-radius:12px;padding:10px 12px;font-family:'Fredoka',sans-serif;font-size:16px}
+  .arrows{display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+  .arw{border:none;background:#f0edf8;color:var(--ink-soft);border-radius:8px;width:30px;height:20px;
+    font-size:9px;cursor:pointer;line-height:1;padding:0}
+  .arw:disabled{opacity:.3;cursor:default}
+  .arw:active:not(:disabled){background:var(--gold);color:#4a3200}
   .edit-row .del{border:none;background:#ffe3e3;color:#c0392b;border-radius:12px;width:42px;height:42px;font-size:17px;cursor:pointer;flex-shrink:0}
   .edit-row input.cost{width:64px;text-align:center;font-family:'DM Mono','Fredoka',monospace;font-size:16px;border:2px solid #e8e3f4;border-radius:12px;padding:10px 4px}
   .hist-row{display:flex;align-items:center;gap:10px;background:#faf8ff;border-radius:14px;padding:10px 12px;margin-bottom:6px}
@@ -291,6 +308,11 @@
     <button class="child-chip" id="childChip" onclick="openChildPicker()" style="display:none">👧 <span id="childChipName"></span> ▾</button>
   </header>
 
+  <div class="past-banner" id="pastBanner">
+    <span id="pastLabel"></span>
+    <button onclick="backToToday()">Aujourd'hui ➜</button>
+  </div>
+
   <div class="tabs">
     <button class="tab active" id="tab-morning" onclick="switchView('morning')"><span class="ic">☀️</span>Matin</button>
     <button class="tab" id="tab-afternoon" onclick="switchView('afternoon')"><span class="ic">⛅</span>Aprem</button>
@@ -328,7 +350,7 @@
   </div>
 
   <div class="week">
-    <div class="week-title">Mes étoiles de la semaine</div>
+    <div class="week-title">Mes étoiles de la semaine <span class="wk-tip">— touche un jour</span></div>
     <div class="week-row" id="weekRow"></div>
   </div>
 </div>
@@ -538,7 +560,7 @@ function emptyDay(){
   return { morning:{done:[],celebrated:false}, afternoon:{done:[],celebrated:false}, evening:{done:[],celebrated:false} };
 }
 function loadDay(){
-  const raw = sGet("pr_day_"+todayKey());
+  const raw = sGet("pr_day_"+activeKey());
   if(raw){
     try{
       const d = JSON.parse(raw);
@@ -548,7 +570,36 @@ function loadDay(){
   }
   return emptyDay();
 }
-function saveDay(){ sSet("pr_day_"+todayKey(), JSON.stringify(dayState)); }
+function saveDay(){ sSet("pr_day_"+activeKey(), JSON.stringify(dayState)); }
+
+/* ── Navigation dans les jours passés ──
+   viewDateOffset : 0 = aujourd'hui, -1 = hier, jusqu'à -13 */
+let viewDateOffset = 0;
+function dateFromOffset(off){ const d = new Date(); d.setDate(d.getDate()+off); return d; }
+function keyFromDate(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function activeKey(){ return keyFromDate(dateFromOffset(viewDateOffset)); }
+function isToday(){ return viewDateOffset === 0; }
+function loadDayFor(key){
+  if(remoteDays && remoteDays[key]){
+    const d = JSON.parse(JSON.stringify(remoteDays[key]));
+    if(!d.afternoon) d.afternoon = {done:[],celebrated:false};
+    return d;
+  }
+  const raw = sGet("pr_day_"+key);
+  if(raw){
+    try{ const d = JSON.parse(raw); if(!d.afternoon) d.afternoon = {done:[],celebrated:false}; return d; }catch(e){}
+  }
+  return emptyDay();
+}
+function selectDay(off){
+  if(off > 0) off = 0;
+  if(off < -13) off = -13;
+  viewDateOffset = off;
+  dayState = loadDayFor(activeKey());
+  render();
+}
+function backToToday(){ selectDay(0); }
+
 let dayState = loadDay();
 
 /* ── Historique étoiles ── */
@@ -585,8 +636,15 @@ const DAYS_SHORT = ["D","L","M","M","J","V","S"];
 const MONTHS_FR = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
 
 function render(){
-  const d = new Date();
-  document.getElementById("dayLabel").textContent = DAYS_FR[d.getDay()]+" "+d.getDate()+" "+MONTHS_FR[d.getMonth()];
+  const d = dateFromOffset(viewDateOffset);
+  document.getElementById("dayLabel").textContent =
+    (isToday() ? "" : "◀ ") + DAYS_FR[d.getDay()]+" "+d.getDate()+" "+MONTHS_FR[d.getMonth()];
+  const pb = document.getElementById("pastBanner");
+  pb.classList.toggle("show", !isToday());
+  if(!isToday()){
+    document.getElementById("pastLabel").textContent =
+      "Tu regardes "+DAYS_FR[d.getDay()].toLowerCase()+" "+d.getDate()+" "+MONTHS_FR[d.getMonth()];
+  }
   const name = config.name ? " "+config.name : "";
 
   document.body.className = view;
@@ -677,13 +735,14 @@ function renderWeek(){
     const d = new Date(today); d.setDate(today.getDate()-i);
     const key = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
     const st = stars[key] || {};
-    const cell = document.createElement("div");
-    cell.className = "wd"+(i===0 ? " today" : "");
+    const cell = document.createElement("button");
+    cell.className = "wd"+(i===0 ? " today" : "")+(viewDateOffset === -i ? " sel" : "");
     let icons = "";
     if(st.morning) icons += "⭐";
     if(st.afternoon) icons += "🌈";
     if(st.evening) icons += "🌟";
     cell.innerHTML = '<span class="n">'+DAYS_SHORT[d.getDay()]+'</span><span class="s">'+icons+'</span>';
+    cell.onclick = ()=>selectDay(-i);
     row.appendChild(cell);
   }
 }
@@ -879,8 +938,9 @@ function checkComplete(){
   if(list.length>0 && done===list.length && !dayState[view].celebrated){
     dayState[view].celebrated = true;
     saveDay();
-    stars[todayKey()] = stars[todayKey()] || {};
-    stars[todayKey()][view] = true;
+    const k = activeKey();
+    stars[k] = stars[k] || {};
+    stars[k][view] = true;
     saveStars();
     setTimeout(showCelebrate, 350);
   }
@@ -938,6 +998,7 @@ parentBtn.addEventListener("mouseleave", cancelPress);
 
 function openParent(scrollTarget){
   editState = JSON.parse(JSON.stringify(config));
+  ROUTINES.forEach(r=>editState[r].forEach((t,i)=>{ t._oi = i; }));
   document.getElementById("childName").value = editState.name || "";
   renderEdit();
   document.getElementById("storageNote").classList.toggle("show", !storageOK);
@@ -984,6 +1045,10 @@ function renderEdit(){
       const row = document.createElement("div");
       row.className = "edit-row";
       row.innerHTML =
+        '<div class="arrows">'+
+          '<button class="arw" onclick="moveTask(\''+r+'\','+i+',-1)"'+(i===0?" disabled":"")+'>▲</button>'+
+          '<button class="arw" onclick="moveTask(\''+r+'\','+i+',1)"'+(i===editState[r].length-1?" disabled":"")+'>▼</button>'+
+        '</div>'+
         '<input class="em" value="'+t.emoji+'" maxlength="4" onchange="editState.'+r+'['+i+'].emoji=this.value">'+
         '<input class="lb" value="'+t.label.replace(/"/g,"&quot;")+'" onchange="editState.'+r+'['+i+'].label=this.value">'+
         '<button class="del" onclick="removeTask(\''+r+'\','+i+')">🗑️</button>';
@@ -1070,12 +1135,35 @@ function addTask(r){
   renderEdit();
 }
 function removeTask(r,i){ editState[r].splice(i,1); renderEdit(); }
+/* Déplace une étape ; l'index d'origine (_oi) suit l'étape pour
+   que les coches déjà faites restent sur la bonne tâche. */
+function moveTask(r,i,dir){
+  const j = i+dir;
+  if(j<0 || j>=editState[r].length) return;
+  const tmp = editState[r][i]; editState[r][i] = editState[r][j]; editState[r][j] = tmp;
+  renderEdit();
+}
 
 function saveParent(){
   editState.name = document.getElementById("childName").value.trim();
+  /* Table de correspondance ancien index -> nouvel index, par routine */
+  const remap = {};
+  ROUTINES.forEach(r=>{ remap[r] = editState[r].map(t=>t._oi); });
+  /* On nettoie les marqueurs avant de sauvegarder la config */
+  ROUTINES.forEach(r=>editState[r].forEach(t=>{ delete t._oi; }));
   config = editState;
   saveConfig();
-  ROUTINES.forEach(r=>{ dayState[r].done = dayState[r].done.slice(0, config[r].length); });
+  /* Réaligner les coches : celles du jour affiché et celles des jours mémorisés */
+  const fix = (st)=>{
+    ROUTINES.forEach(r=>{
+      if(!st[r]) st[r] = {done:[],celebrated:false};
+      const old = st[r].done || [];
+      st[r].done = remap[r].map(oi => (oi === undefined ? false : !!old[oi]));
+    });
+    return st;
+  };
+  fix(dayState);
+  Object.keys(remoteDays || {}).forEach(k=>{ if(k !== activeKey()) fix(remoteDays[k]); });
   saveDay();
   document.getElementById("sheet").classList.remove("show");
   render();
@@ -1084,7 +1172,7 @@ function saveParent(){
 function resetToday(){
   dayState = emptyDay();
   saveDay();
-  const k = todayKey();
+  const k = activeKey();
   if(stars[k]){ delete stars[k]; saveStars(); }
   document.getElementById("sheet").classList.remove("show");
   render();
@@ -1126,7 +1214,7 @@ function makeCode(){
 
 /* Les données locales actuelles → paquet cloud (migration incluse) */
 function localSnapshot(){
-  remoteDays[todayKey()] = dayState;
+  remoteDays[activeKey()] = dayState;
   return { config: config, stars: stars, bank: bank, days: remoteDays };
 }
 
@@ -1147,7 +1235,7 @@ function hydrate(data){
   stars = data.stars || {};
   bank = data.bank || {spent:0, purchases:[]};
   remoteDays = data.days || {};
-  dayState = remoteDays[todayKey()] || emptyDay();
+  dayState = loadDayFor(activeKey());
   if(!dayState.afternoon) dayState.afternoon = {done:[],celebrated:false};
 }
 
