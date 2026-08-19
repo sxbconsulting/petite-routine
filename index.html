@@ -58,7 +58,7 @@
   @keyframes rise{from{transform:translateY(105vh)}to{transform:translateY(-15vh)}}
 
   /* ── Layout ── */
-  .app{position:relative;z-index:1;max-width:460px;margin:0 auto;padding:22px 18px 40px;min-height:100vh;display:flex;flex-direction:column}
+  .app{position:relative;z-index:1;max-width:460px;margin:0 auto;padding:58px 18px 40px;min-height:100vh;display:flex;flex-direction:column}
   header{margin-bottom:12px}
   .day-label{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
   h1{font-size:29px;font-weight:700;line-height:1.1;margin-top:2px}
@@ -187,9 +187,11 @@
   .wd .s{font-size:12px;display:block;margin-top:3px;min-height:16px;letter-spacing:-1px}
 
   /* ── Bouton parent ── */
-  .parent-btn{position:fixed;bottom:14px;right:14px;z-index:5;width:44px;height:44px;border-radius:50%;border:none;
-    background:rgba(255,255,255,.55);font-size:20px;cursor:pointer;opacity:.55}
-  body.evening .parent-btn{background:rgba(255,255,255,.16)}
+  .parent-btn{position:fixed;top:12px;right:12px;z-index:6;border:none;border-radius:16px;padding:9px 13px;
+    background:rgba(255,255,255,.8);font-family:'Fredoka',sans-serif;font-size:13px;font-weight:600;
+    color:var(--ink);cursor:pointer;box-shadow:0 3px 10px rgba(58,46,82,.14);display:flex;align-items:center;gap:5px}
+  .parent-btn:active{transform:scale(.94)}
+  body.evening .parent-btn{background:rgba(255,255,255,.22);color:#f3efff}
 
   /* ── Célébration / Résultat roue ── */
   .celebrate{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;flex-direction:column;
@@ -268,7 +270,10 @@
   .fam-info b{font-family:'Fredoka',sans-serif;font-size:18px;letter-spacing:.12em;color:var(--ink)}
   .fam-info .fam-leave{border:none;background:#ffe3e3;color:#c0392b;border-radius:10px;padding:7px 10px;
     font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;cursor:pointer;margin-top:8px}
-  .sync-dot{position:fixed;top:12px;left:12px;z-index:6;font-family:'Nunito',sans-serif;font-weight:800;font-size:10px;
+  .fam-info .fam-child{border:none;background:#e2f7ec;color:#1e8a5a;border-radius:10px;padding:8px 12px;
+    font-family:'Nunito',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer;margin-top:10px;margin-right:8px}
+  .child-chip{display:none;align-items:center;gap:5px}
+  .sync-dot{position:fixed;top:16px;left:12px;z-index:6;font-family:'Nunito',sans-serif;font-weight:800;font-size:10px;
     letter-spacing:.06em;padding:5px 9px;border-radius:10px;background:rgba(255,255,255,.6);color:var(--ink-soft);display:none}
   .sync-dot.show{display:block}
   .add-btn{border:2px dashed #cfc7e6;background:none;border-radius:14px;padding:11px;width:100%;font-family:'Fredoka',sans-serif;font-size:15px;font-weight:600;color:var(--ink-soft);cursor:pointer;margin-top:2px}
@@ -335,7 +340,7 @@
       <button class="wheel-hub" onclick="spin()">GO&nbsp;!</button>
     </div>
     <button class="spin-btn" id="spinBtn" onclick="spin()">Tourne la roue&nbsp;! 🎡</button>
-    <button class="edit-wheel-btn" id="editWheelBtn">✏️ Modifier les activités <span class="ew-hint">appui long — parents</span></button>
+    <button class="edit-wheel-btn" id="editWheelBtn">✏️ Modifier les activités <span class="ew-hint">parents</span></button>
   </div>
 
   <div class="bank-view" id="bankView">
@@ -346,7 +351,7 @@
     </div>
     <div class="rewards-title">Mes cadeaux 🎁</div>
     <div class="rewards" id="rewards"></div>
-    <button class="edit-wheel-btn" id="editRewardsBtn">✏️ Modifier les cadeaux <span class="ew-hint">appui long — parents</span></button>
+    <button class="edit-wheel-btn" id="editRewardsBtn">✏️ Modifier les cadeaux <span class="ew-hint">parents</span></button>
   </div>
 
   <div class="week">
@@ -355,7 +360,7 @@
   </div>
 </div>
 
-<button class="parent-btn" id="parentBtn" title="Espace parents">⚙️</button>
+<button class="parent-btn" id="parentBtn" title="Espace parents">⚙️ Parents</button>
 
 <div class="celebrate" id="celebrate">
   <div class="big-star" id="celebrateEmoji">🌟</div>
@@ -421,6 +426,7 @@
     <div class="hint">Modifiez les routines et la roue, puis touchez Enregistrer.</div>
     <div class="fam-info" id="famInfo" style="display:none">
       Code famille à partager avec l'autre parent :<br><b id="famCode">—</b><br>
+      <button class="fam-child" onclick="closeSheetAndPickChild()">👧 Changer / ajouter un enfant</button>
       <button class="fam-leave" onclick="leaveFamily()">Quitter la famille sur cet appareil</button>
     </div>
     <div class="field">
@@ -474,6 +480,14 @@ const memStore = {};
 let storageOK = true;
 function sGet(k){ try{ return localStorage.getItem(k); }catch(e){ storageOK=false; return memStore[k] ?? null; } }
 function sSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){ storageOK=false; memStore[k]=v; } }
+/* Chaque enfant a son propre espace de stockage local.
+   Sans ça, un 2e enfant hériterait des données du 1er. */
+function ck(base){
+  try{
+    if(typeof syncInfo !== "undefined" && syncInfo && syncInfo.childId) return base+"@"+syncInfo.childId;
+  }catch(e){}
+  return base;
+}
 
 /* ── Données par défaut ── */
 const DEFAULT_CONFIG = {
@@ -533,7 +547,7 @@ function defaultView(){
 }
 
 function loadConfig(){
-  const raw = sGet("pr_config");
+  const raw = sGet(ck("pr_config"));
   if(raw){
     try{
       const c = JSON.parse(raw);
@@ -549,7 +563,7 @@ function loadConfig(){
   }
   return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 }
-function saveConfig(){ sSet("pr_config", JSON.stringify(config)); }
+function saveConfig(){ sSet(ck("pr_config"), JSON.stringify(config)); }
 
 /* ── État du jour ── */
 function todayKey(){
@@ -560,7 +574,7 @@ function emptyDay(){
   return { morning:{done:[],celebrated:false}, afternoon:{done:[],celebrated:false}, evening:{done:[],celebrated:false} };
 }
 function loadDay(){
-  const raw = sGet("pr_day_"+activeKey());
+  const raw = sGet(ck("pr_day_"+activeKey()));
   if(raw){
     try{
       const d = JSON.parse(raw);
@@ -570,7 +584,7 @@ function loadDay(){
   }
   return emptyDay();
 }
-function saveDay(){ sSet("pr_day_"+activeKey(), JSON.stringify(dayState)); }
+function saveDay(){ sSet(ck("pr_day_"+activeKey()), JSON.stringify(dayState)); }
 
 /* ── Navigation dans les jours passés ──
    viewDateOffset : 0 = aujourd'hui, -1 = hier, jusqu'à -13 */
@@ -585,7 +599,7 @@ function loadDayFor(key){
     if(!d.afternoon) d.afternoon = {done:[],celebrated:false};
     return d;
   }
-  const raw = sGet("pr_day_"+key);
+  const raw = sGet(ck("pr_day_"+key));
   if(raw){
     try{ const d = JSON.parse(raw); if(!d.afternoon) d.afternoon = {done:[],celebrated:false}; return d; }catch(e){}
   }
@@ -604,21 +618,21 @@ let dayState = loadDay();
 
 /* ── Historique étoiles ── */
 function loadStars(){
-  const raw = sGet("pr_stars");
+  const raw = sGet(ck("pr_stars"));
   if(raw){ try{ return JSON.parse(raw); }catch(e){} }
   return {};
 }
 let stars = loadStars();
-function saveStars(){ sSet("pr_stars", JSON.stringify(stars)); }
+function saveStars(){ sSet(ck("pr_stars"), JSON.stringify(stars)); }
 
 /* ── Tirelire : solde = étoiles gagnées (historique) − étoiles dépensées ── */
 function loadBank(){
-  const raw = sGet("pr_bank");
+  const raw = sGet(ck("pr_bank"));
   if(raw){ try{ return JSON.parse(raw); }catch(e){} }
   return { spent:0, purchases:[] };
 }
 let bank = loadBank();
-function saveBank(){ sSet("pr_bank", JSON.stringify(bank)); }
+function saveBank(){ sSet(ck("pr_bank"), JSON.stringify(bank)); }
 function totalEarned(){
   let n = 0;
   Object.values(stars).forEach(d=>{
@@ -987,14 +1001,7 @@ function miniburst(x,y){
 
 /* ───────────── ESPACE PARENTS ───────────── */
 const parentBtn = document.getElementById("parentBtn");
-let pressTimer = null;
-function startPress(){ pressTimer = setTimeout(openParent, 1500); }
-function cancelPress(){ clearTimeout(pressTimer); }
-parentBtn.addEventListener("touchstart", startPress);
-parentBtn.addEventListener("touchend", cancelPress);
-parentBtn.addEventListener("mousedown", startPress);
-parentBtn.addEventListener("mouseup", cancelPress);
-parentBtn.addEventListener("mouseleave", cancelPress);
+parentBtn.addEventListener("click", ()=>openParent());
 
 function openParent(scrollTarget){
   editState = JSON.parse(JSON.stringify(config));
@@ -1013,26 +1020,10 @@ function openParent(scrollTarget){
 }
 
 /* Bouton "Modifier les activités" sous la roue — même protection appui long */
-const editWheelBtn = document.getElementById("editWheelBtn");
-let ewTimer = null;
-function ewStart(){ ewTimer = setTimeout(()=>openParent("wheel"), 1500); }
-function ewCancel(){ clearTimeout(ewTimer); }
-editWheelBtn.addEventListener("touchstart", ewStart);
-editWheelBtn.addEventListener("touchend", ewCancel);
-editWheelBtn.addEventListener("mousedown", ewStart);
-editWheelBtn.addEventListener("mouseup", ewCancel);
-editWheelBtn.addEventListener("mouseleave", ewCancel);
+document.getElementById("editWheelBtn").addEventListener("click", ()=>openParent("wheel"));
 
 /* Bouton "Modifier les cadeaux" sous la tirelire — même protection */
-const editRewardsBtn = document.getElementById("editRewardsBtn");
-let erTimer = null;
-function erStart(){ erTimer = setTimeout(()=>openParent("rewards"), 1500); }
-function erCancel(){ clearTimeout(erTimer); }
-editRewardsBtn.addEventListener("touchstart", erStart);
-editRewardsBtn.addEventListener("touchend", erCancel);
-editRewardsBtn.addEventListener("mousedown", erStart);
-editRewardsBtn.addEventListener("mouseup", erCancel);
-editRewardsBtn.addEventListener("mouseleave", erCancel);
+document.getElementById("editRewardsBtn").addEventListener("click", ()=>openParent("rewards"));
 document.getElementById("sheet").addEventListener("click", (e)=>{
   if(e.target.id==="sheet") document.getElementById("sheet").classList.remove("show");
 });
@@ -1266,12 +1257,20 @@ async function pullChild(){
   syncInfo.childName = data.name;
   if(data.pr_families) syncInfo.code = data.pr_families.code;
   saveSyncInfo();
-  hydrate(data.data);
+  const hasData = data.data && (data.data.config || data.data.stars || data.data.days);
+  if(hasData) hydrate(data.data);
+  else { /* enfant tout neuf : on part sur une config vierge à son prénom */
+    config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+    config.name = data.name || "";
+    stars = {}; bank = {spent:0, purchases:[]}; remoteDays = {}; dayState = emptyDay();
+    saveConfig(); saveStars(); saveBank(); saveDay();
+  }
   setSyncDot("✓ synchro");
 }
 
+let currentChannel = null;
 function subscribeChild(){
-  sb.channel("child-"+syncInfo.childId)
+  currentChannel = sb.channel("child-"+syncInfo.childId)
     .on("postgres_changes",
       { event:"UPDATE", schema:"public", table:"pr_children", filter:"id=eq."+syncInfo.childId },
       (payload)=>{
@@ -1349,11 +1348,24 @@ async function showChildrenStep(){
 }
 
 async function selectChild(k){
+  /* On annule tout envoi en attente : il partirait vers le mauvais enfant */
+  clearTimeout(pushTimer);
+  lastPushedJson = "";
+  /* On coupe l'écoute temps réel de l'enfant précédent */
+  if(currentChannel){ try{ sb.removeChannel(currentChannel); }catch(e){} currentChannel = null; }
+
   const famId = pendingFamily ? pendingFamily.id : syncInfo.familyId;
   const code = pendingFamily ? pendingFamily.code : syncInfo.code;
   syncInfo = { familyId: famId, code: code, childId: k.id, childName: k.name };
   saveSyncInfo();
   pendingFamily = null;
+
+  /* Repartir d'un état vierge avant de charger les données du nouvel enfant */
+  config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  stars = {}; bank = {spent:0, purchases:[]}; remoteDays = {};
+  dayState = emptyDay();
+  viewDateOffset = 0;
+
   await pullChild();
   subscribeChild();
   hideOnboarding();
@@ -1381,6 +1393,10 @@ function openChildPicker(){
 }
 function finishOnb(){ hideOnboarding(); render(); }
 
+function closeSheetAndPickChild(){
+  document.getElementById("sheet").classList.remove("show");
+  openChildPicker();
+}
 function leaveFamily(){
   syncInfo = null;
   sSet("pr_sync","null");
@@ -1391,8 +1407,8 @@ function leaveFamily(){
 function renderChildChip(){
   const chip = document.getElementById("childChip");
   if(cloudOn()){
-    chip.style.display = "inline-block";
-    document.getElementById("childChipName").textContent = syncInfo.childName || "";
+    chip.style.display = "inline-flex";
+    document.getElementById("childChipName").textContent = (syncInfo.childName || "")+" — changer d'enfant";
   } else {
     chip.style.display = "none";
   }
