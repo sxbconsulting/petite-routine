@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Routine">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ffb830">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="favicon.png">
 <title>Petite Routine</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -277,6 +283,34 @@
     letter-spacing:.06em;padding:5px 9px;border-radius:10px;background:rgba(255,255,255,.6);color:var(--ink-soft);display:none}
   .sync-dot.show{display:block}
   .add-btn{border:2px dashed #cfc7e6;background:none;border-radius:14px;padding:11px;width:100%;font-family:'Fredoka',sans-serif;font-size:15px;font-weight:600;color:var(--ink-soft);cursor:pointer;margin-top:2px}
+  /* ── Rappels ── */
+  .rem-row{display:flex;align-items:center;gap:10px;background:#faf8ff;border-radius:16px;
+    padding:11px 12px;margin-bottom:9px;transition:opacity .2s}
+  .rem-row.off{opacity:.5}
+  .rem-ic{font-size:21px;width:26px;text-align:center;flex:none}
+  .rem-lb{flex:1;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;color:#3a2e52}
+  .rem-row input[type=time]{border:2px solid #e6e0f5;border-radius:12px;padding:7px 8px;
+    font-family:'Nunito',sans-serif;font-weight:800;font-size:15px;color:#3a2e52;background:#fff;
+    -webkit-appearance:none;appearance:none;min-width:88px}
+  .rem-sw{width:46px;height:27px;border:none;border-radius:14px;background:#d8d2e8;position:relative;
+    flex:none;cursor:pointer;transition:background .2s}
+  .rem-sw.on{background:#4ecb8f}
+  .rem-sw::after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;
+    background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .rem-sw.on::after{transform:translateX(19px)}
+  .rem-actions{display:flex;flex-direction:column;gap:9px;margin-top:12px}
+  .rem-btn{border:none;border-radius:16px;padding:13px 16px;font-family:'Fredoka',sans-serif;
+    font-size:15px;font-weight:600;cursor:pointer;background:#ffb830;color:#3a2e52;line-height:1.3}
+  .rem-btn.ghost{background:#f0ecfa;color:#3a2e52}
+  .rem-btn:active{transform:scale(.97)}
+  .rem-note{font-family:'Nunito',sans-serif;font-size:12px;color:#7a6f96;line-height:1.5;margin-top:9px}
+  .rem-status{font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;margin-top:8px;color:#4ecb8f}
+  /* Pastille orange sur l'onglet quand l'heure est passée et la routine pas finie */
+  .tab{position:relative}
+  .tab .late-dot{position:absolute;top:5px;right:6px;width:9px;height:9px;border-radius:50%;
+    background:#ff8a3d;box-shadow:0 0 0 2px rgba(255,255,255,.85);display:none}
+  .tab.is-late .late-dot{display:block;animation:latePulse 1.6s ease-in-out infinite}
+  @keyframes latePulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.35);opacity:.6}}
   .edit-wheel-item{background:#faf8ff;border-radius:16px;padding:10px 10px 12px;margin-bottom:10px;transition:opacity .2s}
   .edit-wheel-item.off{opacity:.55}
   .edit-wheel-item .edit-row{margin-bottom:8px}
@@ -319,9 +353,9 @@
   </div>
 
   <div class="tabs">
-    <button class="tab active" id="tab-morning" onclick="switchView('morning')"><span class="ic">☀️</span>Matin</button>
-    <button class="tab" id="tab-afternoon" onclick="switchView('afternoon')"><span class="ic">⛅</span>Aprem</button>
-    <button class="tab" id="tab-evening" onclick="switchView('evening')"><span class="ic">🌙</span>Soir</button>
+    <button class="tab active" id="tab-morning" onclick="switchView('morning')"><span class="late-dot"></span><span class="ic">☀️</span>Matin</button>
+    <button class="tab" id="tab-afternoon" onclick="switchView('afternoon')"><span class="late-dot"></span><span class="ic">⛅</span>Aprem</button>
+    <button class="tab" id="tab-evening" onclick="switchView('evening')"><span class="late-dot"></span><span class="ic">🌙</span>Soir</button>
     <button class="tab" id="tab-wheel" onclick="switchView('wheel')"><span class="ic">🎡</span>La roue</button>
     <button class="tab" id="tab-bank" onclick="switchView('bank')"><span class="ic">🐷</span>Tirelire</button>
   </div>
@@ -459,6 +493,20 @@
       <button class="add-btn" onclick="addTask('rewards')">+ Ajouter un cadeau</button>
     </div>
     <div class="edit-section">
+      <div class="field"><label>Les rappels 🔔</label></div>
+      <div id="edit-reminders"></div>
+      <div class="rem-actions">
+        <button class="rem-btn" onclick="addRemindersToCalendar()">📅 Ajouter les rappels à mon calendrier</button>
+        <button class="rem-btn ghost" onclick="askNotifPermission()">🔔 Activer les notifications de l'app</button>
+      </div>
+      <div class="rem-status" id="remStatus"></div>
+      <div class="rem-note">
+        Le calendrier est le rappel le plus fiable : il sonne même quand l'app est fermée, sur iPhone comme sur Android.
+        Les notifications de l'app ne fonctionnent que si elle est ouverte ou récemment utilisée.
+        Une pastille orange apparaît sur l'onglet quand l'heure est passée et la routine pas terminée.
+      </div>
+    </div>
+    <div class="edit-section">
       <div class="field"><label>Derniers cadeaux offerts 🎁</label></div>
       <div id="purchase-history"></div>
     </div>
@@ -523,6 +571,11 @@ const DEFAULT_CONFIG = {
     {emoji:"🎠", label:"Un tour de manège", cost:8},
     {emoji:"🧸", label:"Un petit jouet", cost:15},
     {emoji:"🎁", label:"Un gros cadeau", cost:30}
+  ],
+  reminders: [
+    {routine:"morning",   time:"07:30", enabled:true},
+    {routine:"afternoon", time:"12:00", enabled:true},
+    {routine:"evening",   time:"19:30", enabled:true}
   ]
 };
 const ROUTINES = ["morning","afternoon","evening"];
@@ -558,6 +611,10 @@ function loadConfig(){
         if(typeof t.enabled !== "boolean") t.enabled = true;
       });
       if(!c.rewards) c.rewards = JSON.parse(JSON.stringify(DEFAULT_CONFIG.rewards));
+      /* Migration : les familles installées avant les rappels n'ont pas ce bloc */
+      if(!Array.isArray(c.reminders) || c.reminders.length !== 3){
+        c.reminders = JSON.parse(JSON.stringify(DEFAULT_CONFIG.reminders));
+      }
       return c;
     }catch(e){}
   }
@@ -692,6 +749,7 @@ function render(){
   }
   renderSky();
   renderWeek();
+  if(typeof renderLateDots === "function") renderLateDots();
   if(typeof renderChildChip === "function") renderChildChip();
 }
 
@@ -1046,6 +1104,7 @@ function renderEdit(){
       wrap.appendChild(row);
     });
   });
+  renderReminderEditor();
   /* La roue : ligne enrichie avec interrupteur + fréquence */
   const wrap = document.getElementById("edit-wheel");
   wrap.innerHTML = "";
@@ -1133,6 +1192,159 @@ function moveTask(r,i,dir){
   if(j<0 || j>=editState[r].length) return;
   const tmp = editState[r][i]; editState[r][i] = editState[r][j]; editState[r][j] = tmp;
   renderEdit();
+}
+
+/* ═══════════════════════════════════════════
+   RAPPELS — 3 niveaux
+   1) Calendrier (.ics)   → fiable, app fermée
+   2) Notification web    → app ouverte / récente
+   3) Pastille orange     → signal visuel dans l'app
+═══════════════════════════════════════════ */
+const REM_META = {
+  morning:  {ic:"☀️", lb:"Routine du matin"},
+  afternoon:{ic:"⛅", lb:"Routine de l'après-midi"},
+  evening:  {ic:"🌙", lb:"Routine du soir"}
+};
+
+function renderReminderEditor(){
+  const wrap = document.getElementById("edit-reminders");
+  if(!wrap) return;
+  if(!Array.isArray(editState.reminders) || editState.reminders.length !== 3){
+    editState.reminders = JSON.parse(JSON.stringify(DEFAULT_CONFIG.reminders));
+  }
+  wrap.innerHTML = "";
+  editState.reminders.forEach((r,i)=>{
+    const meta = REM_META[r.routine] || {ic:"⏰", lb:"Rappel"};
+    const row = document.createElement("div");
+    row.className = "rem-row"+(r.enabled ? "" : " off");
+    row.innerHTML =
+      '<span class="rem-ic">'+meta.ic+'</span>'+
+      '<span class="rem-lb">'+meta.lb+'</span>'+
+      '<input type="time" value="'+r.time+'" onchange="setReminderTime('+i+', this.value)">'+
+      '<button class="rem-sw'+(r.enabled ? " on" : "")+'" onclick="toggleReminder('+i+')" aria-label="Activer"></button>';
+    wrap.appendChild(row);
+  });
+  refreshRemStatus();
+}
+
+function setReminderTime(i, val){
+  if(!/^\d{2}:\d{2}$/.test(val)) return;
+  editState.reminders[i].time = val;
+}
+function toggleReminder(i){
+  editState.reminders[i].enabled = !editState.reminders[i].enabled;
+  renderReminderEditor();
+}
+
+function refreshRemStatus(){
+  const el = document.getElementById("remStatus");
+  if(!el) return;
+  if(!("Notification" in window)){ el.textContent = ""; return; }
+  if(Notification.permission === "granted")      el.textContent = "✅ Notifications de l'app activées";
+  else if(Notification.permission === "denied")  el.textContent = "🚫 Notifications refusées — à réactiver dans les réglages du téléphone";
+  else                                           el.textContent = "";
+}
+
+function askNotifPermission(){
+  if(!("Notification" in window)){
+    alert("Ce navigateur ne gère pas les notifications. Utilisez plutôt le rappel par calendrier, il est plus fiable.");
+    return;
+  }
+  Notification.requestPermission().then(()=>{
+    refreshRemStatus();
+    if(Notification.permission === "granted"){
+      new Notification("Petite Routine ⭐", {body:"C'est prêt ! Vous serez prévenu aux heures choisies."});
+    }
+  });
+}
+
+/* ── Export calendrier : 3 événements quotidiens récurrents ── */
+function icsTime(hhmm){ return hhmm.replace(":","")+"00"; }
+function addRemindersToCalendar(){
+  const list = (editState && editState.reminders ? editState.reminders : config.reminders) || [];
+  const on = list.filter(r=>r.enabled);
+  if(!on.length){ alert("Activez au moins un rappel avant de l'ajouter au calendrier."); return; }
+  const who = (editState && editState.name) || config.name || "";
+  const d = new Date();
+  const day = d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");
+  const stamp = day+"T000000Z";
+  let ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Petite Routine//FR\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n";
+  on.forEach((r,i)=>{
+    const meta = REM_META[r.routine] || {ic:"⏰", lb:"Routine"};
+    const title = meta.ic+" "+meta.lb+(who ? " — "+who : "");
+    const [h,m] = r.time.split(":").map(Number);
+    const endM = m+15;
+    const endH = (h + Math.floor(endM/60)) % 24;
+    const endTime = String(endH).padStart(2,"0")+String(endM%60).padStart(2,"0")+"00";
+    ics +=
+      "BEGIN:VEVENT\r\n"+
+      "UID:petite-routine-"+r.routine+"-"+day+"-"+i+"@sxbconsulting\r\n"+
+      "DTSTAMP:"+stamp+"\r\n"+
+      "DTSTART:"+day+"T"+icsTime(r.time)+"\r\n"+
+      "DTEND:"+day+"T"+endTime+"\r\n"+
+      "RRULE:FREQ=DAILY\r\n"+
+      "SUMMARY:"+title+"\r\n"+
+      "DESCRIPTION:Ouvrez Petite Routine avec votre enfant.\r\n"+
+      "BEGIN:VALARM\r\nTRIGGER:PT0M\r\nACTION:DISPLAY\r\nDESCRIPTION:"+title+"\r\nEND:VALARM\r\n"+
+      "END:VEVENT\r\n";
+  });
+  ics += "END:VCALENDAR\r\n";
+  const blob = new Blob([ics], {type:"text/calendar;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "petite-routine-rappels.ics";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+
+/* ── Notification web + pastilles : vérification toutes les 30 s ── */
+function minutesNow(){ const d = new Date(); return d.getHours()*60 + d.getMinutes(); }
+function remMinutes(t){ const [h,m] = (t||"00:00").split(":").map(Number); return h*60+m; }
+function routineDone(r){
+  const st = dayState && dayState[r];
+  if(!st) return false;
+  const total = (config[r] || []).length;
+  if(!total) return true;
+  let n = 0;
+  for(let i=0;i<total;i++){ if(st.done && st.done[i]) n++; }
+  return n >= total;
+}
+/* Une routine est "en retard" si l'heure du rappel est passée et qu'elle n'est pas finie */
+function isLate(r){
+  if(!isToday()) return false;
+  const rem = (config.reminders||[]).find(x=>x.routine===r);
+  if(!rem || !rem.enabled) return false;
+  return minutesNow() >= remMinutes(rem.time) && !routineDone(r);
+}
+function renderLateDots(){
+  ROUTINES.forEach(r=>{
+    const tab = document.getElementById("tab-"+r);
+    if(tab) tab.classList.toggle("is-late", isLate(r));
+  });
+}
+
+function firedKey(r){ return "pr_fired_"+r+"_"+todayKey(); }
+function checkReminders(){
+  renderLateDots();
+  if(!("Notification" in window) || Notification.permission !== "granted") return;
+  const now = minutesNow();
+  (config.reminders||[]).forEach(rem=>{
+    if(!rem.enabled) return;
+    const target = remMinutes(rem.time);
+    /* Fenêtre de 10 min : si l'app était fermée pile à l'heure, on rattrape à la réouverture */
+    if(now < target || now > target + 10) return;
+    if(routineDone(rem.routine)) return;
+    if(sGet(ck(firedKey(rem.routine))) === "1") return;
+    const meta = REM_META[rem.routine] || {ic:"⏰", lb:"Routine"};
+    const who = config.name ? " avec "+config.name : "";
+    try{
+      new Notification(meta.ic+" "+meta.lb, {body:"C'est l'heure ! Ouvrez Petite Routine"+who+".", tag:"pr-"+rem.routine});
+      sSet(ck(firedKey(rem.routine)), "1");
+    }catch(e){}
+  });
 }
 
 function saveParent(){
@@ -1442,6 +1654,24 @@ async function initSync(){
 /* ── Démarrage ── */
 render();
 initSync();
+
+/* Boucle de rappels : toutes les 30 s, + à chaque retour sur l'app */
+checkReminders();
+setInterval(checkReminders, 30000);
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) checkReminders(); });
+
+/* Ménage : on efface les marqueurs "déjà notifié" des jours précédents */
+(function cleanFiredKeys(){
+  try{
+    const keep = todayKey();
+    const del = [];
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && k.indexOf("pr_fired_") === 0 && k.indexOf(keep) === -1) del.push(k);
+    }
+    del.forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
+})();
 </script>
 </body>
 </html>
