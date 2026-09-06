@@ -271,6 +271,14 @@
     border-radius:16px;padding:13px 16px;font-family:'Fredoka',sans-serif;font-size:17px;font-weight:600;
     color:var(--ink);cursor:pointer;margin-bottom:8px;text-align:left}
   .onb-child:active{transform:scale(.97)}
+  /* ── Avatar de l'enfant ── */
+  .av-label{font-family:'Nunito',sans-serif;font-weight:800;font-size:12px;color:var(--ink-soft);
+    letter-spacing:.06em;text-transform:uppercase;margin:12px 0 6px}
+  .av-pick{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}
+  .av-btn{border:2px solid #e8e3f4;background:#fff;border-radius:14px;padding:5px 7px;
+    font-size:24px;line-height:1.1;cursor:pointer}
+  .av-btn.sel{border-color:var(--gold);background:#fff6e2}
+  .av-btn:active{transform:scale(.94)}
   .fam-info{background:#faf8ff;border-radius:16px;padding:12px 14px;margin-bottom:14px;
     font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;color:var(--ink-soft)}
   .fam-info b{font-family:'Fredoka',sans-serif;font-size:18px;letter-spacing:.12em;color:var(--ink)}
@@ -414,7 +422,8 @@
 <div class="onb" id="onb">
   <div class="onb-card">
     <div class="onb-step" id="onb-home">
-      <div class="onb-emoji">🐷⭐</div>
+      <div class="onb-emoji"><span class="av-emoji">🧒</span>⭐</div>
+      <div id="avatarPickerOnb"></div>
       <h2>Petite Routine</h2>
       <p class="onb-sub">Les routines, la roue et la tirelire de vos enfants — synchronisées entre les téléphones des parents.</p>
       <button class="onb-btn primary" onclick="onbShow('create')">🏠 Créer notre famille</button>
@@ -466,6 +475,7 @@
     <div class="field">
       <label>Prénom de l'enfant</label>
       <input type="text" id="childName" placeholder="Prénom">
+      <div id="avatarPickerParent"></div>
     </div>
     <div class="edit-section">
       <div class="field"><label>Routine du matin ☀️</label></div>
@@ -570,6 +580,7 @@ function esc(s){
 /* ── Données par défaut ── */
 const DEFAULT_CONFIG = {
   name: "",
+  avatar: "🧒",
   morning: [
     {emoji:"🚽", label:"Je vais au pot"},
     {emoji:"👕", label:"Je m'habille"},
@@ -650,6 +661,7 @@ function migrateConfig(c){
     c.reminders = JSON.parse(JSON.stringify(DEFAULT_CONFIG.reminders));
   }
   if(typeof c.name !== "string") c.name = "";
+  if(typeof c.avatar !== "string" || !c.avatar) c.avatar = "🧒";
   return c;
 }
 function loadConfig(){
@@ -744,6 +756,44 @@ function bankBalance(){
   const raw = bankBalanceRaw();
   if(raw < 0) console.warn("[Petite Routine] Solde négatif :", raw, "— gagné", totalEarned(), "dépensé", bank.spent);
   return Math.max(0, raw);
+}
+
+/* ── Avatar de l'enfant ──
+   Genre et carnation seulement : les emoji enfants n'acceptent pas les
+   composants cheveux (🧒‍🦱 se casse en deux glyphes), et aucun emoji
+   n'encode la couleur des yeux. Vérifié plutôt que supposé. */
+const AV_BASES = ["🧒","👦","👧"];
+const AV_TEINTES = ["","🏻","🏼","🏽","🏾","🏿"];
+
+function avatarActuel(){ return (config && config.avatar) || "🧒"; }
+function avatarParts(a){
+  a = a || "🧒";
+  const base = AV_BASES.find(b => a.indexOf(b) === 0) || "🧒";
+  return { base: base, teinte: a.slice(base.length) };
+}
+function choisirBase(b){   const p = avatarParts(avatarActuel()); appliquerAvatar(b, p.teinte); }
+function choisirTeinte(t){ const p = avatarParts(avatarActuel()); appliquerAvatar(p.base, t); }
+function appliquerAvatar(base, teinte){
+  config.avatar = base + teinte;
+  saveConfig();
+  renderAvatarPicker("avatarPickerOnb");
+  renderAvatarPicker("avatarPickerParent");
+  renderChildChip();
+}
+function renderAvatarPicker(id){
+  const w = document.getElementById(id);
+  if(!w) return;
+  const a = avatarActuel(), p = avatarParts(a);
+  w.innerHTML =
+    '<div class="av-label">Qui es-tu ?</div><div class="av-pick">' +
+      AV_BASES.map(b => '<button class="av-btn'+(b===p.base?" sel":"")+'" '+
+        'onclick="choisirBase(&quot;'+b+'&quot;)">'+b+'</button>').join("") +
+    '</div>' +
+    '<div class="av-label">Ta couleur de peau</div><div class="av-pick">' +
+      AV_TEINTES.map(t => '<button class="av-btn'+(t===p.teinte?" sel":"")+'" '+
+        'onclick="choisirTeinte(&quot;'+t+'&quot;)">'+p.base+t+'</button>').join("") +
+    '</div>';
+  document.querySelectorAll(".av-emoji").forEach(el => el.textContent = a);
 }
 
 /* ───────────── RENDU ───────────── */
@@ -1121,6 +1171,7 @@ function openParent(scrollTarget){
   renderEdit();
   document.getElementById("storageNote").classList.toggle("show", !storageOK);
   messageSauvegarde("");   /* pas de message de sauvegarde qui traîne d'une ouverture à l'autre */
+  renderAvatarPicker("avatarPickerParent");
   document.getElementById("sheet").classList.add("show");
   const targetId = (scrollTarget===true || scrollTarget==="wheel") ? "edit-wheel"
                  : (scrollTarget==="rewards") ? "edit-rewards" : null;
@@ -1700,7 +1751,9 @@ async function pullChild(){
   const hasData = data.data && (data.data.config || data.data.stars || data.data.days);
   if(hasData) hydrate(data.data);
   else { /* enfant tout neuf : on part sur une config vierge à son prénom */
+    const avatarChoisi = avatarActuel();   /* choisi pendant l'onboarding */
     config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+    config.avatar = avatarChoisi;
     config.name = data.name || "";
     stars = {}; bank = {spent:0, purchases:[]}; remoteDays = {}; dayState = emptyDay();
     saveConfig(); saveStars(); saveBank(); saveDay();
@@ -1730,7 +1783,11 @@ function setSyncDot(t){
 }
 
 /* ── Onboarding ── */
-function showOnboarding(){ document.getElementById("onb").classList.add("show"); onbShow("home"); }
+function showOnboarding(){
+  document.getElementById("onb").classList.add("show");
+  onbShow("home");
+  renderAvatarPicker("avatarPickerOnb");
+}
 function hideOnboarding(){ document.getElementById("onb").classList.remove("show"); }
 function skipSync(){ sSet("pr_sync_skip","1"); hideOnboarding(); }
 
@@ -1851,7 +1908,8 @@ function renderChildChip(){
   const chip = document.getElementById("childChip");
   if(cloudOn()){
     chip.style.display = "inline-flex";
-    document.getElementById("childChipName").textContent = (syncInfo.childName || "")+" — changer d'enfant";
+    document.getElementById("childChipName").textContent =
+      avatarActuel()+" "+(syncInfo.childName || "")+" — changer d'enfant";
   } else {
     chip.style.display = "none";
   }
