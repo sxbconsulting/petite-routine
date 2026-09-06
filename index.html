@@ -528,13 +528,27 @@ const memStore = {};
 let storageOK = true;
 function sGet(k){ try{ return localStorage.getItem(k); }catch(e){ storageOK=false; return memStore[k] ?? null; } }
 function sSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){ storageOK=false; memStore[k]=v; } }
+/* AUDIT #2 — syncInfo doit exister AVANT le premier appel à ck().
+   Déclaré avec "let" plus bas dans le fichier, il était dans la zone morte
+   temporelle au moment des chargements initiaux : typeof y lève une erreur,
+   le try/catch l'avalait, et ck() renvoyait la clé commune au lieu de celle
+   de l'enfant actif. Hors ligne, rien ne rattrapait ensuite. */
+let syncInfo = null;      /* {familyId, code, childId, childName} */
+function loadSyncInfo(){ try{ return JSON.parse(sGet("pr_sync")||"null"); }catch(e){ return null; } }
+function saveSyncInfo(){ sSet("pr_sync", JSON.stringify(syncInfo)); }
+syncInfo = loadSyncInfo();
+
 /* Chaque enfant a son propre espace de stockage local.
    Sans ça, un 2e enfant hériterait des données du 1er. */
 function ck(base){
-  try{
-    if(typeof syncInfo !== "undefined" && syncInfo && syncInfo.childId) return base+"@"+syncInfo.childId;
-  }catch(e){}
-  return base;
+  return (syncInfo && syncInfo.childId) ? base+"@"+syncInfo.childId : base;
+}
+
+/* AUDIT #7 — échappe tout texte saisi par un parent ou reçu par la
+   synchronisation avant de l'insérer dans du innerHTML. */
+function esc(s){
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c =>
+    ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
 }
 
 /* ── Données par défaut ── */
@@ -599,34 +613,41 @@ function defaultView(){
   return "evening";
 }
 
+/* AUDIT #3 — cette migration existait en double : une copie ici, une autre
+   dans hydrate(). Les deux avaient divergé : celle de hydrate() ne réparait
+   pas le bloc "reminders", si bien qu'une famille synchronisée depuis un
+   enregistrement antérieur à la V6.1 n'avait aucun rappel — ni notification,
+   ni pastille, ni export calendrier — sans le moindre message.
+   Une seule fonction désormais, appelée des deux côtés. */
+function migrateConfig(c){
+  if(!c || typeof c !== "object") return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  ROUTINES.forEach(r=>{
+    if(!Array.isArray(c[r])) c[r] = JSON.parse(JSON.stringify(DEFAULT_CONFIG[r]));
+  });
+  if(!Array.isArray(c.wheelItems)) c.wheelItems = JSON.parse(JSON.stringify(DEFAULT_CONFIG.wheelItems));
+  c.wheelItems.forEach(t=>{
+    if(typeof t.weight !== "number") t.weight = 2;
+    if(typeof t.enabled !== "boolean") t.enabled = true;
+  });
+  if(!Array.isArray(c.rewards)) c.rewards = JSON.parse(JSON.stringify(DEFAULT_CONFIG.rewards));
+  if(!Array.isArray(c.reminders) || c.reminders.length !== 3){
+    c.reminders = JSON.parse(JSON.stringify(DEFAULT_CONFIG.reminders));
+  }
+  if(typeof c.name !== "string") c.name = "";
+  return c;
+}
 function loadConfig(){
   const raw = sGet(ck("pr_config"));
   if(raw){
-    try{
-      const c = JSON.parse(raw);
-      if(!c.afternoon) c.afternoon = JSON.parse(JSON.stringify(DEFAULT_CONFIG.afternoon));
-      if(!c.wheelItems) c.wheelItems = JSON.parse(JSON.stringify(DEFAULT_CONFIG.wheelItems));
-      c.wheelItems.forEach(t=>{
-        if(typeof t.weight !== "number") t.weight = 2;
-        if(typeof t.enabled !== "boolean") t.enabled = true;
-      });
-      if(!c.rewards) c.rewards = JSON.parse(JSON.stringify(DEFAULT_CONFIG.rewards));
-      /* Migration : les familles installées avant les rappels n'ont pas ce bloc */
-      if(!Array.isArray(c.reminders) || c.reminders.length !== 3){
-        c.reminders = JSON.parse(JSON.stringify(DEFAULT_CONFIG.reminders));
-      }
-      return c;
-    }catch(e){}
+    try{ return migrateConfig(JSON.parse(raw)); }catch(e){}
   }
   return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
 }
 function saveConfig(){ sSet(ck("pr_config"), JSON.stringify(config)); }
 
 /* ── État du jour ── */
-function todayKey(){
-  const d = new Date();
-  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
-}
+/* AUDIT #8 — todayKey était une copie mot pour mot de keyFromDate. */
+function todayKey(){ return keyFromDate(new Date()); }
 function emptyDay(){
   return { morning:{done:[],celebrated:false}, afternoon:{done:[],celebrated:false}, evening:{done:[],celebrated:false} };
 }
@@ -699,7 +720,15 @@ function totalEarned(){
   });
   return n;
 }
-function bankBalance(){ return Math.max(0, totalEarned() - (bank.spent||0)); }
+/* AUDIT #8 — le plancher à 0 masquait un solde négatif : un remboursement mal
+   passé restait invisible à jamais. On garde le plancher à l'affichage (montrer
+   un solde négatif à un enfant n'aurait aucun sens) mais l'anomalie est signalée. */
+function bankBalanceRaw(){ return totalEarned() - (bank.spent||0); }
+function bankBalance(){
+  const raw = bankBalanceRaw();
+  if(raw < 0) console.warn("[Petite Routine] Solde négatif :", raw, "— gagné", totalEarned(), "dépensé", bank.spent);
+  return Math.max(0, raw);
+}
 
 /* ───────────── RENDU ───────────── */
 const DAYS_FR = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
@@ -785,7 +814,7 @@ function renderTasks(){
   list.forEach((t,i)=>{
     const b = document.createElement("button");
     b.className = "task"+(done[i] ? " done" : "");
-    b.innerHTML = '<span class="emoji">'+t.emoji+'</span><span class="label">'+t.label+'</span><span class="check">✓</span>';
+    b.innerHTML = '<span class="emoji">'+esc(t.emoji)+'</span><span class="label">'+esc(t.label)+'</span><span class="check">✓</span>';
     b.onclick = (ev)=>toggleTask(i, ev);
     wrap.appendChild(b);
   });
@@ -850,7 +879,7 @@ function renderWheel(){
     const mid = start+seg/2;
     /* taille de l'emoji proportionnelle à la part */
     const fs = Math.max(20, Math.min(38, Math.round(seg/360*140)));
-    html += '<span class="seg-label" style="font-size:'+fs+'px;transform:rotate('+(mid-90)+'deg) translateX(34%) rotate(90deg) translate(-50%,-50%)">'+t.emoji+'</span>';
+    html += '<span class="seg-label" style="font-size:'+fs+'px;transform:rotate('+(mid-90)+'deg) translateX(34%) rotate(90deg) translate(-50%,-50%)">'+esc(t.emoji)+'</span>';
     cursor = end;
   });
   wheel.style.background = "conic-gradient("+gradient.join(",")+")";
@@ -877,8 +906,10 @@ function spin(){
 
   /* Tirage pondéré + anti-répétition : si on retombe sur la même
      activité que la dernière fois, on retire une fois. */
+  /* AUDIT #8 — l'anti-répétition ne retirait qu'une seule fois : retomber deux
+     fois de suite sur la même activité restait fréquent. Jusqu'à 6 essais. */
   let winner = pickWeighted(items);
-  if(items.length>1 && winner.label===lastWinnerLabel){
+  for(let essai=0; essai<6 && items.length>1 && winner.label===lastWinnerLabel; essai++){
     winner = pickWeighted(items);
   }
   lastWinnerLabel = winner.label;
@@ -902,14 +933,21 @@ function spin(){
   }, 4400);
 }
 
-function showWheelResult(item){
-  document.getElementById("celebrateEmoji").textContent = item.emoji;
-  document.getElementById("celebrateTitle").textContent = item.label;
-  const name = config.name ? " "+config.name : "";
-  document.getElementById("celebrateText").textContent = "La roue a choisi"+name+" ! Amuse-toi bien 🎉";
-  document.getElementById("celebrateBtn").textContent = "C'est parti ! 🚀";
+/* AUDIT #8 — ces cinq lignes étaient recopiées à trois endroits : routine
+   terminée, résultat de roue, achat. Un quatrième usage aurait fait une
+   quatrième copie. Un seul point d'entrée désormais. */
+function showModal(emoji, title, text, btn){
+  document.getElementById("celebrateEmoji").textContent = emoji;
+  document.getElementById("celebrateTitle").textContent = title;
+  document.getElementById("celebrateText").textContent = text;
+  document.getElementById("celebrateBtn").textContent = btn;
   document.getElementById("celebrate").classList.add("show");
   confetti();
+}
+
+function showWheelResult(item){
+  const name = config.name ? " "+config.name : "";
+  showModal(item.emoji, item.label, "La roue a choisi"+name+" ! Amuse-toi bien 🎉", "C'est parti ! 🚀");
 }
 
 /* ── Tirelire : rendu + achat ── */
@@ -925,9 +963,9 @@ function renderBank(){
     const pct = Math.min(100, Math.round(balance/r.cost*100));
     const need = r.cost - balance;
     card.innerHTML =
-      '<span class="r-emoji">'+r.emoji+'</span>'+
+      '<span class="r-emoji">'+esc(r.emoji)+'</span>'+
       '<span class="r-body">'+
-        '<span class="r-label">'+r.label+'</span>'+
+        '<span class="r-label">'+esc(r.label)+'</span>'+
         '<span class="r-progress"><i style="width:'+pct+'%"></i></span>'+
         '<span class="r-need">'+(can ? "Je peux l'avoir ! 🎉" : "Encore "+need+" ⭐")+'</span>'+
       '</span>'+
@@ -960,17 +998,16 @@ function closeBuy(){
 function confirmBuy(){
   if(!pendingReward) return;
   const r = pendingReward;
+  /* AUDIT #8 — le solde n'était pas revérifié entre l'ouverture de la fiche et
+     la fin de l'appui long : une synchro arrivée entre-temps pouvait faire
+     dépenser des étoiles qui n'existaient plus. */
+  if(bankBalance() < r.cost){ closeBuy(); renderBank(); return; }
   bank.spent = (bank.spent||0) + r.cost;
   bank.purchases.push({emoji:r.emoji, label:r.label, cost:r.cost, date:todayKey()});
   saveBank();
   closeBuy();
-  document.getElementById("celebrateEmoji").textContent = r.emoji;
   const name = config.name ? " "+config.name : "";
-  document.getElementById("celebrateTitle").textContent = "Bravo"+name+" !";
-  document.getElementById("celebrateText").textContent = "Tu as économisé "+r.cost+" ⭐ pour : "+r.label+" 🎉";
-  document.getElementById("celebrateBtn").textContent = "Merci ! 💛";
-  document.getElementById("celebrate").classList.add("show");
-  confetti();
+  showModal(r.emoji, "Bravo"+name+" !", "Tu as économisé "+r.cost+" ⭐ pour : "+r.label+" 🎉", "Merci ! 💛");
   renderBank();
   const bal = document.querySelector(".piggy-balance");
   bal.classList.remove("spend"); void bal.offsetWidth; bal.classList.add("spend");
@@ -979,10 +1016,15 @@ function confirmBuy(){
 /* Validation parentale : appui long 1,5s sur le bouton d'achat */
 const buyConfirmBtn = document.getElementById("buyConfirm");
 let buyTimer = null;
-function buyStart(){ buyTimer = setTimeout(confirmBuy, 1500); }
+function buyStart(){ clearTimeout(buyTimer); buyTimer = setTimeout(confirmBuy, 1500); }
 function buyCancel(){ clearTimeout(buyTimer); }
 buyConfirmBtn.addEventListener("touchstart", buyStart);
 buyConfirmBtn.addEventListener("touchend", buyCancel);
+/* AUDIT #4 — sur iPhone, une notification, un début de défilement ou la paume
+   qui effleure l'écran annulent le toucher SANS déclencher touchend : le
+   minuteur de 1,5 s allait au bout et le cadeau était acheté doigt levé.
+   C'est la seule action protégée de l'app. */
+buyConfirmBtn.addEventListener("touchcancel", buyCancel);
 buyConfirmBtn.addEventListener("mousedown", buyStart);
 buyConfirmBtn.addEventListener("mouseup", buyCancel);
 buyConfirmBtn.addEventListener("mouseleave", buyCancel);
@@ -1020,12 +1062,7 @@ function checkComplete(){
 
 function showCelebrate(){
   const name = config.name ? " "+config.name : "";
-  document.getElementById("celebrateEmoji").textContent = "🌟";
-  document.getElementById("celebrateTitle").textContent = "Bravo"+name+" !";
-  document.getElementById("celebrateText").textContent = ROUTINE_META[view].doneMsg;
-  document.getElementById("celebrateBtn").textContent = "Youpi ! 🎉";
-  document.getElementById("celebrate").classList.add("show");
-  confetti();
+  showModal("🌟", "Bravo"+name+" !", ROUTINE_META[view].doneMsg, "Youpi ! 🎉");
   renderWeek();
 }
 function closeCelebrate(){ document.getElementById("celebrate").classList.remove("show"); }
@@ -1098,8 +1135,8 @@ function renderEdit(){
           '<button class="arw" onclick="moveTask(\''+r+'\','+i+',-1)"'+(i===0?" disabled":"")+'>▲</button>'+
           '<button class="arw" onclick="moveTask(\''+r+'\','+i+',1)"'+(i===editState[r].length-1?" disabled":"")+'>▼</button>'+
         '</div>'+
-        '<input class="em" value="'+t.emoji+'" maxlength="4" onchange="editState.'+r+'['+i+'].emoji=this.value">'+
-        '<input class="lb" value="'+t.label.replace(/"/g,"&quot;")+'" onchange="editState.'+r+'['+i+'].label=this.value">'+
+        '<input class="em" value="'+esc(t.emoji)+'" maxlength="4" onchange="editState.'+r+'['+i+'].emoji=this.value">'+
+        '<input class="lb" value="'+esc(t.label)+'" onchange="editState.'+r+'['+i+'].label=this.value">'+
         '<button class="del" onclick="removeTask(\''+r+'\','+i+')">🗑️</button>';
       wrap.appendChild(row);
     });
@@ -1113,8 +1150,8 @@ function renderEdit(){
     row.className = "edit-wheel-item"+(t.enabled===false ? " off" : "");
     row.innerHTML =
       '<div class="edit-row">'+
-        '<input class="em" value="'+t.emoji+'" maxlength="4" onchange="editState.wheelItems['+i+'].emoji=this.value">'+
-        '<input class="lb" value="'+t.label.replace(/"/g,"&quot;")+'" onchange="editState.wheelItems['+i+'].label=this.value">'+
+        '<input class="em" value="'+esc(t.emoji)+'" maxlength="4" onchange="editState.wheelItems['+i+'].emoji=this.value">'+
+        '<input class="lb" value="'+esc(t.label)+'" onchange="editState.wheelItems['+i+'].label=this.value">'+
         '<button class="del" onclick="removeTask(\'wheelItems\','+i+')">🗑️</button>'+
       '</div>'+
       '<div class="wheel-opts">'+
@@ -1145,8 +1182,8 @@ function renderRewardsEdit(){
     const row = document.createElement("div");
     row.className = "edit-row";
     row.innerHTML =
-      '<input class="em" value="'+r.emoji+'" maxlength="4" onchange="editState.rewards['+i+'].emoji=this.value">'+
-      '<input class="lb" value="'+r.label.replace(/"/g,"&quot;")+'" onchange="editState.rewards['+i+'].label=this.value">'+
+      '<input class="em" value="'+esc(r.emoji)+'" maxlength="4" onchange="editState.rewards['+i+'].emoji=this.value">'+
+      '<input class="lb" value="'+esc(r.label)+'" onchange="editState.rewards['+i+'].label=this.value">'+
       '<input class="cost" type="number" min="1" max="999" value="'+r.cost+'" onchange="editState.rewards['+i+'].cost=Math.max(1,parseInt(this.value)||1)">'+
       '<button class="del" onclick="removeTask(\'rewards\','+i+')">🗑️</button>';
     wrap.appendChild(row);
@@ -1162,8 +1199,8 @@ function renderRewardsEdit(){
       const row = document.createElement("div");
       row.className = "hist-row";
       row.innerHTML =
-        '<span class="h-emoji">'+p.emoji+'</span>'+
-        '<span class="h-label">'+p.label+'</span>'+
+        '<span class="h-emoji">'+esc(p.emoji)+'</span>'+
+        '<span class="h-label">'+esc(p.label)+'</span>'+
         '<span class="h-cost">−'+p.cost+' ⭐</span>'+
         '<button class="h-refund" onclick="refundPurchase('+idx+')" title="Annuler / rembourser">↩️</button>';
       hist.appendChild(row);
@@ -1278,7 +1315,10 @@ function addRemindersToCalendar(){
     const endTime = String(endH).padStart(2,"0")+String(endM%60).padStart(2,"0")+"00";
     ics +=
       "BEGIN:VEVENT\r\n"+
-      "UID:petite-routine-"+r.routine+"-"+day+"-"+i+"@sxbconsulting\r\n"+
+      /* AUDIT #6 — l'UID contenait la date d'export et le rang du rappel :
+         chaque réexport créait une NOUVELLE série d'alarmes quotidiennes au
+         lieu de remplacer la précédente. Identifiant stable par routine. */
+      "UID:petite-routine-"+r.routine+"@sxbconsulting\r\n"+
       "DTSTAMP:"+stamp+"\r\n"+
       "DTSTART:"+day+"T"+icsTime(r.time)+"\r\n"+
       "DTEND:"+day+"T"+endTime+"\r\n"+
@@ -1303,8 +1343,13 @@ function addRemindersToCalendar(){
 /* ── Notification web + pastilles : vérification toutes les 30 s ── */
 function minutesNow(){ const d = new Date(); return d.getHours()*60 + d.getMinutes(); }
 function remMinutes(t){ const [h,m] = (t||"00:00").split(":").map(Number); return h*60+m; }
+/* AUDIT #5 — routineDone lisait dayState, c'est-à-dire le jour AFFICHÉ.
+   Un parent qui consultait un jour passé et laissait l'app ouverte faussait
+   les rappels du jour : notification supprimée à tort, ou émise alors que la
+   routine était terminée. On évalue désormais toujours aujourd'hui. */
 function routineDone(r){
-  const st = dayState && dayState[r];
+  const day = isToday() ? dayState : loadDayFor(todayKey());
+  const st = day && day[r];
   if(!st) return false;
   const total = (config[r] || []).length;
   if(!total) return true;
@@ -1362,6 +1407,11 @@ function saveParent(){
       if(!st[r]) st[r] = {done:[],celebrated:false};
       const old = st[r].done || [];
       st[r].done = remap[r].map(oi => (oi === undefined ? false : !!old[oi]));
+      /* AUDIT #8 — ajouter une étape à une routine déjà célébrée laissait
+         "celebrated" à true : la routine redevenait incomplète mais ne pouvait
+         plus être fêtée. L'étoile déjà gagnée, elle, reste acquise. */
+      const total = (config[r]||[]).length;
+      if(total > 0 && st[r].done.filter(Boolean).length < total) st[r].celebrated = false;
     });
     return st;
   };
@@ -1391,14 +1441,11 @@ const SUPABASE_URL = "https://xkdymodyzktowuixpbzo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhrZHltb2R5emt0b3d1aXhwYnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5NTk4MzIsImV4cCI6MjEwMDUzNTgzMn0.P7_hvtsU9xlxvQr1399IzdTsmRunV6aQM8pQG5KjcJ0";
 
 let sb = null;            /* client supabase */
-let syncInfo = null;      /* {familyId, code, childId, childName} */
+/* syncInfo est déclaré et chargé en tête de fichier — voir AUDIT #2 */
 let remoteDays = {};      /* historique des jours (14 derniers) */
 let pushTimer = null;
-let lastPushedJson = "";
 let pendingFamily = null; /* pendant l'onboarding */
 
-function loadSyncInfo(){ try{ return JSON.parse(sGet("pr_sync")||"null"); }catch(e){ return null; } }
-function saveSyncInfo(){ sSet("pr_sync", JSON.stringify(syncInfo)); }
 function cloudOn(){ return !!(sb && syncInfo && syncInfo.childId); }
 function onbMsg(t){ document.getElementById("onbMsg").textContent = t||""; }
 function onbShow(step){
@@ -1424,17 +1471,7 @@ function localSnapshot(){
 /* Paquet cloud → variables locales */
 function hydrate(data){
   if(!data) return;
-  if(data.config){
-    const c = data.config;
-    if(!c.afternoon) c.afternoon = JSON.parse(JSON.stringify(DEFAULT_CONFIG.afternoon));
-    if(!c.wheelItems) c.wheelItems = JSON.parse(JSON.stringify(DEFAULT_CONFIG.wheelItems));
-    c.wheelItems.forEach(t=>{
-      if(typeof t.weight !== "number") t.weight = 2;
-      if(typeof t.enabled !== "boolean") t.enabled = true;
-    });
-    if(!c.rewards) c.rewards = JSON.parse(JSON.stringify(DEFAULT_CONFIG.rewards));
-    config = c;
-  }
+  if(data.config) config = migrateConfig(data.config);   /* AUDIT #3 */
   stars = data.stars || {};
   bank = data.bank || {spent:0, purchases:[]};
   remoteDays = data.days || {};
@@ -1446,19 +1483,49 @@ function hydrate(data){
 function scheduleCloudSave(){
   if(!cloudOn()) return;
   clearTimeout(pushTimer);
+  clearTimeout(retryTimer);
+  retriesLeft = 3;
   pushTimer = setTimeout(pushChild, 800);
 }
+
+/* AUDIT #1 — marqueur de révision.
+   L'anti-écho comparait deux textes JSON. C'était voué à échouer : la colonne
+   "data" est de type jsonb, et Postgres réordonne les clés au stockage. Les
+   deux textes différaient donc toujours, l'écho n'était jamais reconnu, et
+   l'app réappliquait son propre état daté — effaçant au passage les taps
+   faits pendant l'aller-retour. On compare maintenant un seul identifiant,
+   insensible à l'ordre des clés. */
+let lastPushedRev = "";
+function makeRev(){ return Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10); }
+
+/* AUDIT #8 — un envoi échoué n'était jamais réessayé : le serveur restait en
+   retard jusqu'au tap suivant. Trois relances espacées, puis on laisse tomber
+   jusqu'à la prochaine modification. */
+let retryTimer = null;
+let retriesLeft = 3;
+
 async function pushChild(){
   if(!cloudOn()) return;
   const snap = localSnapshot();
   const keys = Object.keys(snap.days).sort();
   while(keys.length > 14){ delete snap.days[keys.shift()]; }
-  lastPushedJson = JSON.stringify(snap);
+  snap._rev = makeRev();
+  lastPushedRev = snap._rev;
   setSyncDot("⟳");
   const { error } = await sb.from("pr_children")
     .update({ data: snap, updated_at: new Date().toISOString() })
     .eq("id", syncInfo.childId);
-  setSyncDot(error ? "⚠︎ hors ligne" : "✓ synchro");
+  if(error){
+    setSyncDot("⚠︎ hors ligne");
+    if(retriesLeft > 0){
+      retriesLeft--;
+      clearTimeout(retryTimer);
+      retryTimer = setTimeout(pushChild, 5000);
+    }
+  } else {
+    retriesLeft = 3;
+    setSyncDot("✓ synchro");
+  }
 }
 
 async function pullChild(){
@@ -1486,9 +1553,10 @@ function subscribeChild(){
     .on("postgres_changes",
       { event:"UPDATE", schema:"public", table:"pr_children", filter:"id=eq."+syncInfo.childId },
       (payload)=>{
-        const incoming = JSON.stringify(payload.new.data);
-        if(incoming === lastPushedJson) return; /* écho de notre propre envoi */
-        hydrate(payload.new.data);
+        const d = payload.new && payload.new.data;
+        /* AUDIT #1 — écho de notre propre envoi, reconnu par son marqueur */
+        if(d && d._rev && d._rev === lastPushedRev) return;
+        hydrate(d);
         render();
       })
     .subscribe();
@@ -1562,7 +1630,9 @@ async function showChildrenStep(){
 async function selectChild(k){
   /* On annule tout envoi en attente : il partirait vers le mauvais enfant */
   clearTimeout(pushTimer);
-  lastPushedJson = "";
+  clearTimeout(retryTimer);   /* AUDIT #8 — la relance aussi, sinon elle vise l'enfant précédent */
+  retriesLeft = 3;
+  lastPushedRev = "";         /* AUDIT #1 */
   /* On coupe l'écoute temps réel de l'enfant précédent */
   if(currentChannel){ try{ sb.removeChannel(currentChannel); }catch(e){} currentChannel = null; }
 
