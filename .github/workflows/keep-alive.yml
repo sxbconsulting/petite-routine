@@ -1,0 +1,68 @@
+# ══════════════════════════════════════════════════════════════
+#  Réveil Supabase — Petite Routine
+#
+#  Un projet Supabase gratuit se met en pause après 7 jours
+#  sans la moindre requête. En pause, la synchronisation entre
+#  les téléphones des parents ne fonctionne plus.
+#
+#  Ce workflow interroge la base deux fois par semaine pour
+#  que le compteur des 7 jours ne soit jamais atteint.
+#
+#  NE PAS SUPPRIMER.
+# ══════════════════════════════════════════════════════════════
+
+name: Réveil Supabase
+
+on:
+  schedule:
+    # Lundi et jeudi à 6h00 UTC (7h ou 8h en France selon la saison).
+    - cron: '0 6 * * 1,4'
+  # Permet aussi de lancer le workflow à la main depuis l'onglet Actions.
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Interroger la base
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Requête sur pr_families
+        run: |
+          URL="https://xkdymodyzktowuixpbzo.supabase.co/rest/v1/pr_families?select=id&limit=1"
+          # Clé anonyme : publique par conception, déjà visible dans index.html.
+          # La protection vient de la RLS, pas du secret. Voir PRD §15.
+          KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhrZHltb2R5emt0b3d1aXhwYnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5NTk4MzIsImV4cCI6MjEwMDUzNTgzMn0.P7_hvtsU9xlxvQr1399IzdTsmRunV6aQM8pQG5KjcJ0"
+
+          # Trois tentatives : un incident réseau passager ne doit pas
+          # déclencher une fausse alerte par email.
+          for ESSAI in 1 2 3; do
+            echo "── Tentative $ESSAI ──"
+            CODE=$(curl -s -o /tmp/reponse.txt -w '%{http_code}' --max-time 30 \
+              "$URL" \
+              -H "apikey: $KEY" \
+              -H "Authorization: Bearer $KEY" || echo "000")
+
+            echo "Code HTTP : $CODE"
+
+            if [ "$CODE" = "200" ]; then
+              echo "✅ Supabase répond. Le compteur de mise en veille est remis à zéro."
+              exit 0
+            fi
+
+            echo "Réponse reçue :"
+            head -c 300 /tmp/reponse.txt || true
+            echo ""
+            [ "$ESSAI" -lt 3 ] && sleep 20
+          done
+
+          echo ""
+          echo "❌ Supabase n'a pas répondu correctement après 3 tentatives."
+          echo ""
+          echo "Que faire :"
+          echo "  1. Ouvrir https://supabase.com/dashboard/project/xkdymodyzktowuixpbzo"
+          echo "  2. Si le projet est en pause, cliquer sur « Restore project »."
+          echo "     Un simple ping ne réveille PAS un projet déjà en pause."
+          echo "  3. Si le code était 401, la clé anon a été régénérée :"
+          echo "     la remplacer ici ET dans index.html."
+          exit 1
