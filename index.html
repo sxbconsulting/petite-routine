@@ -278,6 +278,7 @@
   .av-pick + .av-pick{margin-top:7px}
   .av-btn{border:2px solid #e8e3f4;background:#fff;border-radius:14px;padding:5px 7px;
     font-size:24px;line-height:1.1;cursor:pointer}
+  .av-btn.gros{font-size:34px;padding:8px 14px;border-radius:18px}
   .av-btn.sel{border-color:var(--gold);background:#fff6e2}
   .av-btn:active{transform:scale(.94)}
   .fam-info{background:#faf8ff;border-radius:16px;padding:12px 14px;margin-bottom:14px;
@@ -763,7 +764,8 @@ function bankBalance(){
    Genre et carnation seulement : les emoji enfants n'acceptent pas les
    composants cheveux (🧒‍🦱 se casse en deux glyphes), et aucun emoji
    n'encode la couleur des yeux. Vérifié plutôt que supposé. */
-const AV_BASES = ["🧒","👦","👧"];
+const AV_CHOIX = ["👦","👧"];              /* ce qu'on propose au premier temps */
+const AV_BASES = ["🧒","👦","👧"];         /* 🧒 reste reconnu : c'est le defaut */
 const AV_TEINTES = ["","🏻","🏼","🏽","🏾","🏿"];
 
 function avatarActuel(){ return (config && config.avatar) || "🧒"; }
@@ -772,6 +774,8 @@ function avatarParts(a){
   const base = AV_BASES.find(b => a.indexOf(b) === 0) || "🧒";
   return { base: base, teinte: a.slice(base.length) };
 }
+/* La carnation n'est proposee qu'apres un premier choix : deux temps. */
+function avatarChoisi(){ return AV_CHOIX.indexOf(avatarParts(avatarActuel()).base) !== -1; }
 function choisirBase(b){   const p = avatarParts(avatarActuel()); appliquerAvatar(b, p.teinte); }
 function choisirTeinte(t){ const p = avatarParts(avatarActuel()); appliquerAvatar(p.base, t); }
 function appliquerAvatar(base, teinte){
@@ -785,16 +789,20 @@ function renderAvatarPicker(id){
   const w = document.getElementById(id);
   if(!w) return;
   const a = avatarActuel(), p = avatarParts(a);
+  const etape2 = avatarChoisi();
   w.innerHTML =
-    '<div class="av-label">Personnalise ton avatar</div>' +
+    '<div class="av-label">Choisis ton avatar</div>' +
     '<div class="av-pick">' +
-      AV_BASES.map(b => '<button class="av-btn'+(b===p.base?" sel":"")+'" '+
+      AV_CHOIX.map(b => '<button class="av-btn gros'+(b===p.base?" sel":"")+'" '+
         'onclick="choisirBase(&quot;'+b+'&quot;)">'+b+'</button>').join("") +
     '</div>' +
-    '<div class="av-pick">' +
-      AV_TEINTES.map(t => '<button class="av-btn'+(t===p.teinte?" sel":"")+'" '+
-        'onclick="choisirTeinte(&quot;'+t+'&quot;)">'+p.base+t+'</button>').join("") +
-    '</div>';
+    (etape2 ?
+      '<div class="av-label">Personnalise-le</div>' +
+      '<div class="av-pick">' +
+        AV_TEINTES.map(t => '<button class="av-btn'+(t===p.teinte?" sel":"")+'" '+
+          'onclick="choisirTeinte(&quot;'+t+'&quot;)">'+p.base+t+'</button>').join("") +
+      '</div>'
+    : "");
   document.querySelectorAll(".av-emoji").forEach(el => el.textContent = a);
 }
 
