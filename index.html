@@ -510,6 +510,22 @@
       <div class="field"><label>Derniers cadeaux offerts 🎁</label></div>
       <div id="purchase-history"></div>
     </div>
+    <div class="edit-section">
+      <div class="field"><label>Sauvegarde de secours 💾</label></div>
+      <div class="rem-actions">
+        <button class="rem-btn" onclick="exporterEnfant()">⬇️ Enregistrer une sauvegarde</button>
+        <button class="rem-btn ghost" onclick="document.getElementById('importFile').click()">⬆️ Restaurer une sauvegarde</button>
+      </div>
+      <input type="file" id="importFile" accept="application/json,.json" onchange="importerEnfant(this)" hidden>
+      <div class="rem-status" id="backupStatus"></div>
+      <div class="rem-note">
+        La sauvegarde contient tout ce qui concerne cet enfant : ses routines, ses étoiles,
+        sa tirelire et son historique. Conservez-la ailleurs que sur ce téléphone — un mail
+        que vous vous envoyez suffit. C'est elle qui vous protège si vous perdez à la fois
+        l'appareil et le code famille.
+        Restaurer remplace définitivement les données actuelles de cet enfant.
+      </div>
+    </div>
     <div class="sheet-actions">
       <button class="btn-reset" onclick="resetToday()">Remettre à zéro aujourd'hui</button>
       <button class="btn-save" onclick="saveParent()">Enregistrer</button>
@@ -1104,6 +1120,7 @@ function openParent(scrollTarget){
   document.getElementById("childName").value = editState.name || "";
   renderEdit();
   document.getElementById("storageNote").classList.toggle("show", !storageOK);
+  messageSauvegarde("");   /* pas de message de sauvegarde qui traîne d'une ouverture à l'autre */
   document.getElementById("sheet").classList.add("show");
   const targetId = (scrollTarget===true || scrollTarget==="wheel") ? "edit-wheel"
                  : (scrollTarget==="rewards") ? "edit-rewards" : null;
@@ -1390,6 +1407,150 @@ function checkReminders(){
       sSet(ck(firedKey(rem.routine)), "1");
     }catch(e){}
   });
+}
+
+/* ═══════════════════════════════════════════
+   SAUVEGARDE DE SECOURS — export / import JSON
+   Le filet de sécurité : sans lui, perdre l'appareil ET le code
+   famille signifie tout perdre. Le fichier contient l'intégralité
+   des données de l'enfant actif.
+═══════════════════════════════════════════ */
+
+function messageSauvegarde(txt){
+  const el = document.getElementById("backupStatus");
+  if(el) el.textContent = txt || "";
+}
+
+/* Nom de fichier lisible : "Léa" devient "lea" */
+function motCleFichier(s){
+  return String(s||"enfant").normalize("NFD").replace(/[̀-ͯ]/g,"")
+    .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"") || "enfant";
+}
+
+/* On rassemble TOUS les jours connus de cet enfant, pas seulement les 14
+   derniers envoyés au serveur : la sauvegarde doit être plus complète que
+   le cloud, sinon elle ne protège de rien. */
+function tousLesJoursDeLEnfant(){
+  const jours = Object.assign({}, remoteDays || {});
+  const suffixe = (syncInfo && syncInfo.childId) ? "@"+syncInfo.childId : "";
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(!k || k.indexOf("pr_day_") !== 0) continue;
+      const reste = k.slice(7);
+      const at = reste.indexOf("@");
+      const date = (at === -1) ? reste : reste.slice(0, at);
+      const suf  = (at === -1) ? ""    : reste.slice(at);
+      if(suf !== suffixe) continue;          /* jour d'un autre enfant */
+      try{ jours[date] = JSON.parse(localStorage.getItem(k)); }catch(e){}
+    }
+  }catch(e){}
+  jours[activeKey()] = dayState;
+  return jours;
+}
+
+function exporterEnfant(){
+  /* Si l'espace parents est ouvert, on exporte ce qui est à l'écran,
+     y compris les modifications pas encore enregistrées. */
+  const conf = editState ? JSON.parse(JSON.stringify(editState)) : config;
+  ROUTINES.forEach(r=>{ if(conf[r]) conf[r].forEach(x=>{ delete x._oi; }); });
+  const champ = document.getElementById("childName");
+  if(editState && champ) conf.name = champ.value.trim();
+
+  const paquet = {
+    _format: "petite-routine",
+    _version: 1,
+    _exporte_le: new Date().toISOString(),
+    _app: "V6.1",
+    enfant: conf.name || "",
+    code_famille: (syncInfo && syncInfo.code) || null,
+    config: conf,
+    stars: stars,
+    bank: bank,
+    days: tousLesJoursDeLEnfant()
+  };
+
+  const nom = "petite-routine-"+motCleFichier(conf.name)+"-"+todayKey()+".json";
+  const blob = new Blob([JSON.stringify(paquet, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = nom;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+
+  const nbJours = Object.keys(paquet.days).length;
+  messageSauvegarde("✅ Sauvegarde enregistrée : "+nom+" — "+nbJours+" jour"+(nbJours>1?"s":"")+" d'historique.");
+}
+
+function importerEnfant(champFichier){
+  const f = champFichier && champFichier.files && champFichier.files[0];
+  if(!f) return;
+  const lecteur = new FileReader();
+
+  lecteur.onerror = ()=>{
+    messageSauvegarde("❌ Le fichier n'a pas pu être lu.");
+    champFichier.value = "";
+  };
+
+  lecteur.onload = ()=>{
+    let p = null;
+    try{ p = JSON.parse(lecteur.result); }catch(e){}
+    if(!p || p._format !== "petite-routine" || !p.config){
+      messageSauvegarde("❌ Ce fichier n'est pas une sauvegarde Petite Routine.");
+      champFichier.value = "";
+      return;
+    }
+
+    const quand = p._exporte_le ? new Date(p._exporte_le).toLocaleDateString("fr-FR") : "date inconnue";
+    const qui   = p.enfant || "sans prénom";
+    const cible = (syncInfo && syncInfo.childName) || config.name || "l'enfant actif";
+    if(!confirm(
+      "Restaurer la sauvegarde de « "+qui+" » du "+quand+" ?\n\n"+
+      "Elle sera appliquée à "+cible+".\n"+
+      "Toutes ses données actuelles — routines, étoiles, tirelire, historique — "+
+      "seront remplacées. C'est définitif."
+    )){
+      champFichier.value = "";
+      messageSauvegarde("Restauration annulée. Rien n'a été modifié.");
+      return;
+    }
+
+    /* On repasse par migrateConfig : une vieille sauvegarde doit être
+       complétée comme n'importe quelle vieille configuration. */
+    config = migrateConfig(p.config);
+    stars  = (p.stars && typeof p.stars === "object") ? p.stars : {};
+    bank   = (p.bank  && typeof p.bank  === "object") ? p.bank  : {spent:0, purchases:[]};
+    if(!Array.isArray(bank.purchases)) bank.purchases = [];
+    if(typeof bank.spent !== "number")  bank.spent = 0;
+    remoteDays = (p.days && typeof p.days === "object") ? p.days : {};
+
+    /* Chaque jour restauré est réécrit dans l'espace de CET enfant */
+    Object.keys(remoteDays).forEach(d=>{
+      try{ sSet(ck("pr_day_"+d), JSON.stringify(remoteDays[d])); }catch(e){}
+    });
+
+    viewDateOffset = 0;
+    dayState = loadDayFor(activeKey());
+    if(!dayState.afternoon) dayState.afternoon = {done:[],celebrated:false};
+
+    /* Ces quatre appels déclenchent aussi l'envoi vers Supabase si la
+       synchronisation est active : la restauration se propage aux autres
+       téléphones de la famille. */
+    saveConfig(); saveStars(); saveBank(); saveDay();
+
+    /* On ferme l'espace parents : editState contient l'ANCIENNE configuration,
+       et un clic sur « Enregistrer » écraserait la restauration. */
+    editState = null;
+    champFichier.value = "";
+    const nbJours = Object.keys(remoteDays).length;
+    messageSauvegarde("✅ Restauration effectuée — "+nbJours+" jour"+(nbJours>1?"s":"")+" d'historique.");
+    setTimeout(()=>{
+      document.getElementById("sheet").classList.remove("show");
+      render();
+    }, 1400);
+  };
+
+  lecteur.readAsText(f);
 }
 
 function saveParent(){
