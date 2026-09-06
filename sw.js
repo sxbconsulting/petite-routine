@@ -81,7 +81,12 @@ function avecDelai(promesse, ms) {
 async function reseauDabord(requete) {
   const cache = await caches.open(CACHE);
   try {
-    const reponse = await avecDelai(fetch(requete), 4000);
+    /* cache:"reload" force un vrai aller sur le reseau.
+       Sans ça, GitHub Pages sert le HTML avec une duree de vie de 10 minutes,
+       et le navigateur nous rendrait sa propre copie perimee : le "reseau
+       d'abord" n'aurait alors de reseau que le nom, et une nouvelle version
+       pourrait rester invisible dix minutes de plus que necessaire. */
+    const reponse = await avecDelai(fetch(requete.url, {cache: "reload"}), 4000);
     if (reponse && reponse.ok) {
       cache.put("./index.html", reponse.clone());
     }
