@@ -1730,6 +1730,26 @@ checkReminders();
 setInterval(checkReminders, 30000);
 document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) checkReminders(); });
 
+/* ═══════════════════════════════════════════
+   SERVICE WORKER — ouverture hors ligne
+   Le fichier sw.js fait tout le travail. Ici on se contente de
+   l'enregistrer et de redemander une vérification de mise à jour
+   à chaque retour sur l'app : sans ça, une nouvelle version peut
+   rester invisible plusieurs jours.
+   Chemin relatif : le site est servi sur /petite-routine/.
+═══════════════════════════════════════════ */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{
+    navigator.serviceWorker.register("sw.js", {updateViaCache:"none"})
+      .then(reg=>{
+        document.addEventListener("visibilitychange", ()=>{
+          if(!document.hidden) reg.update();
+        });
+      })
+      .catch(()=>{ /* pas de service worker : l'app fonctionne quand même */ });
+  });
+}
+
 /* Ménage : on efface les marqueurs "déjà notifié" des jours précédents */
 (function cleanFiredKeys(){
   try{
