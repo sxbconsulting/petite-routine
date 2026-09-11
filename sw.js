@@ -17,7 +17,7 @@
    structurellement impossible tant qu'il y a du réseau.
    ═══════════════════════════════════════════════════════════════════ */
 
-const VERSION = "6.1.5";
+const VERSION = "6.2.0";
 const CACHE   = "petite-routine-" + VERSION;
 
 /* Le strict nécessaire pour que l'app s'ouvre : même origine, doit réussir. */

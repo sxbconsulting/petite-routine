@@ -281,6 +281,31 @@
   .av-btn.gros{font-size:34px;padding:8px 14px;border-radius:18px}
   .av-btn.sel{border-color:var(--gold);background:#fff6e2}
   .av-btn:active{transform:scale(.94)}
+  /* ── Profils de journée (V6.2) ── */
+  .day-type{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;margin-top:6px;opacity:.78}
+  .prof-tabs{display:flex;gap:8px;margin-top:22px}
+  .prof-tab{flex:1;border:2px solid #e8e3f4;background:#fff;border-radius:16px;padding:12px 6px;
+    font-family:'Fredoka',sans-serif;font-size:15px;font-weight:600;color:var(--ink-soft);cursor:pointer}
+  .prof-tab.sel{background:var(--gold);border-color:var(--gold);color:#4a3200}
+  .prof-tab:active{transform:scale(.97)}
+  .prof-badge{letter-spacing:.02em;text-transform:none;font-weight:700}
+  .wm-q{font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;color:var(--ink);margin-bottom:8px}
+  .week-map{display:flex;gap:5px}
+  .wm-day{flex:1;border:2px solid #e8e3f4;background:#fff;border-radius:14px;padding:6px 0 5px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:2px;font-family:'Fredoka',sans-serif;
+    font-weight:600;font-size:13px;color:var(--ink-soft)}
+  .wm-day .wm-ic{font-size:21px;line-height:1.1}
+  .wm-day.school{background:#fff6e2;border-color:#ffd98a}
+  .wm-day.home{background:#e9f8f0;border-color:#b9ebd2}
+  .wm-day:active{transform:scale(.94)}
+  .week-map.off .wm-day{opacity:.45}
+  .vac-row{margin-top:14px}
+  .vac-sub{display:block;font-weight:700;font-size:12px;color:var(--ink-soft)}
+  .vac-until{align-items:center;gap:10px;margin-top:8px;padding:0 4px}
+  .vac-until label{font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;color:var(--ink)}
+  .vac-until input{border:2px solid #e6e0f5;border-radius:12px;padding:7px 8px;font-family:'Fredoka',sans-serif;
+    font-size:15px;color:var(--ink);background:#fff}
+  .vac-hint{font-family:'Nunito',sans-serif;font-size:12px;color:var(--ink-soft)}
   .fam-info{background:#faf8ff;border-radius:16px;padding:12px 14px;margin-bottom:14px;
     font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;color:var(--ink-soft)}
   .fam-info b{font-family:'Fredoka',sans-serif;font-size:18px;letter-spacing:.12em;color:var(--ink)}
@@ -354,6 +379,7 @@
     <div class="day-label" id="dayLabel"></div>
     <h1 id="greeting">Bonjour&nbsp;!</h1>
     <div class="subtitle" id="subtitle">C'est l'heure de la routine du matin</div>
+    <div class="day-type" id="dayType"></div>
     <button class="child-chip" id="childChip" onclick="openChildPicker()" style="display:none">👧 <span id="childChipName"></span> ▾</button>
   </header>
 
@@ -480,32 +506,42 @@
       <div id="avatarPickerParent"></div>
     </div>
     <div class="edit-section">
-      <div class="field"><label>Routine du matin ☀️</label></div>
+      <div class="field"><label>Les journées 📅</label></div>
+      <div class="wm-q">Quels jours vont à l'école ?</div>
+      <div class="week-map" id="weekMapEdit"></div>
+      <div class="rem-note">Touchez un jour pour changer.</div>
+      <div class="rem-row vac-row">
+        <span class="rem-ic">🏖️</span>
+        <span class="rem-lb">Mode vacances<span class="vac-sub">Tous les jours deviennent des jours de maison.</span></span>
+        <button class="rem-sw" id="vacSw" onclick="basculerVacances()" aria-label="Mode vacances"></button>
+      </div>
+      <div class="vac-until" id="vacUntil">
+        <label for="vacDate">Jusqu'au</label>
+        <input type="date" id="vacDate" onchange="dateVacances(this.value)">
+        <span class="vac-hint">facultatif</span>
+      </div>
+    </div>
+    <div class="prof-tabs" id="profTabs">
+      <button class="prof-tab" data-p="school" onclick="choisirProfilEdite('school')">🎒 Jour d'école</button>
+      <button class="prof-tab" data-p="home" onclick="choisirProfilEdite('home')">🏠 Jour de maison</button>
+    </div>
+    <div class="edit-section">
+      <div class="field"><label>Routine du matin ☀️ <span class="prof-badge"></span></label></div>
       <div id="edit-morning"></div>
       <button class="add-btn" onclick="addTask('morning')">+ Ajouter une étape</button>
     </div>
     <div class="edit-section">
-      <div class="field"><label>Routine de l'après-midi ⛅</label></div>
+      <div class="field"><label>Routine de l'après-midi ⛅ <span class="prof-badge"></span></label></div>
       <div id="edit-afternoon"></div>
       <button class="add-btn" onclick="addTask('afternoon')">+ Ajouter une étape</button>
     </div>
     <div class="edit-section">
-      <div class="field"><label>Routine du soir 🌙</label></div>
+      <div class="field"><label>Routine du soir 🌙 <span class="prof-badge"></span></label></div>
       <div id="edit-evening"></div>
       <button class="add-btn" onclick="addTask('evening')">+ Ajouter une étape</button>
     </div>
     <div class="edit-section">
-      <div class="field"><label>La roue des activités 🎡</label></div>
-      <div id="edit-wheel"></div>
-      <button class="add-btn" onclick="addTask('wheelItems')">+ Ajouter une activité</button>
-    </div>
-    <div class="edit-section">
-      <div class="field"><label>Les cadeaux de la tirelire 🐷</label></div>
-      <div id="edit-rewards"></div>
-      <button class="add-btn" onclick="addTask('rewards')">+ Ajouter un cadeau</button>
-    </div>
-    <div class="edit-section">
-      <div class="field"><label>Les rappels 🔔</label></div>
+      <div class="field"><label>Les rappels 🔔 <span class="prof-badge"></span></label></div>
       <div id="edit-reminders"></div>
       <div class="rem-actions">
         <button class="rem-btn" onclick="addRemindersToCalendar()">📅 Ajouter les rappels à mon calendrier</button>
@@ -516,7 +552,18 @@
         Le calendrier est le rappel le plus fiable : il sonne même quand l'app est fermée, sur iPhone comme sur Android.
         Les notifications de l'app ne fonctionnent que si elle est ouverte ou récemment utilisée.
         Une pastille orange apparaît sur l'onglet quand l'heure est passée et la routine pas terminée.
+        Les rappels du calendrier suivent votre semaine type, pas le mode vacances.
       </div>
+    </div>
+    <div class="edit-section">
+      <div class="field"><label>La roue des activités 🎡</label></div>
+      <div id="edit-wheel"></div>
+      <button class="add-btn" onclick="addTask('wheelItems')">+ Ajouter une activité</button>
+    </div>
+    <div class="edit-section">
+      <div class="field"><label>Les cadeaux de la tirelire 🐷</label></div>
+      <div id="edit-rewards"></div>
+      <button class="add-btn" onclick="addTask('rewards')">+ Ajouter un cadeau</button>
     </div>
     <div class="edit-section">
       <div class="field"><label>Derniers cadeaux offerts 🎁</label></div>
@@ -580,9 +627,16 @@ function esc(s){
 }
 
 /* ── Données par défaut ── */
-const DEFAULT_CONFIG = {
-  name: "",
-  avatar: "🧒",
+/* ── V6.2 — Profils de journée ──
+   Ces constantes doivent rester AVANT le premier appel à loadConfig() :
+   déclarées plus bas, elles seraient en zone morte temporelle au chargement. */
+const PROFILS = ["school","home"];
+const PROFIL_META = { school:{ic:"🎒", lb:"Jour d'école"}, home:{ic:"🏠", lb:"Jour de maison"} };
+/* Index 0 = dimanche, comme Date.getDay() */
+const DEFAULT_WEEKMAP = ["home","school","school","home","school","school","home"];
+/* Étapes détectées comme scolaires, retirées du profil maison à la migration */
+const MOTS_SCOLAIRES = /(école|ecole|cartable|\bsac\b|crèche|creche|maternelle|cantine|maîtresse|maitresse|classe)/i;
+const DEFAULT_ROUTINES = {
   morning: [
     {emoji:"🚽", label:"Je vais au pot"},
     {emoji:"👕", label:"Je m'habille"},
@@ -601,7 +655,34 @@ const DEFAULT_CONFIG = {
     {emoji:"🦷", label:"Je brosse mes dents"},
     {emoji:"📖", label:"L'histoire"},
     {emoji:"😴", label:"Au dodo"}
-  ],
+  ]
+};
+const DEFAULT_REMINDERS = {
+  school: [ {routine:"morning", time:"07:30", enabled:true},
+            {routine:"afternoon", time:"12:00", enabled:true},
+            {routine:"evening", time:"19:30", enabled:true} ],
+  home:   [ {routine:"morning", time:"09:00", enabled:true},
+            {routine:"afternoon", time:"12:30", enabled:true},
+            {routine:"evening", time:"20:00", enabled:true} ]
+};
+function cloneProfond(x){ return JSON.parse(JSON.stringify(x)); }
+
+const DEFAULT_CONFIG = {
+  name: "",
+  avatar: "🧒",
+  /* Le profil maison démarre identique au profil école : le parent découvre la
+     fonction sans rien perdre, puis retire ce qui ne s'applique pas. */
+  profiles: {
+    school: { label:"Jour d'école",
+      morning: cloneProfond(DEFAULT_ROUTINES.morning), afternoon: cloneProfond(DEFAULT_ROUTINES.afternoon),
+      evening: cloneProfond(DEFAULT_ROUTINES.evening), reminders: cloneProfond(DEFAULT_REMINDERS.school) },
+    home:   { label:"Jour de maison",
+      morning: cloneProfond(DEFAULT_ROUTINES.morning), afternoon: cloneProfond(DEFAULT_ROUTINES.afternoon),
+      evening: cloneProfond(DEFAULT_ROUTINES.evening), reminders: cloneProfond(DEFAULT_REMINDERS.home) }
+  },
+  weekMap: cloneProfond(DEFAULT_WEEKMAP),
+  vacation: { on:false, until:null },
+  /* La roue et les cadeaux restent communs : ils ne dépendent pas du type de journée */
   wheelItems: [
     {emoji:"📺", label:"Un épisode de T'choupi", weight:1, enabled:true},
     {emoji:"🎨", label:"Dessiner ou colorier", weight:2, enabled:true},
@@ -614,11 +695,6 @@ const DEFAULT_CONFIG = {
     {emoji:"🎠", label:"Un tour de manège", cost:8},
     {emoji:"🧸", label:"Un petit jouet", cost:15},
     {emoji:"🎁", label:"Un gros cadeau", cost:30}
-  ],
-  reminders: [
-    {routine:"morning",   time:"07:30", enabled:true},
-    {routine:"afternoon", time:"12:00", enabled:true},
-    {routine:"evening",   time:"19:30", enabled:true}
   ]
 };
 const ROUTINES = ["morning","afternoon","evening"];
@@ -648,49 +724,113 @@ function defaultView(){
    enregistrement antérieur à la V6.1 n'avait aucun rappel — ni notification,
    ni pastille, ni export calendrier — sans le moindre message.
    Une seule fonction désormais, appelée des deux côtés. */
+function normaliserProfil(pr, nom){
+  if(!pr || typeof pr !== "object") pr = {};
+  ROUTINES.forEach(r=>{ if(!Array.isArray(pr[r])) pr[r] = cloneProfond(DEFAULT_ROUTINES[r]); });
+  if(!Array.isArray(pr.reminders) || pr.reminders.length !== 3) pr.reminders = cloneProfond(DEFAULT_REMINDERS[nom]);
+  if(typeof pr.label !== "string") pr.label = PROFIL_META[nom].lb;
+  return pr;
+}
 function migrateConfig(c){
-  if(!c || typeof c !== "object") return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
-  ROUTINES.forEach(r=>{
-    if(!Array.isArray(c[r])) c[r] = JSON.parse(JSON.stringify(DEFAULT_CONFIG[r]));
-  });
-  if(!Array.isArray(c.wheelItems)) c.wheelItems = JSON.parse(JSON.stringify(DEFAULT_CONFIG.wheelItems));
-  c.wheelItems.forEach(t=>{
-    if(typeof t.weight !== "number") t.weight = 2;
-    if(typeof t.enabled !== "boolean") t.enabled = true;
-  });
-  if(!Array.isArray(c.rewards)) c.rewards = JSON.parse(JSON.stringify(DEFAULT_CONFIG.rewards));
-  if(!Array.isArray(c.reminders) || c.reminders.length !== 3){
-    c.reminders = JSON.parse(JSON.stringify(DEFAULT_CONFIG.reminders));
+  if(!c || typeof c !== "object") return cloneProfond(DEFAULT_CONFIG);
+  /* V6.2 — une configuration d'avant les profils a ses routines à la racine.
+     Elles deviennent le profil école, à l'identique : aucune famille ne perd rien.
+     Le profil maison en est une copie, moins les étapes manifestement scolaires. */
+  if(!c.profiles || typeof c.profiles !== "object"){
+    const ecole = { label: PROFIL_META.school.lb };
+    ROUTINES.forEach(r=>{ ecole[r] = Array.isArray(c[r]) ? c[r] : cloneProfond(DEFAULT_ROUTINES[r]); });
+    ecole.reminders = (Array.isArray(c.reminders) && c.reminders.length === 3)
+      ? c.reminders : cloneProfond(DEFAULT_REMINDERS.school);
+    const maison = { label: PROFIL_META.home.lb };
+    ROUTINES.forEach(r=>{
+      const sansEcole = ecole[r].filter(x => !MOTS_SCOLAIRES.test((x && x.label) || ""));
+      maison[r] = cloneProfond(sansEcole.length ? sansEcole : ecole[r]);   /* jamais d'écran vide */
+    });
+    /* Horaires maison par défaut, mais un rappel coupé par le parent reste coupé */
+    maison.reminders = cloneProfond(DEFAULT_REMINDERS.home).map(rm=>{
+      const s = ecole.reminders.find(x => x.routine === rm.routine);
+      if(s) rm.enabled = !!s.enabled;
+      return rm;
+    });
+    c.profiles = { school: ecole, home: maison };
   }
+  /* Les anciennes clés racine n'ont plus cours — y compris si un appareil encore
+     en V6.1 les a réécrites entre-temps par la synchronisation. */
+  ["morning","afternoon","evening","reminders"].forEach(k=>{ delete c[k]; });
+  PROFILS.forEach(p=>{ c.profiles[p] = normaliserProfil(c.profiles[p], p); });
+  if(!Array.isArray(c.weekMap) || c.weekMap.length !== 7) c.weekMap = cloneProfond(DEFAULT_WEEKMAP);
+  c.weekMap = c.weekMap.map((p,i)=> PROFILS.indexOf(p) !== -1 ? p : DEFAULT_WEEKMAP[i]);
+  if(!c.vacation || typeof c.vacation !== "object") c.vacation = { on:false, until:null };
+  c.vacation.on = !!c.vacation.on;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(c.vacation.until || "")) c.vacation.until = null;
+  /* Extinction automatique : la date « jusqu'au » est dépassée */
+  if(c.vacation.on && c.vacation.until && c.vacation.until < todayKey()){
+    c.vacation.on = false; c.vacation.until = null;
+  }
+  if(!Array.isArray(c.wheelItems)) c.wheelItems = cloneProfond(DEFAULT_CONFIG.wheelItems);
+  c.wheelItems.forEach(x=>{
+    if(typeof x.weight !== "number") x.weight = 2;
+    if(typeof x.enabled !== "boolean") x.enabled = true;
+  });
+  if(!Array.isArray(c.rewards)) c.rewards = cloneProfond(DEFAULT_CONFIG.rewards);
   if(typeof c.name !== "string") c.name = "";
   if(typeof c.avatar !== "string" || !c.avatar) c.avatar = "🧒";
   return c;
 }
+
+/* ── V6.2 — quel profil pour quelle date ── */
+function vacationActive(dateStr){
+  const v = config.vacation;
+  if(!v || !v.on) return false;
+  if(!v.until) return true;
+  return dateStr <= v.until;            /* chaînes AAAA-MM-JJ : comparaison sûre */
+}
+function profileFor(dateStr){
+  if(vacationActive(dateStr)) return "home";
+  const d = new Date(dateStr + "T12:00:00");   /* midi : évite les décalages de fuseau */
+  return config.weekMap[d.getDay()] || "school";
+}
+/* Les routines affichées sont celles du profil FIGÉ dans la journée,
+   jamais profileFor() recalculé : sinon l'historique se réécrirait. */
+function routinesDe(jour){ return config.profiles[(jour && PROFILS.indexOf(jour._p) !== -1) ? jour._p : "school"]; }
+function routinesAffichees(){ return routinesDe(dayState); }
+function todayReminders(){ return config.profiles[profileFor(todayKey())].reminders; }
 function loadConfig(){
   const raw = sGet(ck("pr_config"));
-  if(raw){
-    try{ return migrateConfig(JSON.parse(raw)); }catch(e){}
-  }
-  return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  if(!raw) return cloneProfond(DEFAULT_CONFIG);
+  let brut;
+  try{ brut = JSON.parse(raw); }catch(e){ return cloneProfond(DEFAULT_CONFIG); }
+  const avaitProfils = !!(brut && brut.profiles);
+  /* V6.2 — pas de try/catch autour de la migration. L'ancien filet avalait toute
+     erreur et remplaçait EN SILENCE la configuration par les valeurs par défaut ;
+     sauvegardée aussitôt, la famille perdait ses routines sans le moindre message. */
+  const c = migrateConfig(brut);
+  if(!avaitProfils) sSet(ck("pr_config_avant_v62"), raw);   /* filet : l'original, intact */
+  const net = JSON.stringify(c);
+  if(net !== raw) sSet(ck("pr_config"), net);   /* migration ou fin de vacances : sauvé tout de suite */
+  return c;
 }
 function saveConfig(){ sSet(ck("pr_config"), JSON.stringify(config)); }
 
 /* ── État du jour ── */
 /* AUDIT #8 — todayKey était une copie mot pour mot de keyFromDate. */
 function todayKey(){ return keyFromDate(new Date()); }
-function emptyDay(){
-  return { morning:{done:[],celebrated:false}, afternoon:{done:[],celebrated:false}, evening:{done:[],celebrated:false} };
+function emptyDay(p){
+  return { _p: (PROFILS.indexOf(p) !== -1 ? p : "school"),
+           morning:{done:[],celebrated:false}, afternoon:{done:[],celebrated:false}, evening:{done:[],celebrated:false} };
+}
+/* V6.2 — _p est écrit une seule fois, à la création de la journée. Une journée
+   enregistrée avant la V6.2 n'en a pas : elle était forcément « école ». */
+function normaliserJour(d){
+  if(!d.afternoon) d.afternoon = {done:[],celebrated:false};
+  if(PROFILS.indexOf(d._p) === -1) d._p = "school";
+  return d;
 }
 function loadDay(){
-  const raw = sGet(ck("pr_day_"+activeKey()));
-  if(raw){
-    try{
-      const d = JSON.parse(raw);
-      if(!d.afternoon) d.afternoon = {done:[],celebrated:false};
-      return d;
-    }catch(e){}
-  }
-  return emptyDay();
+  const key = activeKey();
+  const raw = sGet(ck("pr_day_"+key));
+  if(raw){ try{ return normaliserJour(JSON.parse(raw)); }catch(e){} }
+  return emptyDay(profileFor(key));
 }
 function saveDay(){ sSet(ck("pr_day_"+activeKey()), JSON.stringify(dayState)); }
 
@@ -702,16 +842,10 @@ function keyFromDate(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padSt
 function activeKey(){ return keyFromDate(dateFromOffset(viewDateOffset)); }
 function isToday(){ return viewDateOffset === 0; }
 function loadDayFor(key){
-  if(remoteDays && remoteDays[key]){
-    const d = JSON.parse(JSON.stringify(remoteDays[key]));
-    if(!d.afternoon) d.afternoon = {done:[],celebrated:false};
-    return d;
-  }
+  if(remoteDays && remoteDays[key]) return normaliserJour(cloneProfond(remoteDays[key]));
   const raw = sGet(ck("pr_day_"+key));
-  if(raw){
-    try{ const d = JSON.parse(raw); if(!d.afternoon) d.afternoon = {done:[],celebrated:false}; return d; }catch(e){}
-  }
-  return emptyDay();
+  if(raw){ try{ return normaliserJour(JSON.parse(raw)); }catch(e){} }
+  return emptyDay(profileFor(key));
 }
 function selectDay(off){
   if(off > 0) off = 0;
@@ -852,6 +986,17 @@ function render(){
     renderTasks();
     renderProgress();
   }
+  /* V6.2 — type de journée sous le titre. Volontairement NON tactile : c'est une
+     information, pas un réglage ; un tap de curiosité ne doit rien basculer. */
+  const dt = document.getElementById("dayType");
+  if(dt){
+    if(isRoutine){
+      const vac = isToday() && vacationActive(todayKey());
+      const m = PROFIL_META[dayState._p] || PROFIL_META.school;
+      dt.textContent = (config.name ? config.name+" · " : "") + (vac ? "🏖️ Vacances" : m.ic+" "+m.lb);
+      dt.style.display = "";
+    } else dt.style.display = "none";
+  }
   renderSky();
   renderWeek();
   if(typeof renderLateDots === "function") renderLateDots();
@@ -885,7 +1030,7 @@ function renderSky(){
 function renderTasks(){
   const wrap = document.getElementById("tasks");
   wrap.innerHTML = "";
-  const list = config[view];
+  const list = routinesAffichees()[view];
   const done = dayState[view].done;
   list.forEach((t,i)=>{
     const b = document.createElement("button");
@@ -897,7 +1042,7 @@ function renderTasks(){
 }
 
 function renderProgress(){
-  const list = config[view];
+  const list = routinesAffichees()[view];
   const done = dayState[view].done.filter(Boolean).length;
   const pct = list.length ? Math.round(done/list.length*100) : 0;
   document.getElementById("progressFill").style.width = pct+"%";
@@ -1123,7 +1268,7 @@ function toggleTask(i, ev){
 }
 
 function checkComplete(){
-  const list = config[view];
+  const list = routinesAffichees()[view];
   const done = dayState[view].done.filter(Boolean).length;
   if(list.length>0 && done===list.length && !dayState[view].celebrated){
     dayState[view].celebrated = true;
@@ -1176,7 +1321,10 @@ parentBtn.addEventListener("click", ()=>openParent());
 
 function openParent(scrollTarget){
   editState = JSON.parse(JSON.stringify(config));
-  ROUTINES.forEach(r=>editState[r].forEach((t,i)=>{ t._oi = i; }));
+  /* Marqueurs de remappage posés dans LES DEUX profils : chacun se remappe seul */
+  PROFILS.forEach(p=>ROUTINES.forEach(r=>editState.profiles[p][r].forEach((t,i)=>{ t._oi = i; })));
+  /* On ouvre sur le profil du jour affiché : c'est celui que le parent a sous les yeux */
+  profilEdite = (dayState && dayState._p) || "school";
   document.getElementById("childName").value = editState.name || "";
   renderEdit();
   document.getElementById("storageNote").classList.toggle("show", !storageOK);
@@ -1201,20 +1349,57 @@ document.getElementById("sheet").addEventListener("click", (e)=>{
   if(e.target.id==="sheet") document.getElementById("sheet").classList.remove("show");
 });
 
+/* ── V6.2 — éditeur : profil en cours de modification, semaine type, vacances ── */
+let profilEdite = "school";
+function listeEditee(r){ return ROUTINES.indexOf(r) !== -1 ? editState.profiles[profilEdite][r] : editState[r]; }
+function choisirProfilEdite(p){ profilEdite = p; renderEdit(); }
+function renderSelecteurProfil(){
+  document.querySelectorAll("#profTabs .prof-tab").forEach(b=>b.classList.toggle("sel", b.dataset.p === profilEdite));
+  const m = PROFIL_META[profilEdite];
+  /* Rappel du profil dans chaque titre de section : même après avoir fait défiler,
+     le parent sait lequel des deux il est en train de modifier. */
+  document.querySelectorAll(".prof-badge").forEach(e=>{ e.textContent = "· "+m.ic+" "+m.lb; });
+}
+const ORDRE_SEMAINE = [1,2,3,4,5,6,0];                 /* affichage du lundi au dimanche */
+const JOURS_COURTS  = ["D","L","M","M","J","V","S"];   /* indexés comme getDay() */
+function renderJournees(){
+  const w = document.getElementById("weekMapEdit");
+  if(!w || !editState) return;
+  w.innerHTML = ORDRE_SEMAINE.map(i=>{
+    const p = editState.weekMap[i];
+    return '<button class="wm-day '+p+'" onclick="basculerJour('+i+')" aria-label="'+DAYS_FR[i]+' : '+PROFIL_META[p].lb+'">'+
+             '<span>'+JOURS_COURTS[i]+'</span><span class="wm-ic">'+PROFIL_META[p].ic+'</span></button>';
+  }).join("");
+  const vac = !!editState.vacation.on;
+  w.classList.toggle("off", vac);               /* en vacances, la semaine type est ignorée */
+  document.getElementById("vacSw").classList.toggle("on", vac);
+  document.getElementById("vacUntil").style.display = vac ? "flex" : "none";
+  document.getElementById("vacDate").value = editState.vacation.until || "";
+}
+function basculerJour(i){ editState.weekMap[i] = editState.weekMap[i] === "school" ? "home" : "school"; renderJournees(); }
+function basculerVacances(){
+  editState.vacation.on = !editState.vacation.on;
+  if(!editState.vacation.on) editState.vacation.until = null;
+  renderJournees();
+}
+function dateVacances(v){ editState.vacation.until = /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null; }
+
 function renderEdit(){
+  renderSelecteurProfil();
+  renderJournees();
   ["morning","afternoon","evening"].forEach(r=>{
     const wrap = document.getElementById("edit-"+r);
     wrap.innerHTML = "";
-    editState[r].forEach((t,i)=>{
+    listeEditee(r).forEach((t,i)=>{
       const row = document.createElement("div");
       row.className = "edit-row";
       row.innerHTML =
         '<div class="arrows">'+
           '<button class="arw" onclick="moveTask(\''+r+'\','+i+',-1)"'+(i===0?" disabled":"")+'>▲</button>'+
-          '<button class="arw" onclick="moveTask(\''+r+'\','+i+',1)"'+(i===editState[r].length-1?" disabled":"")+'>▼</button>'+
+          '<button class="arw" onclick="moveTask(\''+r+'\','+i+',1)"'+(i===listeEditee(r).length-1?" disabled":"")+'>▼</button>'+
         '</div>'+
-        '<input class="em" value="'+esc(t.emoji)+'" maxlength="4" onchange="editState.'+r+'['+i+'].emoji=this.value">'+
-        '<input class="lb" value="'+esc(t.label)+'" onchange="editState.'+r+'['+i+'].label=this.value">'+
+        '<input class="em" value="'+esc(t.emoji)+'" maxlength="4" onchange="editState.profiles.'+profilEdite+'.'+r+'['+i+'].emoji=this.value">'+
+        '<input class="lb" value="'+esc(t.label)+'" onchange="editState.profiles.'+profilEdite+'.'+r+'['+i+'].label=this.value">'+
         '<button class="del" onclick="removeTask(\''+r+'\','+i+')">🗑️</button>';
       wrap.appendChild(row);
     });
@@ -1295,17 +1480,17 @@ function refundPurchase(idx){
 }
 function addTask(r){
   if(r==="rewards"){ editState.rewards.push({emoji:"🎁", label:"Nouveau cadeau", cost:10}); }
-  else if(r==="wheelItems"){ editState[r].push({emoji:"🎲", label:"Nouvelle activité", weight:2, enabled:true}); }
-  else { editState[r].push({emoji:"⭐", label:"Nouvelle étape"}); }
+  else if(r==="wheelItems"){ listeEditee(r).push({emoji:"🎲", label:"Nouvelle activité", weight:2, enabled:true}); }
+  else { listeEditee(r).push({emoji:"⭐", label:"Nouvelle étape"}); }
   renderEdit();
 }
-function removeTask(r,i){ editState[r].splice(i,1); renderEdit(); }
+function removeTask(r,i){ listeEditee(r).splice(i,1); renderEdit(); }
 /* Déplace une étape ; l'index d'origine (_oi) suit l'étape pour
    que les coches déjà faites restent sur la bonne tâche. */
 function moveTask(r,i,dir){
   const j = i+dir;
-  if(j<0 || j>=editState[r].length) return;
-  const tmp = editState[r][i]; editState[r][i] = editState[r][j]; editState[r][j] = tmp;
+  if(j<0 || j>=listeEditee(r).length) return;
+  const tmp = listeEditee(r)[i]; listeEditee(r)[i] = listeEditee(r)[j]; listeEditee(r)[j] = tmp;
   renderEdit();
 }
 
@@ -1324,11 +1509,11 @@ const REM_META = {
 function renderReminderEditor(){
   const wrap = document.getElementById("edit-reminders");
   if(!wrap) return;
-  if(!Array.isArray(editState.reminders) || editState.reminders.length !== 3){
-    editState.reminders = JSON.parse(JSON.stringify(DEFAULT_CONFIG.reminders));
+  if(!Array.isArray(editState.profiles[profilEdite].reminders) || editState.profiles[profilEdite].reminders.length !== 3){
+    editState.profiles[profilEdite].reminders = JSON.parse(JSON.stringify(DEFAULT_REMINDERS[profilEdite]));
   }
   wrap.innerHTML = "";
-  editState.reminders.forEach((r,i)=>{
+  editState.profiles[profilEdite].reminders.forEach((r,i)=>{
     const meta = REM_META[r.routine] || {ic:"⏰", lb:"Rappel"};
     const row = document.createElement("div");
     row.className = "rem-row"+(r.enabled ? "" : " off");
@@ -1344,10 +1529,10 @@ function renderReminderEditor(){
 
 function setReminderTime(i, val){
   if(!/^\d{2}:\d{2}$/.test(val)) return;
-  editState.reminders[i].time = val;
+  editState.profiles[profilEdite].reminders[i].time = val;
 }
 function toggleReminder(i){
-  editState.reminders[i].enabled = !editState.reminders[i].enabled;
+  editState.profiles[profilEdite].reminders[i].enabled = !editState.profiles[profilEdite].reminders[i].enabled;
   renderReminderEditor();
 }
 
@@ -1376,36 +1561,50 @@ function askNotifPermission(){
 /* ── Export calendrier : 3 événements quotidiens récurrents ── */
 function icsTime(hhmm){ return hhmm.replace(":","")+"00"; }
 function addRemindersToCalendar(){
-  const list = (editState && editState.reminders ? editState.reminders : config.reminders) || [];
-  const on = list.filter(r=>r.enabled);
-  if(!on.length){ alert("Activez au moins un rappel avant de l'ajouter au calendrier."); return; }
-  const who = (editState && editState.name) || config.name || "";
-  const d = new Date();
-  const day = d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");
-  const stamp = day+"T000000Z";
+  /* Si l'espace parents est ouvert, on exporte ce qui est à l'écran, même non enregistré */
+  const src = editState || config;
+  const who = src.name || config.name || "";
+  const JOURS_ICS = ["SU","MO","TU","WE","TH","FR","SA"];
+  const auj = new Date();
+  const stamp = keyFromDate(auj).replace(/-/g,"")+"T000000Z";
+  const sequence = Math.floor(Date.now()/1000);   /* toujours croissant : la nouvelle version remplace l'ancienne */
   let ics = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Petite Routine//FR\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n";
-  on.forEach((r,i)=>{
-    const meta = REM_META[r.routine] || {ic:"⏰", lb:"Routine"};
-    const title = meta.ic+" "+meta.lb+(who ? " — "+who : "");
-    const [h,m] = r.time.split(":").map(Number);
-    const endM = m+15;
-    const endH = (h + Math.floor(endM/60)) % 24;
-    const endTime = String(endH).padStart(2,"0")+String(endM%60).padStart(2,"0")+"00";
-    ics +=
-      "BEGIN:VEVENT\r\n"+
-      /* AUDIT #6 — l'UID contenait la date d'export et le rang du rappel :
-         chaque réexport créait une NOUVELLE série d'alarmes quotidiennes au
-         lieu de remplacer la précédente. Identifiant stable par routine. */
-      "UID:petite-routine-"+r.routine+"@sxbconsulting\r\n"+
-      "DTSTAMP:"+stamp+"\r\n"+
-      "DTSTART:"+day+"T"+icsTime(r.time)+"\r\n"+
-      "DTEND:"+day+"T"+endTime+"\r\n"+
-      "RRULE:FREQ=DAILY\r\n"+
-      "SUMMARY:"+title+"\r\n"+
-      "DESCRIPTION:Ouvrez Petite Routine avec votre enfant.\r\n"+
-      "BEGIN:VALARM\r\nTRIGGER:PT0M\r\nACTION:DISPLAY\r\nDESCRIPTION:"+title+"\r\nEND:VALARM\r\n"+
-      "END:VEVENT\r\n";
+  let nb = 0;
+  PROFILS.forEach(p=>{
+    /* V6.2 — les jours de chaque profil viennent de la semaine type, jamais codés en dur */
+    const jours = [];
+    src.weekMap.forEach((q,i)=>{ if(q === p) jours.push(i); });
+    if(!jours.length) return;                        /* aucun jour pour ce profil : rien à exporter */
+    const debut = new Date(auj);                     /* 1re date à venir qui appartient à ce profil */
+    while(jours.indexOf(debut.getDay()) === -1) debut.setDate(debut.getDate()+1);
+    const jourDebut = keyFromDate(debut).replace(/-/g,"");
+    const byday = jours.map(i => JOURS_ICS[i]).join(",");
+    src.profiles[p].reminders.filter(r => r.enabled).forEach(r=>{
+      const meta = REM_META[r.routine] || {ic:"⏰", lb:"Routine"};
+      const title = meta.ic+" "+meta.lb+" · "+PROFIL_META[p].ic+(who ? " — "+who : "");
+      const [h,m] = r.time.split(":").map(Number);
+      const endM = m+15;
+      const endH = (h + Math.floor(endM/60)) % 24;
+      const endTime = String(endH).padStart(2,"0")+String(endM%60).padStart(2,"0")+"00";
+      /* Le profil école garde l'identifiant des versions précédentes : un parent qui
+         réexporte voit ses anciennes alarmes quotidiennes remplacées, pas doublées. */
+      const uid = (p === "school" ? "petite-routine-" : "petite-routine-home-") + r.routine + "@sxbconsulting";
+      ics +=
+        "BEGIN:VEVENT\r\n"+
+        "UID:"+uid+"\r\n"+
+        "SEQUENCE:"+sequence+"\r\n"+
+        "DTSTAMP:"+stamp+"\r\n"+
+        "DTSTART:"+jourDebut+"T"+icsTime(r.time)+"\r\n"+
+        "DTEND:"+jourDebut+"T"+endTime+"\r\n"+
+        "RRULE:FREQ=WEEKLY;BYDAY="+byday+"\r\n"+
+        "SUMMARY:"+title+"\r\n"+
+        "DESCRIPTION:Ouvrez Petite Routine avec votre enfant.\r\n"+
+        "BEGIN:VALARM\r\nTRIGGER:PT0M\r\nACTION:DISPLAY\r\nDESCRIPTION:"+title+"\r\nEND:VALARM\r\n"+
+        "END:VEVENT\r\n";
+      nb++;
+    });
   });
+  if(!nb){ alert("Activez au moins un rappel avant de l'ajouter au calendrier."); return; }
   ics += "END:VCALENDAR\r\n";
   const blob = new Blob([ics], {type:"text/calendar;charset=utf-8"});
   const url = URL.createObjectURL(blob);
@@ -1429,7 +1628,7 @@ function routineDone(r){
   const day = isToday() ? dayState : loadDayFor(todayKey());
   const st = day && day[r];
   if(!st) return false;
-  const total = (config[r] || []).length;
+  const total = (routinesDe(day)[r] || []).length;
   if(!total) return true;
   let n = 0;
   for(let i=0;i<total;i++){ if(st.done && st.done[i]) n++; }
@@ -1438,7 +1637,7 @@ function routineDone(r){
 /* Une routine est "en retard" si l'heure du rappel est passée et qu'elle n'est pas finie */
 function isLate(r){
   if(!isToday()) return false;
-  const rem = (config.reminders||[]).find(x=>x.routine===r);
+  const rem = (todayReminders()||[]).find(x=>x.routine===r);
   if(!rem || !rem.enabled) return false;
   return minutesNow() >= remMinutes(rem.time) && !routineDone(r);
 }
@@ -1454,7 +1653,7 @@ function checkReminders(){
   renderLateDots();
   if(!("Notification" in window) || Notification.permission !== "granted") return;
   const now = minutesNow();
-  (config.reminders||[]).forEach(rem=>{
+  (todayReminders()||[]).forEach(rem=>{
     if(!rem.enabled) return;
     const target = remMinutes(rem.time);
     /* Fenêtre de 10 min : si l'app était fermée pile à l'heure, on rattrape à la réouverture */
@@ -1514,7 +1713,7 @@ function exporterEnfant(){
   /* Si l'espace parents est ouvert, on exporte ce qui est à l'écran,
      y compris les modifications pas encore enregistrées. */
   const conf = editState ? JSON.parse(JSON.stringify(editState)) : config;
-  ROUTINES.forEach(r=>{ if(conf[r]) conf[r].forEach(x=>{ delete x._oi; }); });
+  PROFILS.forEach(p=>ROUTINES.forEach(r=>{ const l = conf.profiles && conf.profiles[p] && conf.profiles[p][r]; if(l) l.forEach(x=>{ delete x._oi; }); }));
   const champ = document.getElementById("childName");
   if(editState && champ) conf.name = champ.value.trim();
 
@@ -1614,38 +1813,95 @@ function importerEnfant(champFichier){
   lecteur.readAsText(f);
 }
 
+/* Dates des journées enregistrées sur l'appareil pour l'enfant actif */
+function clesJoursLocaux(){
+  const suffixe = (syncInfo && syncInfo.childId) ? "@"+syncInfo.childId : "";
+  const cles = [];
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(!k || k.indexOf("pr_day_") !== 0) continue;
+      const reste = k.slice(7), at = reste.indexOf("@");
+      if(((at === -1) ? "" : reste.slice(at)) !== suffixe) continue;   /* jour d'un autre enfant */
+      cles.push(at === -1 ? reste : reste.slice(0, at));
+    }
+  }catch(e){}
+  return cles;
+}
 function saveParent(){
   editState.name = document.getElementById("childName").value.trim();
-  /* Table de correspondance ancien index -> nouvel index, par routine */
+  /* Remappage des coches profil par profil : réordonner une étape du profil école
+     ne doit rien déplacer dans le profil maison, ni l'inverse. */
   const remap = {};
-  ROUTINES.forEach(r=>{ remap[r] = editState[r].map(t=>t._oi); });
-  /* On nettoie les marqueurs avant de sauvegarder la config */
-  ROUTINES.forEach(r=>editState[r].forEach(t=>{ delete t._oi; }));
+  PROFILS.forEach(p=>{
+    remap[p] = {};
+    ROUTINES.forEach(r=>{ remap[p][r] = editState.profiles[p][r].map(x => x._oi); });
+    ROUTINES.forEach(r=>editState.profiles[p][r].forEach(x=>{ delete x._oi; }));
+  });
   config = editState;
   saveConfig();
-  /* Réaligner les coches : celles du jour affiché et celles des jours mémorisés */
+  /* Réaligner les coches : celles du jour affiché et celles des jours mémorisés,
+     chacun avec la table de SON profil figé */
   const fix = (st)=>{
+    const rm = remap[st._p] || remap.school;
     ROUTINES.forEach(r=>{
       if(!st[r]) st[r] = {done:[],celebrated:false};
       const old = st[r].done || [];
-      st[r].done = remap[r].map(oi => (oi === undefined ? false : !!old[oi]));
+      st[r].done = rm[r].map(oi => (oi === undefined ? false : !!old[oi]));
       /* AUDIT #8 — ajouter une étape à une routine déjà célébrée laissait
          "celebrated" à true : la routine redevenait incomplète mais ne pouvait
          plus être fêtée. L'étoile déjà gagnée, elle, reste acquise. */
-      const total = (config[r]||[]).length;
+      const total = (routinesDe(st)[r]||[]).length;
       if(total > 0 && st[r].done.filter(Boolean).length < total) st[r].celebrated = false;
     });
     return st;
   };
   fix(dayState);
-  Object.keys(remoteDays || {}).forEach(k=>{ if(k !== activeKey()) fix(remoteDays[k]); });
+  /* V6.2 — tous les jours passés, ceux du serveur ET ceux gardés seulement sur
+     l'appareil. Avant, seuls les jours du serveur étaient réalignés : une famille
+     sans synchronisation voyait ses coches passées glisser sur la mauvaise étape
+     dès qu'un parent réordonnait une routine. */
+  const cles = {};
+  Object.keys(remoteDays || {}).forEach(k=>{ cles[k] = true; });
+  clesJoursLocaux().forEach(k=>{ cles[k] = true; });
+  delete cles[activeKey()];
+  Object.keys(cles).forEach(k=>{
+    let st = remoteDays && remoteDays[k];
+    const raw = sGet(ck("pr_day_"+k));
+    if(!st && raw){ try{ st = JSON.parse(raw); }catch(e){ return; } }
+    if(!st) return;
+    fix(normaliserJour(st));                       /* une seule fois par jour */
+    if(remoteDays && remoteDays[k]) remoteDays[k] = st;
+    if(raw) sSet(ck("pr_day_"+k), JSON.stringify(st));
+  });
   saveDay();
+  const aChange = recalculerAujourdhui();
   document.getElementById("sheet").classList.remove("show");
   render();
+  if(aChange) setTimeout(()=>alert("Les étapes d'aujourd'hui ont changé."), 60);
+}
+
+/* V6.2 — aujourd'hui fait exception à la règle du profil figé : si la semaine type
+   ou le mode vacances changent le profil du jour, la journée en cours bascule.
+   Seules les routines dont la liste diffère repartent à zéro. */
+function recalculerAujourdhui(){
+  const cle = todayKey();
+  const jour = isToday() ? dayState : loadDayFor(cle);
+  const nouveau = profileFor(cle);
+  if(jour._p === nouveau) return false;
+  const avant = config.profiles[jour._p], apres = config.profiles[nouveau];
+  const empreinte = liste => JSON.stringify(liste.map(x => [x.emoji, x.label]));
+  ROUTINES.forEach(r=>{
+    if(empreinte(avant[r]) !== empreinte(apres[r])) jour[r] = {done:[], celebrated:false};
+  });
+  jour._p = nouveau;
+  if(isToday()){ dayState = jour; saveDay(); }
+  else { sSet(ck("pr_day_"+cle), JSON.stringify(jour)); remoteDays[cle] = jour; scheduleCloudSave(); }
+  return true;
 }
 
 function resetToday(){
-  dayState = emptyDay();
+  dayState = emptyDay(dayState._p || profileFor(activeKey()));
   saveDay();
   const k = activeKey();
   if(stars[k]){ delete stars[k]; saveStars(); }
@@ -1765,7 +2021,7 @@ async function pullChild(){
     config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
     config.avatar = avatarChoisi;
     config.name = data.name || "";
-    stars = {}; bank = {spent:0, purchases:[]}; remoteDays = {}; dayState = emptyDay();
+    stars = {}; bank = {spent:0, purchases:[]}; remoteDays = {}; dayState = emptyDay(profileFor(activeKey()));
     saveConfig(); saveStars(); saveBank(); saveDay();
   }
   setSyncDot("✓ synchro");
@@ -1873,7 +2129,7 @@ async function selectChild(k){
   /* Repartir d'un état vierge avant de charger les données du nouvel enfant */
   config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
   stars = {}; bank = {spent:0, purchases:[]}; remoteDays = {};
-  dayState = emptyDay();
+  dayState = emptyDay(profileFor(todayKey()));   /* état transitoire, remplacé par pullChild() */
   viewDateOffset = 0;
 
   await pullChild();
