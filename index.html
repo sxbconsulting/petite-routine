@@ -24,6 +24,9 @@
     --radius:28px;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  /* V6.3.2 — AUDIT V6.2 #8 — un bouton n'hérite pas de la police de la page : les
+     cartes de tâche et de cadeau s'affichaient dans la police du système. */
+  button{font-family:inherit}
   html,body{height:100%}
   body{
     font-family:'Fredoka',sans-serif;
@@ -221,6 +224,19 @@
   .sheet-inner{position:absolute;bottom:0;left:0;right:0;max-height:88vh;overflow-y:auto;background:#fff;color:var(--ink);
     border-radius:26px 26px 0 0;padding:22px 20px 34px;max-width:460px;margin:0 auto}
   .sheet-inner h3{font-size:22px;margin-bottom:2px}
+  /* En-tête collant : titre + croix restent en haut pendant le défilement, sur un fond
+     blanc, et le contenu passe dessous. Une croix flottant seule au-dessus du contenu
+     tombait sur les corbeilles : un tap mal placé fermait le panneau sans enregistrer.
+     top et margin à -22px : l'en-tête recouvre aussi la marge haute du panneau. */
+  .sheet-head{position:sticky;top:-22px;z-index:3;display:flex;align-items:center;gap:12px;
+    background:#fff;margin:-22px -20px 0;padding:16px 20px 6px}
+  .sheet-head h3{flex:1;min-width:0;margin:0}
+  .sheet-close{flex:none;
+    width:40px;height:40px;border:none;border-radius:50%;background:#f3f0fa;color:var(--ink-soft);
+    font-size:17px;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 2px 8px rgba(58,46,82,.12)}
+  .sheet-close:active{transform:scale(.92)}
+  .sheet-close:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
   .sheet-inner .hint{font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;color:var(--ink-soft);margin-bottom:16px}
   .field{margin-bottom:14px}
   .field label{font-family:'Nunito',sans-serif;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);display:block;margin-bottom:6px}
@@ -228,7 +244,9 @@
   .edit-section{margin-top:18px}
   .edit-row{display:flex;gap:8px;margin-bottom:8px;align-items:center}
   .edit-row input.em{width:64px;text-align:center;font-size:22px;border:2px solid #e8e3f4;border-radius:12px;padding:10px 4px}
-  .edit-row input.lb{flex:1;border:2px solid #e8e3f4;border-radius:12px;padding:10px 12px;font-family:'Fredoka',sans-serif;font-size:16px}
+  /* V6.3.2 — min-width:0 : sans ça, un champ texte garde sa largeur naturelle et pousse
+     la corbeille hors de l'écran sur un iPhone de 375 ou 390 px. */
+  .edit-row input.lb{flex:1;min-width:0;border:2px solid #e8e3f4;border-radius:12px;padding:10px 12px;font-family:'Fredoka',sans-serif;font-size:16px}
   .arrows{display:flex;flex-direction:column;gap:2px;flex-shrink:0}
   .arw{border:none;background:#f0edf8;color:var(--ink-soft);border-radius:8px;width:30px;height:20px;
     font-size:9px;cursor:pointer;line-height:1;padding:0}
@@ -381,7 +399,7 @@
     <h1 id="greeting">Bonjour&nbsp;!</h1>
     <div class="subtitle" id="subtitle">C'est l'heure de la routine du matin</div>
     <div class="day-type" id="dayType"></div>
-    <button class="child-chip" id="childChip" onclick="openChildPicker()" style="display:none">👧 <span id="childChipName"></span> ▾</button>
+    <button class="child-chip" id="childChip" onclick="openChildPicker()" style="display:none"><span id="childChipName"></span> ▾</button>
   </header>
 
   <div class="past-banner" id="pastBanner">
@@ -495,7 +513,10 @@
 
 <div class="sheet" id="sheet">
   <div class="sheet-inner">
-    <h3 data-i18n="sheet_title">Espace parents 👋</h3>
+    <div class="sheet-head">
+      <h3 data-i18n="sheet_title">Espace parents 👋</h3>
+      <button class="sheet-close" onclick="fermerEspaceParents()" aria-label="Fermer" data-i18n-aria="close" data-i18n-title="close" title="Fermer">✕</button>
+    </div>
     <div class="hint" data-i18n="sheet_hint">Modifiez les routines et la roue, puis touchez Enregistrer.</div>
     <div class="field">
       <label>Langue · Language</label>
@@ -506,12 +527,12 @@
     </div>
     <div class="fam-info" id="famInfo" style="display:none">
       <span data-i18n="fam_code">Code famille à partager avec l'autre parent :</span><br><b id="famCode">—</b><br>
-      <button class="fam-child" onclick="closeSheetAndPickChild()" data-i18n="fam_child">👧 Changer / ajouter un enfant</button>
+      <button class="fam-child" onclick="closeSheetAndPickChild()" data-i18n="fam_child">🧒 Changer / ajouter un enfant</button>
       <button class="fam-leave" onclick="leaveFamily()" data-i18n="fam_leave">Quitter la famille sur cet appareil</button>
     </div>
     <div class="field">
       <label data-i18n="child_name_label">Prénom de l'enfant</label>
-      <input type="text" id="childName" placeholder="Prénom" data-i18n-ph="ph_first_name">
+      <input type="text" id="childName" placeholder="Prénom" data-i18n-ph="ph_first_name" maxlength="20">
       <div id="avatarPickerParent"></div>
     </div>
     <div class="edit-section">
@@ -643,6 +664,8 @@ function esc(s){
    Ce bloc doit rester AVANT le premier appel à loadConfig() : les routines
    par défaut d'une nouvelle famille sont écrites dans la langue choisie.
 ═══════════════════════════════════════════ */
+/* Version affichée dans les sauvegardes. À tenir alignée sur VERSION dans sw.js. */
+const VERSION_APP = "6.3.2";
 const LANGUES = ["fr","en"];
 function langueDuTelephone(){
   const l = String((navigator.languages && navigator.languages[0]) || navigator.language || "fr").toLowerCase();
@@ -746,10 +769,10 @@ const T = {
     onb_error: "Oups, réessaie",
     av_pick: "Choisis ton avatar", av_custom: "Personnalise-le",
     chip_switch: " — changer d'enfant",
-    sheet_title: "Espace parents 👋",
+    sheet_title: "Espace parents 👋", close: "Fermer",
     sheet_hint: "Modifiez les routines et la roue, puis touchez Enregistrer.",
     fam_code: "Code famille à partager avec l'autre parent :",
-    fam_child: "👧 Changer / ajouter un enfant",
+    fam_child: "🧒 Changer / ajouter un enfant",
     fam_leave: "Quitter la famille sur cet appareil",
     child_name_label: "Prénom de l'enfant",
     days_label: "Les journées 📅",
@@ -883,10 +906,10 @@ const T = {
     onb_error: "Oops, try again",
     av_pick: "Pick your avatar", av_custom: "Make it yours",
     chip_switch: " — switch child",
-    sheet_title: "Parent area 👋",
+    sheet_title: "Parent area 👋", close: "Close",
     sheet_hint: "Edit the routines and the wheel, then tap Save.",
     fam_code: "Family code to share with the other parent:",
-    fam_child: "👧 Switch / add a child",
+    fam_child: "🧒 Switch / add a child",
     fam_leave: "Leave the family on this device",
     child_name_label: "Child's first name",
     days_label: "The days 📅",
@@ -1280,6 +1303,10 @@ function choisirBase(b){   const p = avatarParts(avatarActuel()); appliquerAvata
 function choisirTeinte(t){ const p = avatarParts(avatarActuel()); appliquerAvatar(p.base, t); }
 function appliquerAvatar(base, teinte){
   config.avatar = base + teinte;
+  /* V6.3.2 — AUDIT V6.2 #3 — espace parents ouvert : « Enregistrer » remplace la
+     configuration par sa copie de travail. Sans cette ligne, la copie gardait
+     l'ancien avatar et annulait le choix qu'on venait de faire. */
+  if(editState) editState.avatar = config.avatar;
   saveConfig();
   renderAvatarPicker("avatarPickerOnb");
   renderAvatarPicker("avatarPickerParent");
@@ -1704,8 +1731,10 @@ document.getElementById("editWheelBtn").addEventListener("click", ()=>openParent
 
 /* Bouton "Modifier les cadeaux" sous la tirelire — même protection */
 document.getElementById("editRewardsBtn").addEventListener("click", ()=>openParent("rewards"));
+/* Fermer sans enregistrer : la croix et le tap à côté du panneau font la même chose */
+function fermerEspaceParents(){ document.getElementById("sheet").classList.remove("show"); }
 document.getElementById("sheet").addEventListener("click", (e)=>{
-  if(e.target.id==="sheet") document.getElementById("sheet").classList.remove("show");
+  if(e.target.id==="sheet") fermerEspaceParents();
 });
 
 /* ── V6.2 — éditeur : profil en cours de modification, semaine type, vacances ── */
@@ -1939,10 +1968,11 @@ function addRemindersToCalendar(){
     src.profiles[p].reminders.filter(r => r.enabled).forEach(r=>{
       const meta = remMeta(r.routine);
       const title = meta.ic+" "+meta.lb+" · "+PROFIL_META[p].ic+(who ? " — "+who : "");
+      /* V6.3.2 — AUDIT V6.2 #7 — la fin se calcule sur une vraie date : un rappel à
+         23 h 50 finit le lendemain à 00 h 05, et non le même jour avant son début. */
       const [h,m] = r.time.split(":").map(Number);
-      const endM = m+15;
-      const endH = (h + Math.floor(endM/60)) % 24;
-      const endTime = String(endH).padStart(2,"0")+String(endM%60).padStart(2,"0")+"00";
+      const fin = new Date(debut); fin.setHours(h, m + 15, 0, 0);
+      const finIcs = keyFromDate(fin).replace(/-/g,"")+"T"+String(fin.getHours()).padStart(2,"0")+String(fin.getMinutes()).padStart(2,"0")+"00";
       /* Le profil école garde l'identifiant des versions précédentes : un parent qui
          réexporte voit ses anciennes alarmes quotidiennes remplacées, pas doublées. */
       const uid = (p === "school" ? "petite-routine-" : "petite-routine-home-") + r.routine + "@sxbconsulting";
@@ -1952,7 +1982,7 @@ function addRemindersToCalendar(){
         "SEQUENCE:"+sequence+"\r\n"+
         "DTSTAMP:"+stamp+"\r\n"+
         "DTSTART:"+jourDebut+"T"+icsTime(r.time)+"\r\n"+
-        "DTEND:"+jourDebut+"T"+endTime+"\r\n"+
+        "DTEND:"+finIcs+"\r\n"+
         "RRULE:FREQ=WEEKLY;BYDAY="+byday+"\r\n"+
         "SUMMARY:"+title+"\r\n"+
         "DESCRIPTION:"+t("ics_desc")+"\r\n"+
@@ -2078,7 +2108,7 @@ function exporterEnfant(){
     _format: "petite-routine",
     _version: 1,
     _exporte_le: new Date().toISOString(),
-    _app: "V6.1",
+    _app: "V"+VERSION_APP,
     enfant: conf.name || "",
     code_famille: (syncInfo && syncInfo.code) || null,
     config: conf,
@@ -2182,6 +2212,7 @@ function clesJoursLocaux(){
 }
 function saveParent(){
   editState.name = document.getElementById("childName").value.trim();
+  if(syncInfo && editState.name) { syncInfo.childName = editState.name; saveSyncInfo(); }
   /* Remappage des coches profil par profil : réordonner une étape du profil école
      ne doit rien déplacer dans le profil maison, ni l'inverse. */
   const remap = {};
@@ -2346,7 +2377,12 @@ function scheduleCloudSave(){
    l'app réappliquait son propre état daté — effaçant au passage les taps
    faits pendant l'aller-retour. On compare maintenant un seul identifiant,
    insensible à l'ordre des clés. */
-let lastPushedRev = "";
+/* V6.3.2 — AUDIT V6.2 #4 — on retient les derniers marqueurs envoyés, pas un seul.
+   Avec un seul, sur réseau lent, l'écho d'un envoi arrivé après le départ du
+   suivant passait pour une modification de l'autre parent : l'app réappliquait
+   son propre état d'avant et le dernier tap disparaissait de l'écran. */
+let revsEnvoyees = [];
+function retenirRev(r){ revsEnvoyees.push(r); if(revsEnvoyees.length > 10) revsEnvoyees.shift(); }
 function makeRev(){ return Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,10); }
 
 /* AUDIT #8 — un envoi échoué n'était jamais réessayé : le serveur restait en
@@ -2355,18 +2391,33 @@ function makeRev(){ return Date.now().toString(36)+"-"+Math.random().toString(36
 let retryTimer = null;
 let retriesLeft = 3;
 
+/* V6.3.2 — AUDIT V6.2 #6 — le prénom part avec chaque envoi dans la colonne « name »,
+   celle que lisent la liste « Qui est-ce ? » et la pastille. Avant, renommer l'enfant
+   dans l'espace parents ne la touchait jamais. En l'envoyant à chaque fois, un
+   renommage fait hors ligne finit par arriver lui aussi. */
+function majEnfant(snap){
+  const maj = { data: snap, updated_at: new Date().toISOString() };
+  const nom = (config.name || "").trim();
+  if(nom) maj.name = nom;
+  return maj;
+}
 async function pushChild(){
   if(!cloudOn()) return;
   const snap = localSnapshot();
   const keys = Object.keys(snap.days).sort();
   while(keys.length > 14){ delete snap.days[keys.shift()]; }
   snap._rev = makeRev();
-  lastPushedRev = snap._rev;
+  retenirRev(snap._rev);
   const envoyees = modifsNonEnvoyees;
   setSyncDot("⟳");
-  const { error } = await sb.from("pr_children")
-    .update({ data: snap, updated_at: new Date().toISOString() })
-    .eq("id", syncInfo.childId);
+  const maj = majEnfant(snap);
+  let { error } = await sb.from("pr_children").update(maj).eq("id", syncInfo.childId);
+  /* Filet : si la base refusait le prénom (contrainte inconnue d'ici), le reste
+     doit passer quand même — les étoiles comptent plus que l'étiquette. */
+  if(error && maj.name){
+    delete maj.name;
+    ({ error } = await sb.from("pr_children").update(maj).eq("id", syncInfo.childId));
+  }
   if(error){
     setSyncDot(t("sync_offline"));
     if(retriesLeft > 0){
@@ -2441,7 +2492,7 @@ function subscribeChild(){
       (payload)=>{
         const d = payload.new && payload.new.data;
         /* AUDIT #1 — écho de notre propre envoi, reconnu par son marqueur */
-        if(d && d._rev && d._rev === lastPushedRev) return;
+        if(d && d._rev && revsEnvoyees.indexOf(d._rev) !== -1) return;
         hydrate(d);
         render();
       })
@@ -2510,7 +2561,9 @@ async function showChildrenStep(){
   (kids||[]).forEach(k=>{
     const b = document.createElement("button");
     b.className = "onb-child";
-    b.innerHTML = "👧 <span>"+k.name+"</span>";
+    /* V6.3.2 — AUDIT V6.2 #5 — avatar neutre (la liste ne connaît que les prénoms)
+       et prénom échappé, comme partout ailleurs depuis l'audit n°7 */
+    b.innerHTML = "🧒 <span>"+esc(k.name)+"</span>";
     b.onclick = ()=>selectChild(k);
     list.appendChild(b);
   });
@@ -2522,7 +2575,7 @@ async function selectChild(k){
   clearTimeout(pushTimer);
   clearTimeout(retryTimer);   /* AUDIT #8 — la relance aussi, sinon elle vise l'enfant précédent */
   retriesLeft = 3;
-  lastPushedRev = "";         /* AUDIT #1 */
+  revsEnvoyees = [];         /* AUDIT #1 */
   /* On coupe l'écoute temps réel de l'enfant précédent */
   if(currentChannel){ try{ sb.removeChannel(currentChannel); }catch(e){} currentChannel = null; }
 
@@ -2581,7 +2634,7 @@ function renderChildChip(){
   if(cloudOn()){
     chip.style.display = "inline-flex";
     document.getElementById("childChipName").textContent =
-      avatarActuel()+" "+(syncInfo.childName || "")+t("chip_switch");
+      avatarActuel()+" "+(config.name || syncInfo.childName || "")+t("chip_switch");
   } else {
     chip.style.display = "none";
   }
