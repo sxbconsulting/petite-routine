@@ -458,7 +458,7 @@
       <button class="onb-btn primary" onclick="onbShow('create')" data-i18n="onb_create_btn">🏠 Créer notre famille</button>
       <button class="onb-btn" onclick="onbShow('join')" data-i18n="onb_join_btn">🔑 J'ai un code famille</button>
       <button class="onb-link" onclick="skipSync()" data-i18n="onb_skip">Essayer sans synchronisation</button>
-      <br><button class="onb-link" onclick="changerLangue(LANG === 'fr' ? 'en' : 'fr')" data-i18n="onb_other_lang">English version</button>
+      <br><button class="onb-link" onclick="changerLangue(LANG === 'fr' ? 'en' : 'fr')" data-i18n="onb_other_lang">🇬🇧 English version</button>
     </div>
     <div class="onb-step" id="onb-create" style="display:none">
       <h2 data-i18n="onb_create_title">Créer la famille 🏠</h2>
@@ -500,8 +500,8 @@
     <div class="field">
       <label>Langue · Language</label>
       <div class="prof-tabs lang-tabs">
-        <button class="prof-tab" data-lang="fr" onclick="changerLangue('fr')">Français</button>
-        <button class="prof-tab" data-lang="en" onclick="changerLangue('en')">English</button>
+        <button class="prof-tab" data-lang="fr" onclick="changerLangue('fr')">🇫🇷 Français</button>
+        <button class="prof-tab" data-lang="en" onclick="changerLangue('en')">🇬🇧 English</button>
       </div>
     </div>
     <div class="fam-info" id="famInfo" style="display:none">
@@ -721,7 +721,7 @@ const T = {
     onb_create_btn: "🏠 Créer notre famille",
     onb_join_btn: "🔑 J'ai un code famille",
     onb_skip: "Essayer sans synchronisation",
-    onb_other_lang: "English version",
+    onb_other_lang: "🇬🇧 English version",
     onb_create_title: "Créer la famille 🏠",
     onb_create_sub: "Prénom (ou surnom) de votre enfant :",
     ph_first_name: "Prénom",
@@ -858,7 +858,7 @@ const T = {
     onb_create_btn: "🏠 Create our family",
     onb_join_btn: "🔑 I have a family code",
     onb_skip: "Try without syncing",
-    onb_other_lang: "Version française",
+    onb_other_lang: "🇫🇷 Version française",
     onb_create_title: "Create your family 🏠",
     onb_create_sub: "Your child's first name (or nickname):",
     ph_first_name: "First name",
@@ -1206,6 +1206,23 @@ function selectDay(off){
 function backToToday(){ selectDay(0); }
 
 let dayState = loadDay();
+
+/* V6.3.1 — AUDIT V6.2 #2 — passage de minuit, app restée ouverte.
+   La journée n'était chargée qu'au démarrage. Un iPhone qui garde l'app en mémoire
+   la rouvrait le lendemain matin sur la journée de la veille, avec la date du jour
+   au-dessus : le premier tap recopiait hier dans aujourd'hui, et la routine du soir,
+   déjà « fêtée », ne pouvait plus rapporter d'étoile. */
+let jourCharge = todayKey();
+function verifierChangementDeJour(){
+  const auj = todayKey();
+  if(auj === jourCharge) return false;
+  jourCharge = auj;
+  viewDateOffset = 0;                 /* « hier » d'hier soir n'est plus hier */
+  dayState = loadDayFor(auj);
+  view = defaultView();               /* le matin, on ouvre sur la routine du matin */
+  render();
+  return true;
+}
 
 /* ── Historique étoiles ── */
 function loadStars(){
@@ -1594,6 +1611,9 @@ buyConfirmBtn.addEventListener("mouseleave", buyCancel);
 function switchView(v){ view = v; render(); }
 
 function toggleTask(i, ev){
+  /* Tap arrivé avant la vérification périodique : l'écran affichait encore hier.
+     On montre aujourd'hui et on ne coche rien. */
+  if(verifierChangementDeJour()) return;
   const arr = dayState[view].done;
   arr[i] = !arr[i];
   saveDay();
@@ -1987,6 +2007,7 @@ function renderLateDots(){
 
 function firedKey(r){ return "pr_fired_"+r+"_"+todayKey(); }
 function checkReminders(){
+  verifierChangementDeJour();
   renderLateDots();
   if(!("Notification" in window) || Notification.permission !== "granted") return;
   const now = minutesNow();
@@ -2286,11 +2307,32 @@ function hydrate(data){
   remoteDays = data.days || {};
   dayState = loadDayFor(activeKey());
   if(!dayState.afternoon) dayState.afternoon = {done:[],celebrated:false};
+  enregistrerLocalement();
+}
+
+/* V6.3.1 — AUDIT V6.2 #1 — ce qui arrive du serveur est aussi écrit sur le téléphone.
+   Avant, hydrate() ne touchait que la mémoire : relancée hors ligne, l'app repartait
+   de ce que CE téléphone avait écrit lui-même, sans rien de l'autre parent, puis
+   renvoyait cet état périmé au serveur au premier tap — étoiles, achats et routines
+   de l'autre parent effacés. On passe par les fonctions d'origine (_save*) :
+   réécrire au serveur ce qu'on vient d'en recevoir n'aurait aucun sens. */
+function enregistrerLocalement(){
+  _saveConfig(); _saveStars(); _saveBank();
+  Object.keys(remoteDays || {}).forEach(k=>{
+    if(k !== activeKey()) sSet(ck("pr_day_"+k), JSON.stringify(remoteDays[k]));
+  });
+  _saveDay();
 }
 
 /* Envoi (debounce 800ms) — élagage aux 14 derniers jours */
+/* Nombre de modifications faites sur ce téléphone et pas encore confirmées par
+   le serveur. Tant qu'il en reste, on ne relit pas le serveur : la relecture
+   écraserait ces modifications. On les envoie d'abord. */
+let modifsNonEnvoyees = 0;
+
 function scheduleCloudSave(){
   if(!cloudOn()) return;
+  modifsNonEnvoyees++;
   clearTimeout(pushTimer);
   clearTimeout(retryTimer);
   retriesLeft = 3;
@@ -2320,6 +2362,7 @@ async function pushChild(){
   while(keys.length > 14){ delete snap.days[keys.shift()]; }
   snap._rev = makeRev();
   lastPushedRev = snap._rev;
+  const envoyees = modifsNonEnvoyees;
   setSyncDot("⟳");
   const { error } = await sb.from("pr_children")
     .update({ data: snap, updated_at: new Date().toISOString() })
@@ -2333,15 +2376,46 @@ async function pushChild(){
     }
   } else {
     retriesLeft = 3;
+    /* Une modification faite pendant l'aller-retour n'est pas dans cet envoi : elle reste à envoyer */
+    if(modifsNonEnvoyees === envoyees) modifsNonEnvoyees = 0;
     setSyncDot(t("sync_ok"));
   }
 }
 
-async function pullChild(){
+/* V6.3.1 — rattrapage au retour sur l'app et au retour du réseau.
+   L'écoute temps réel ne voit rien pendant que le téléphone dort ou n'a pas de
+   réseau : sans relecture, l'app repartait de l'état d'avant et l'envoyait au
+   premier tap. S'il reste des modifications locales, on les envoie d'abord. */
+let rattrapageEnCours = false;
+async function rattraperServeur(){
+  if(!cloudOn() || rattrapageEnCours) return;
+  /* Espace parents ouvert : un rattrapage changerait les données sous ses yeux, et
+     « Enregistrer » les écraserait aussitôt avec sa copie. Le rattrapage se fera au
+     prochain retour sur l'app ; l'écoute temps réel, elle, continue entre-temps. */
+  if(document.getElementById("sheet").classList.contains("show")) return;
+  if(modifsNonEnvoyees > 0){
+    clearTimeout(retryTimer);
+    retriesLeft = 3;
+    pushChild();
+    return;
+  }
+  rattrapageEnCours = true;
+  try{
+    if(await pullChild(true)) render();
+  } finally { rattrapageEnCours = false; }
+}
+
+/* siRienEnAttente : si une modification locale est faite pendant la requête, on
+   jette la réponse — l'appliquer effacerait ce tap. L'envoi déjà programmé
+   remettra le serveur à jour. Renvoie true si la réponse a été appliquée. */
+async function pullChild(siRienEnAttente){
+  const enfant = syncInfo.childId;
   const { data, error } = await sb.from("pr_children")
     .select("id,name,data,pr_families(code)")
-    .eq("id", syncInfo.childId).single();
-  if(error || !data){ setSyncDot(t("sync_offline")); return; }
+    .eq("id", enfant).single();
+  if(error || !data){ setSyncDot(t("sync_offline")); return false; }
+  if(!syncInfo || syncInfo.childId !== enfant) return false;   /* enfant changé entre-temps */
+  if(siRienEnAttente && modifsNonEnvoyees > 0) return false;
   syncInfo.childName = data.name;
   if(data.pr_families) syncInfo.code = data.pr_families.code;
   saveSyncInfo();
@@ -2356,6 +2430,7 @@ async function pullChild(){
     saveConfig(); saveStars(); saveBank(); saveDay();
   }
   setSyncDot(t("sync_ok"));
+  return true;
 }
 
 let currentChannel = null;
@@ -2569,7 +2644,13 @@ initSync();
 /* Boucle de rappels : toutes les 30 s, + à chaque retour sur l'app */
 checkReminders();
 setInterval(checkReminders, 30000);
-document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) checkReminders(); });
+/* Retour sur l'app : nouvelle journée ? rappels ? et rattrapage de ce que l'autre
+   parent a fait pendant que le téléphone dormait. pageshow couvre les iPhone qui
+   ressortent l'app de leur mémoire sans émettre visibilitychange. */
+function auRetourSurLApp(){ checkReminders(); rattraperServeur(); }
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) auRetourSurLApp(); });
+window.addEventListener("pageshow", (e)=>{ if(e.persisted) auRetourSurLApp(); });
+window.addEventListener("online", ()=>rattraperServeur());
 
 /* ═══════════════════════════════════════════
    SERVICE WORKER — ouverture hors ligne
