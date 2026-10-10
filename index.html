@@ -288,6 +288,7 @@
     font-family:'Fredoka',sans-serif;font-size:15px;font-weight:600;color:var(--ink-soft);cursor:pointer}
   .prof-tab.sel{background:var(--gold);border-color:var(--gold);color:#4a3200}
   .prof-tab:active{transform:scale(.97)}
+  .lang-tabs{margin-top:0}
   .prof-badge{letter-spacing:.02em;text-transform:none;font-weight:700}
   .wm-q{font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;color:var(--ink);margin-bottom:8px}
   .week-map{display:flex;gap:5px}
@@ -385,15 +386,15 @@
 
   <div class="past-banner" id="pastBanner">
     <span id="pastLabel"></span>
-    <button onclick="backToToday()">Aujourd'hui ➜</button>
+    <button onclick="backToToday()" data-i18n="today_btn">Aujourd'hui ➜</button>
   </div>
 
   <div class="tabs">
-    <button class="tab active" id="tab-morning" onclick="switchView('morning')"><span class="late-dot"></span><span class="ic">☀️</span>Matin</button>
-    <button class="tab" id="tab-afternoon" onclick="switchView('afternoon')"><span class="late-dot"></span><span class="ic">⛅</span>Aprem</button>
-    <button class="tab" id="tab-evening" onclick="switchView('evening')"><span class="late-dot"></span><span class="ic">🌙</span>Soir</button>
-    <button class="tab" id="tab-wheel" onclick="switchView('wheel')"><span class="ic">🎡</span>La roue</button>
-    <button class="tab" id="tab-bank" onclick="switchView('bank')"><span class="ic">🐷</span>Tirelire</button>
+    <button class="tab active" id="tab-morning" onclick="switchView('morning')"><span class="late-dot"></span><span class="ic">☀️</span><span data-i18n="tab_morning">Matin</span></button>
+    <button class="tab" id="tab-afternoon" onclick="switchView('afternoon')"><span class="late-dot"></span><span class="ic">⛅</span><span data-i18n="tab_afternoon">Aprem</span></button>
+    <button class="tab" id="tab-evening" onclick="switchView('evening')"><span class="late-dot"></span><span class="ic">🌙</span><span data-i18n="tab_evening">Soir</span></button>
+    <button class="tab" id="tab-wheel" onclick="switchView('wheel')"><span class="ic">🎡</span><span data-i18n="tab_wheel">La roue</span></button>
+    <button class="tab" id="tab-bank" onclick="switchView('bank')"><span class="ic">🐷</span><span data-i18n="tab_bank">Tirelire</span></button>
   </div>
 
   <div class="progress-wrap" id="progressWrap">
@@ -407,30 +408,30 @@
     <div class="wheel-stage">
       <div class="pointer">🔻</div>
       <div class="wheel" id="wheel"></div>
-      <button class="wheel-hub" onclick="spin()">GO&nbsp;!</button>
+      <button class="wheel-hub" onclick="spin()" data-i18n="hub_go">GO&nbsp;!</button>
     </div>
-    <button class="spin-btn" id="spinBtn" onclick="spin()">Tourne la roue&nbsp;! 🎡</button>
-    <button class="edit-wheel-btn" id="editWheelBtn">✏️ Modifier les activités <span class="ew-hint">parents</span></button>
+    <button class="spin-btn" id="spinBtn" onclick="spin()" data-i18n="spin_btn">Tourne la roue&nbsp;! 🎡</button>
+    <button class="edit-wheel-btn" id="editWheelBtn"><span data-i18n="edit_wheel">✏️ Modifier les activités</span> <span class="ew-hint" data-i18n="ew_hint">parents</span></button>
   </div>
 
   <div class="bank-view" id="bankView">
     <div class="piggy-card">
       <div class="piggy">🐷</div>
       <div class="piggy-balance"><span id="bankBalance">0</span> <span class="piggy-star">⭐</span></div>
-      <div class="piggy-caption">dans ma tirelire</div>
+      <div class="piggy-caption" data-i18n="piggy_caption">dans ma tirelire</div>
     </div>
-    <div class="rewards-title">Mes cadeaux 🎁</div>
+    <div class="rewards-title" data-i18n="rewards_title">Mes cadeaux 🎁</div>
     <div class="rewards" id="rewards"></div>
-    <button class="edit-wheel-btn" id="editRewardsBtn">✏️ Modifier les cadeaux <span class="ew-hint">parents</span></button>
+    <button class="edit-wheel-btn" id="editRewardsBtn"><span data-i18n="edit_rewards">✏️ Modifier les cadeaux</span> <span class="ew-hint" data-i18n="ew_hint">parents</span></button>
   </div>
 
   <div class="week">
-    <div class="week-title">Mes étoiles de la semaine <span class="wk-tip">— touche un jour</span></div>
+    <div class="week-title"><span data-i18n="week_title">Mes étoiles de la semaine</span> <span class="wk-tip" data-i18n="week_tip">— touche un jour</span></div>
     <div class="week-row" id="weekRow"></div>
   </div>
 </div>
 
-<button class="parent-btn" id="parentBtn" title="Espace parents">⚙️ Parents</button>
+<button class="parent-btn" id="parentBtn" title="Espace parents" data-i18n="parent_btn" data-i18n-title="parent_title">⚙️ Parents</button>
 
 <div class="celebrate" id="celebrate">
   <div class="big-star" id="celebrateEmoji">🌟</div>
@@ -443,8 +444,8 @@
   <div class="big-star" id="buyEmoji">🎁</div>
   <h2 id="buyTitle">Cadeau</h2>
   <p id="buyText">Prix : 5 ⭐</p>
-  <button class="buy-confirm" id="buyConfirm">👨‍👩‍👧 Parent : appui long pour offrir</button>
-  <button class="buy-cancel" onclick="closeBuy()">Pas maintenant</button>
+  <button class="buy-confirm" id="buyConfirm" data-i18n="buy_hold">👨‍👩‍👧 Parent : appui long pour offrir</button>
+  <button class="buy-cancel" onclick="closeBuy()" data-i18n="buy_cancel">Pas maintenant</button>
 </div>
 
 <div class="onb" id="onb">
@@ -453,39 +454,40 @@
       <div class="onb-emoji"><span class="av-emoji">🧒</span>⭐</div>
       <div id="avatarPickerOnb"></div>
       <h2>Petite Routine</h2>
-      <p class="onb-sub">Les routines, la roue et la tirelire de vos enfants — synchronisées entre les téléphones des parents.</p>
-      <button class="onb-btn primary" onclick="onbShow('create')">🏠 Créer notre famille</button>
-      <button class="onb-btn" onclick="onbShow('join')">🔑 J'ai un code famille</button>
-      <button class="onb-link" onclick="skipSync()">Essayer sans synchronisation</button>
+      <p class="onb-sub" data-i18n="onb_tagline">Les routines, la roue et la tirelire de vos enfants — synchronisées entre les téléphones des parents.</p>
+      <button class="onb-btn primary" onclick="onbShow('create')" data-i18n="onb_create_btn">🏠 Créer notre famille</button>
+      <button class="onb-btn" onclick="onbShow('join')" data-i18n="onb_join_btn">🔑 J'ai un code famille</button>
+      <button class="onb-link" onclick="skipSync()" data-i18n="onb_skip">Essayer sans synchronisation</button>
+      <br><button class="onb-link" onclick="changerLangue(LANG === 'fr' ? 'en' : 'fr')" data-i18n="onb_other_lang">English version</button>
     </div>
     <div class="onb-step" id="onb-create" style="display:none">
-      <h2>Créer la famille 🏠</h2>
-      <p class="onb-sub">Prénom (ou surnom) de votre enfant :</p>
-      <input class="onb-input" id="onbChildName" placeholder="Prénom" maxlength="20">
-      <button class="onb-btn primary" id="onbCreateBtn" onclick="createFamily()">C'est parti ! 🚀</button>
-      <button class="onb-link" onclick="onbShow('home')">← Retour</button>
+      <h2 data-i18n="onb_create_title">Créer la famille 🏠</h2>
+      <p class="onb-sub" data-i18n="onb_create_sub">Prénom (ou surnom) de votre enfant :</p>
+      <input class="onb-input" id="onbChildName" placeholder="Prénom" data-i18n-ph="ph_first_name" maxlength="20">
+      <button class="onb-btn primary" id="onbCreateBtn" onclick="createFamily()" data-i18n="lets_go">C'est parti ! 🚀</button>
+      <button class="onb-link" onclick="onbShow('home')" data-i18n="onb_back">← Retour</button>
     </div>
     <div class="onb-step" id="onb-join" style="display:none">
-      <h2>Rejoindre 🔑</h2>
-      <p class="onb-sub">Saisissez le code famille (ex. PR-K4TZ) :</p>
+      <h2 data-i18n="onb_join_title">Rejoindre 🔑</h2>
+      <p class="onb-sub" data-i18n="onb_join_sub">Saisissez le code famille (ex. PR-K4TZ) :</p>
       <input class="onb-input code" id="onbCode" placeholder="PR-XXXX" maxlength="7" autocapitalize="characters">
-      <button class="onb-btn primary" id="onbJoinBtn" onclick="joinFamily()">Rejoindre</button>
-      <button class="onb-link" onclick="onbShow('home')">← Retour</button>
+      <button class="onb-btn primary" id="onbJoinBtn" onclick="joinFamily()" data-i18n="onb_join">Rejoindre</button>
+      <button class="onb-link" onclick="onbShow('home')" data-i18n="onb_back">← Retour</button>
     </div>
     <div class="onb-step" id="onb-children" style="display:none">
-      <h2>Qui est-ce ? 👧👦</h2>
-      <p class="onb-sub">Choisissez l'enfant ou ajoutez-en un :</p>
+      <h2 data-i18n="onb_children_title">Qui est-ce ? 👧👦</h2>
+      <p class="onb-sub" data-i18n="onb_children_sub">Choisissez l'enfant ou ajoutez-en un :</p>
       <div id="onbChildList"></div>
-      <input class="onb-input" id="onbNewChild" placeholder="Ajouter un enfant (prénom)" maxlength="20">
-      <button class="onb-btn" onclick="addChild()">➕ Ajouter</button>
+      <input class="onb-input" id="onbNewChild" placeholder="Ajouter un enfant (prénom)" data-i18n-ph="ph_new_child" maxlength="20">
+      <button class="onb-btn" onclick="addChild()" data-i18n="onb_add">➕ Ajouter</button>
     </div>
     <div class="onb-step" id="onb-done" style="display:none">
       <div class="onb-emoji">🎉</div>
-      <h2>Famille créée !</h2>
-      <p class="onb-sub">Votre code famille :</p>
+      <h2 data-i18n="onb_done_title">Famille créée !</h2>
+      <p class="onb-sub" data-i18n="onb_done_sub">Votre code famille :</p>
       <div class="onb-code-display" id="onbCodeDisplay">PR-XXXX</div>
-      <p class="onb-sub">Partagez-le avec l'autre parent : il saisira ce code sur son téléphone pour voir les mêmes données.</p>
-      <button class="onb-btn primary" onclick="finishOnb()">Ouvrir l'app ⭐</button>
+      <p class="onb-sub" data-i18n="onb_done_share">Partagez-le avec l'autre parent : il saisira ce code sur son téléphone pour voir les mêmes données.</p>
+      <button class="onb-btn primary" onclick="finishOnb()" data-i18n="onb_open">Ouvrir l'app ⭐</button>
     </div>
     <div class="onb-msg" id="onbMsg"></div>
   </div>
@@ -493,62 +495,69 @@
 
 <div class="sheet" id="sheet">
   <div class="sheet-inner">
-    <h3>Espace parents 👋</h3>
-    <div class="hint">Modifiez les routines et la roue, puis touchez Enregistrer.</div>
+    <h3 data-i18n="sheet_title">Espace parents 👋</h3>
+    <div class="hint" data-i18n="sheet_hint">Modifiez les routines et la roue, puis touchez Enregistrer.</div>
+    <div class="field">
+      <label>Langue · Language</label>
+      <div class="prof-tabs lang-tabs">
+        <button class="prof-tab" data-lang="fr" onclick="changerLangue('fr')">Français</button>
+        <button class="prof-tab" data-lang="en" onclick="changerLangue('en')">English</button>
+      </div>
+    </div>
     <div class="fam-info" id="famInfo" style="display:none">
-      Code famille à partager avec l'autre parent :<br><b id="famCode">—</b><br>
-      <button class="fam-child" onclick="closeSheetAndPickChild()">👧 Changer / ajouter un enfant</button>
-      <button class="fam-leave" onclick="leaveFamily()">Quitter la famille sur cet appareil</button>
+      <span data-i18n="fam_code">Code famille à partager avec l'autre parent :</span><br><b id="famCode">—</b><br>
+      <button class="fam-child" onclick="closeSheetAndPickChild()" data-i18n="fam_child">👧 Changer / ajouter un enfant</button>
+      <button class="fam-leave" onclick="leaveFamily()" data-i18n="fam_leave">Quitter la famille sur cet appareil</button>
     </div>
     <div class="field">
-      <label>Prénom de l'enfant</label>
-      <input type="text" id="childName" placeholder="Prénom">
+      <label data-i18n="child_name_label">Prénom de l'enfant</label>
+      <input type="text" id="childName" placeholder="Prénom" data-i18n-ph="ph_first_name">
       <div id="avatarPickerParent"></div>
     </div>
     <div class="edit-section">
-      <div class="field"><label>Les journées 📅</label></div>
-      <div class="wm-q">Quels jours vont à l'école ?</div>
+      <div class="field"><label data-i18n="days_label">Les journées 📅</label></div>
+      <div class="wm-q" data-i18n="days_q">Quels jours vont à l'école ?</div>
       <div class="week-map" id="weekMapEdit"></div>
-      <div class="rem-note">Touchez un jour pour changer.</div>
+      <div class="rem-note" data-i18n="days_hint">Touchez un jour pour changer.</div>
       <div class="rem-row vac-row">
         <span class="rem-ic">🏖️</span>
-        <span class="rem-lb">Mode vacances<span class="vac-sub">Tous les jours deviennent des jours de maison.</span></span>
-        <button class="rem-sw" id="vacSw" onclick="basculerVacances()" aria-label="Mode vacances"></button>
+        <span class="rem-lb"><span data-i18n="vac_title">Mode vacances</span><span class="vac-sub" data-i18n="vac_sub">Tous les jours deviennent des jours de maison.</span></span>
+        <button class="rem-sw" id="vacSw" onclick="basculerVacances()" aria-label="Mode vacances" data-i18n-aria="vac_title"></button>
       </div>
       <div class="vac-until" id="vacUntil">
-        <label for="vacDate">Jusqu'au</label>
+        <label for="vacDate" data-i18n="vac_until">Jusqu'au</label>
         <input type="date" id="vacDate" onchange="dateVacances(this.value)">
-        <span class="vac-hint">facultatif</span>
+        <span class="vac-hint" data-i18n="vac_optional">facultatif</span>
       </div>
     </div>
     <div class="prof-tabs" id="profTabs">
-      <button class="prof-tab" data-p="school" onclick="choisirProfilEdite('school')">🎒 Jour d'école</button>
-      <button class="prof-tab" data-p="home" onclick="choisirProfilEdite('home')">🏠 Jour de maison</button>
+      <button class="prof-tab" data-p="school" onclick="choisirProfilEdite('school')">🎒 <span data-i18n="prof_school">Jour d'école</span></button>
+      <button class="prof-tab" data-p="home" onclick="choisirProfilEdite('home')">🏠 <span data-i18n="prof_home">Jour de maison</span></button>
     </div>
     <div class="edit-section">
-      <div class="field"><label>Routine du matin ☀️ <span class="prof-badge"></span></label></div>
+      <div class="field"><label><span data-i18n="sec_morning">Routine du matin ☀️</span> <span class="prof-badge"></span></label></div>
       <div id="edit-morning"></div>
-      <button class="add-btn" onclick="addTask('morning')">+ Ajouter une étape</button>
+      <button class="add-btn" onclick="addTask('morning')" data-i18n="add_step">+ Ajouter une étape</button>
     </div>
     <div class="edit-section">
-      <div class="field"><label>Routine de l'après-midi ⛅ <span class="prof-badge"></span></label></div>
+      <div class="field"><label><span data-i18n="sec_afternoon">Routine de l'après-midi ⛅</span> <span class="prof-badge"></span></label></div>
       <div id="edit-afternoon"></div>
-      <button class="add-btn" onclick="addTask('afternoon')">+ Ajouter une étape</button>
+      <button class="add-btn" onclick="addTask('afternoon')" data-i18n="add_step">+ Ajouter une étape</button>
     </div>
     <div class="edit-section">
-      <div class="field"><label>Routine du soir 🌙 <span class="prof-badge"></span></label></div>
+      <div class="field"><label><span data-i18n="sec_evening">Routine du soir 🌙</span> <span class="prof-badge"></span></label></div>
       <div id="edit-evening"></div>
-      <button class="add-btn" onclick="addTask('evening')">+ Ajouter une étape</button>
+      <button class="add-btn" onclick="addTask('evening')" data-i18n="add_step">+ Ajouter une étape</button>
     </div>
     <div class="edit-section">
-      <div class="field"><label>Les rappels 🔔 <span class="prof-badge"></span></label></div>
+      <div class="field"><label><span data-i18n="sec_reminders">Les rappels 🔔</span> <span class="prof-badge"></span></label></div>
       <div id="edit-reminders"></div>
       <div class="rem-actions">
-        <button class="rem-btn" onclick="addRemindersToCalendar()">📅 Ajouter les rappels à mon calendrier</button>
-        <button class="rem-btn ghost" onclick="askNotifPermission()">🔔 Activer les notifications de l'app</button>
+        <button class="rem-btn" onclick="addRemindersToCalendar()" data-i18n="rem_calendar">📅 Ajouter les rappels à mon calendrier</button>
+        <button class="rem-btn ghost" onclick="askNotifPermission()" data-i18n="rem_notif">🔔 Activer les notifications de l'app</button>
       </div>
       <div class="rem-status" id="remStatus"></div>
-      <div class="rem-note">
+      <div class="rem-note" data-i18n="rem_note">
         Le calendrier est le rappel le plus fiable : il sonne même quand l'app est fermée, sur iPhone comme sur Android.
         Les notifications de l'app ne fonctionnent que si elle est ouverte ou récemment utilisée.
         Une pastille orange apparaît sur l'onglet quand l'heure est passée et la routine pas terminée.
@@ -556,28 +565,28 @@
       </div>
     </div>
     <div class="edit-section">
-      <div class="field"><label>La roue des activités 🎡</label></div>
+      <div class="field"><label data-i18n="sec_wheel">La roue des activités 🎡</label></div>
       <div id="edit-wheel"></div>
-      <button class="add-btn" onclick="addTask('wheelItems')">+ Ajouter une activité</button>
+      <button class="add-btn" onclick="addTask('wheelItems')" data-i18n="add_activity">+ Ajouter une activité</button>
     </div>
     <div class="edit-section">
-      <div class="field"><label>Les cadeaux de la tirelire 🐷</label></div>
+      <div class="field"><label data-i18n="sec_rewards">Les cadeaux de la tirelire 🐷</label></div>
       <div id="edit-rewards"></div>
-      <button class="add-btn" onclick="addTask('rewards')">+ Ajouter un cadeau</button>
+      <button class="add-btn" onclick="addTask('rewards')" data-i18n="add_reward">+ Ajouter un cadeau</button>
     </div>
     <div class="edit-section">
-      <div class="field"><label>Derniers cadeaux offerts 🎁</label></div>
+      <div class="field"><label data-i18n="sec_history">Derniers cadeaux offerts 🎁</label></div>
       <div id="purchase-history"></div>
     </div>
     <div class="edit-section">
-      <div class="field"><label>Sauvegarde de secours 💾</label></div>
+      <div class="field"><label data-i18n="sec_backup">Sauvegarde de secours 💾</label></div>
       <div class="rem-actions">
-        <button class="rem-btn" onclick="exporterEnfant()">⬇️ Enregistrer une sauvegarde</button>
-        <button class="rem-btn ghost" onclick="document.getElementById('importFile').click()">⬆️ Restaurer une sauvegarde</button>
+        <button class="rem-btn" onclick="exporterEnfant()" data-i18n="backup_save">⬇️ Enregistrer une sauvegarde</button>
+        <button class="rem-btn ghost" onclick="document.getElementById('importFile').click()" data-i18n="backup_restore">⬆️ Restaurer une sauvegarde</button>
       </div>
       <input type="file" id="importFile" accept="application/json,.json" onchange="importerEnfant(this)" hidden>
       <div class="rem-status" id="backupStatus"></div>
-      <div class="rem-note">
+      <div class="rem-note" data-i18n="backup_note">
         La sauvegarde contient tout ce qui concerne cet enfant : ses routines, ses étoiles,
         sa tirelire et son historique. Conservez-la ailleurs que sur ce téléphone — un mail
         que vous vous envoyez suffit. C'est elle qui vous protège si vous perdez à la fois
@@ -586,10 +595,10 @@
       </div>
     </div>
     <div class="sheet-actions">
-      <button class="btn-reset" onclick="resetToday()">Remettre à zéro aujourd'hui</button>
-      <button class="btn-save" onclick="saveParent()">Enregistrer</button>
+      <button class="btn-reset" onclick="resetToday()" data-i18n="btn_reset">Remettre à zéro aujourd'hui</button>
+      <button class="btn-save" onclick="saveParent()" data-i18n="btn_save">Enregistrer</button>
     </div>
-    <div class="storage-note" id="storageNote">
+    <div class="storage-note" id="storageNote" data-i18n="storage_note">
       ⚠️ Mode aperçu : les données ne sont pas sauvegardées ici. Une fois l'app installée sur votre téléphone, tout sera mémorisé automatiquement.
     </div>
   </div>
@@ -626,37 +635,353 @@ function esc(s){
     ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
 }
 
+/* ═══════════════════════════════════════════
+   LANGUE — V6.3 : français et anglais
+   La langue est un réglage du TÉLÉPHONE, jamais synchronisé : deux parents
+   peuvent lire l'app chacun dans la sienne. Par défaut, celle du téléphone ;
+   tout ce qui n'est pas du français bascule en anglais.
+   Ce bloc doit rester AVANT le premier appel à loadConfig() : les routines
+   par défaut d'une nouvelle famille sont écrites dans la langue choisie.
+═══════════════════════════════════════════ */
+const LANGUES = ["fr","en"];
+function langueDuTelephone(){
+  const l = String((navigator.languages && navigator.languages[0]) || navigator.language || "fr").toLowerCase();
+  return l.indexOf("fr") === 0 ? "fr" : "en";
+}
+let LANG = LANGUES.indexOf(sGet("pr_lang")) !== -1 ? sGet("pr_lang") : langueDuTelephone();
+
+/* Le prénom s'insère différemment selon la langue : « Bonjour Léa ! » / « Good morning, Léa! » */
+const nomFr = p => p.name ? " "+p.name : "";
+const nomEn = p => p.name ? ", "+p.name : "";
+const pluriel = (n, un, plusieurs) => n+" "+(n > 1 ? plusieurs : un);
+
+const T = {
+  fr: {
+    locale: "fr-FR",
+    days_long:  ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"],
+    days_short: ["D","L","M","M","J","V","S"],
+    months: ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"],
+    date_long:  d => T.fr.days_long[d.getDay()]+" "+d.getDate()+" "+T.fr.months[d.getMonth()],
+    past_label: d => "Tu regardes "+T.fr.days_long[d.getDay()].toLowerCase()+" "+d.getDate()+" "+T.fr.months[d.getMonth()],
+    today_btn: "Aujourd'hui ➜",
+    tab_morning: "Matin", tab_afternoon: "Aprem", tab_evening: "Soir", tab_wheel: "La roue", tab_bank: "Tirelire",
+    greet_morning: p => "Bonjour"+nomFr(p)+" !",
+    greet_afternoon: p => "Coucou"+nomFr(p)+" !",
+    greet_evening: p => "Bonsoir"+nomFr(p)+" !",
+    sub_morning: "C'est l'heure de la routine du matin",
+    sub_afternoon: "C'est l'heure de la routine de l'après-midi",
+    sub_evening: "C'est l'heure de la routine du soir",
+    done_morning: "Routine du matin terminée, tu as gagné ton étoile ! ⭐",
+    done_afternoon: "Routine de l'après-midi terminée, bravo ! 🌈",
+    done_evening: "Routine du soir terminée, bonne nuit petite étoile ! 🌟",
+    wheel_title: p => "On joue"+nomFr(p)+" ? 🎉",
+    wheel_sub: "Tourne la roue pour choisir une activité",
+    bank_title: p => "Ma tirelire"+nomFr(p)+" 🐷",
+    bank_sub: "Gagne des étoiles et économise pour tes cadeaux !",
+    day_vacation: "🏖️ Vacances",
+    hub_go: "GO !",
+    spin_btn: "Tourne la roue ! 🎡",
+    edit_wheel: "✏️ Modifier les activités", ew_hint: "parents",
+    wheel_empty: "Active des activités dans l'espace parents 👇",
+    wheel_result: p => "La roue a choisi"+nomFr(p)+" ! Amuse-toi bien 🎉",
+    lets_go: "C'est parti ! 🚀",
+    piggy_caption: "dans ma tirelire",
+    rewards_title: "Mes cadeaux 🎁",
+    edit_rewards: "✏️ Modifier les cadeaux",
+    reward_can: "Je peux l'avoir ! 🎉",
+    reward_need: p => "Encore "+p.n+" ⭐",
+    buy_price: p => "Prix : "+p.cost+" ⭐ — il t'en restera "+p.left+" après",
+    buy_missing: p => "Il te manque encore "+p.n+" ⭐ — continue tes routines !",
+    buy_hold: "👨‍👩‍👧 Parent : appui long pour offrir",
+    buy_cancel: "Pas maintenant",
+    bravo: p => "Bravo"+nomFr(p)+" !",
+    buy_done: p => "Tu as économisé "+p.cost+" ⭐ pour : "+p.label+" 🎉",
+    buy_thanks: "Merci ! 💛",
+    yay: "Youpi ! 🎉",
+    week_title: "Mes étoiles de la semaine", week_tip: "— touche un jour",
+    parent_btn: "⚙️ Parents", parent_title: "Espace parents",
+    onb_tagline: "Les routines, la roue et la tirelire de vos enfants — synchronisées entre les téléphones des parents.",
+    onb_create_btn: "🏠 Créer notre famille",
+    onb_join_btn: "🔑 J'ai un code famille",
+    onb_skip: "Essayer sans synchronisation",
+    onb_other_lang: "English version",
+    onb_create_title: "Créer la famille 🏠",
+    onb_create_sub: "Prénom (ou surnom) de votre enfant :",
+    ph_first_name: "Prénom",
+    onb_back: "← Retour",
+    onb_join_title: "Rejoindre 🔑",
+    onb_join_sub: "Saisissez le code famille (ex. PR-K4TZ) :",
+    onb_join: "Rejoindre",
+    onb_children_title: "Qui est-ce ? 👧👦",
+    onb_children_sub: "Choisissez l'enfant ou ajoutez-en un :",
+    ph_new_child: "Ajouter un enfant (prénom)",
+    onb_add: "➕ Ajouter",
+    onb_done_title: "Famille créée !",
+    onb_done_sub: "Votre code famille :",
+    onb_done_share: "Partagez-le avec l'autre parent : il saisira ce code sur son téléphone pour voir les mêmes données.",
+    onb_open: "Ouvrir l'app ⭐",
+    onb_need_name: "Indique un prénom 🙂",
+    onb_creating: "Création…",
+    onb_error_conn: "Oups, réessaie (connexion ?)",
+    onb_bad_code: "Code invalide",
+    onb_searching: "Recherche…",
+    onb_code_unknown: "Code introuvable — vérifie avec l'autre parent",
+    onb_error: "Oups, réessaie",
+    av_pick: "Choisis ton avatar", av_custom: "Personnalise-le",
+    chip_switch: " — changer d'enfant",
+    sheet_title: "Espace parents 👋",
+    sheet_hint: "Modifiez les routines et la roue, puis touchez Enregistrer.",
+    fam_code: "Code famille à partager avec l'autre parent :",
+    fam_child: "👧 Changer / ajouter un enfant",
+    fam_leave: "Quitter la famille sur cet appareil",
+    child_name_label: "Prénom de l'enfant",
+    days_label: "Les journées 📅",
+    days_q: "Quels jours vont à l'école ?",
+    days_hint: "Touchez un jour pour changer.",
+    vac_title: "Mode vacances",
+    vac_sub: "Tous les jours deviennent des jours de maison.",
+    vac_until: "Jusqu'au", vac_optional: "facultatif",
+    prof_school: "Jour d'école", prof_home: "Jour de maison",
+    sec_morning: "Routine du matin ☀️", sec_afternoon: "Routine de l'après-midi ⛅", sec_evening: "Routine du soir 🌙",
+    sec_reminders: "Les rappels 🔔",
+    add_step: "+ Ajouter une étape",
+    rem_calendar: "📅 Ajouter les rappels à mon calendrier",
+    rem_notif: "🔔 Activer les notifications de l'app",
+    rem_note: "Le calendrier est le rappel le plus fiable : il sonne même quand l'app est fermée, sur iPhone comme sur Android. "+
+              "Les notifications de l'app ne fonctionnent que si elle est ouverte ou récemment utilisée. "+
+              "Une pastille orange apparaît sur l'onglet quand l'heure est passée et la routine pas terminée. "+
+              "Les rappels du calendrier suivent votre semaine type, pas le mode vacances.",
+    rem_morning: "Routine du matin", rem_afternoon: "Routine de l'après-midi", rem_evening: "Routine du soir",
+    rem_generic: "Rappel", rem_toggle: "Activer",
+    notif_on: "✅ Notifications de l'app activées",
+    notif_denied: "🚫 Notifications refusées — à réactiver dans les réglages du téléphone",
+    notif_unsupported: "Ce navigateur ne gère pas les notifications. Utilisez plutôt le rappel par calendrier, il est plus fiable.",
+    notif_ready: "C'est prêt ! Vous serez prévenu aux heures choisies.",
+    notif_body: p => "C'est l'heure ! Ouvrez Petite Routine"+(p.name ? " avec "+p.name : "")+".",
+    ics_desc: "Ouvrez Petite Routine avec votre enfant.",
+    ics_none: "Activez au moins un rappel avant de l'ajouter au calendrier.",
+    ics_file: "petite-routine-rappels.ics",
+    sec_wheel: "La roue des activités 🎡", add_activity: "+ Ajouter une activité",
+    wheel_on: "✅ Sur la roue", wheel_off: "🚫 Retirée",
+    freq_1: "Rare", freq_2: "Normal", freq_3: "Souvent",
+    sec_rewards: "Les cadeaux de la tirelire 🐷", add_reward: "+ Ajouter un cadeau",
+    sec_history: "Derniers cadeaux offerts 🎁",
+    hist_empty: "Aucun cadeau offert pour l'instant.",
+    refund_title: "Annuler / rembourser",
+    new_reward: "Nouveau cadeau", new_activity: "Nouvelle activité", new_step: "Nouvelle étape",
+    sec_backup: "Sauvegarde de secours 💾",
+    backup_save: "⬇️ Enregistrer une sauvegarde",
+    backup_restore: "⬆️ Restaurer une sauvegarde",
+    backup_note: "La sauvegarde contient tout ce qui concerne cet enfant : ses routines, ses étoiles, "+
+                 "sa tirelire et son historique. Conservez-la ailleurs que sur ce téléphone — un mail "+
+                 "que vous vous envoyez suffit. C'est elle qui vous protège si vous perdez à la fois "+
+                 "l'appareil et le code famille. "+
+                 "Restaurer remplace définitivement les données actuelles de cet enfant.",
+    backup_default_name: "enfant",
+    backup_saved: p => "✅ Sauvegarde enregistrée : "+p.file+" — "+pluriel(p.n,"jour","jours")+" d'historique.",
+    backup_unreadable: "❌ Le fichier n'a pas pu être lu.",
+    backup_invalid: "❌ Ce fichier n'est pas une sauvegarde Petite Routine.",
+    backup_unknown_date: "date inconnue", backup_no_name: "sans prénom", backup_active_child: "l'enfant actif",
+    backup_confirm: p => "Restaurer la sauvegarde de « "+p.who+" » du "+p.when+" ?\n\n"+
+                         "Elle sera appliquée à "+p.target+".\n"+
+                         "Toutes ses données actuelles — routines, étoiles, tirelire, historique — "+
+                         "seront remplacées. C'est définitif.",
+    backup_cancelled: "Restauration annulée. Rien n'a été modifié.",
+    backup_restored: p => "✅ Restauration effectuée — "+pluriel(p.n,"jour","jours")+" d'historique.",
+    btn_reset: "Remettre à zéro aujourd'hui", btn_save: "Enregistrer",
+    steps_changed: "Les étapes d'aujourd'hui ont changé.",
+    storage_note: "⚠️ Mode aperçu : les données ne sont pas sauvegardées ici. Une fois l'app installée sur votre téléphone, tout sera mémorisé automatiquement.",
+    sync_offline: "⚠︎ hors ligne", sync_ok: "✓ synchro"
+  },
+  en: {
+    locale: "en-US",
+    days_long:  ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+    days_short: ["S","M","T","W","T","F","S"],
+    months: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+    date_long:  d => T.en.days_long[d.getDay()]+", "+T.en.months[d.getMonth()]+" "+d.getDate(),
+    past_label: d => "You're looking at "+T.en.days_long[d.getDay()]+", "+T.en.months[d.getMonth()]+" "+d.getDate(),
+    today_btn: "Today ➜",
+    tab_morning: "Morning", tab_afternoon: "Afternoon", tab_evening: "Evening", tab_wheel: "Wheel", tab_bank: "Piggy",
+    greet_morning: p => "Good morning"+nomEn(p)+"!",
+    greet_afternoon: p => "Hi there"+nomEn(p)+"!",
+    greet_evening: p => "Good evening"+nomEn(p)+"!",
+    sub_morning: "Time for the morning routine",
+    sub_afternoon: "Time for the afternoon routine",
+    sub_evening: "Time for the evening routine",
+    done_morning: "Morning routine done, you earned your star! ⭐",
+    done_afternoon: "Afternoon routine done, well done! 🌈",
+    done_evening: "Evening routine done, good night little star! 🌟",
+    wheel_title: p => "Let's play"+nomEn(p)+"! 🎉",
+    wheel_sub: "Spin the wheel to pick an activity",
+    bank_title: p => (p.name ? p.name+"'s piggy bank" : "My piggy bank")+" 🐷",
+    bank_sub: "Earn stars and save up for your rewards!",
+    day_vacation: "🏖️ Vacation",
+    hub_go: "GO!",
+    spin_btn: "Spin the wheel! 🎡",
+    edit_wheel: "✏️ Edit activities", ew_hint: "parents",
+    wheel_empty: "Turn on some activities in the parent area 👇",
+    wheel_result: p => "The wheel has chosen"+nomEn(p)+"! Have fun 🎉",
+    lets_go: "Let's go! 🚀",
+    piggy_caption: "in my piggy bank",
+    rewards_title: "My rewards 🎁",
+    edit_rewards: "✏️ Edit rewards",
+    reward_can: "I can get it! 🎉",
+    reward_need: p => p.n+" more ⭐",
+    buy_price: p => "Price: "+p.cost+" ⭐ — you'll have "+p.left+" left",
+    buy_missing: p => "You need "+p.n+" more ⭐ — keep up your routines!",
+    buy_hold: "👨‍👩‍👧 Parent: press and hold to give",
+    buy_cancel: "Not now",
+    bravo: p => "Well done"+nomEn(p)+"!",
+    buy_done: p => "You saved "+p.cost+" ⭐ for: "+p.label+" 🎉",
+    buy_thanks: "Thank you! 💛",
+    yay: "Yay! 🎉",
+    week_title: "My stars this week", week_tip: "— tap a day",
+    parent_btn: "⚙️ Parents", parent_title: "Parent area",
+    onb_tagline: "Your children's routines, activity wheel and piggy bank — synced between both parents' phones.",
+    onb_create_btn: "🏠 Create our family",
+    onb_join_btn: "🔑 I have a family code",
+    onb_skip: "Try without syncing",
+    onb_other_lang: "Version française",
+    onb_create_title: "Create your family 🏠",
+    onb_create_sub: "Your child's first name (or nickname):",
+    ph_first_name: "First name",
+    onb_back: "← Back",
+    onb_join_title: "Join 🔑",
+    onb_join_sub: "Enter the family code (e.g. PR-K4TZ):",
+    onb_join: "Join",
+    onb_children_title: "Who's this? 👧👦",
+    onb_children_sub: "Pick a child or add one:",
+    ph_new_child: "Add a child (first name)",
+    onb_add: "➕ Add",
+    onb_done_title: "Family created!",
+    onb_done_sub: "Your family code:",
+    onb_done_share: "Share it with the other parent: they enter this code on their phone to see the same data.",
+    onb_open: "Open the app ⭐",
+    onb_need_name: "Please enter a first name 🙂",
+    onb_creating: "Creating…",
+    onb_error_conn: "Oops, try again (connection?)",
+    onb_bad_code: "Invalid code",
+    onb_searching: "Looking it up…",
+    onb_code_unknown: "Code not found — check with the other parent",
+    onb_error: "Oops, try again",
+    av_pick: "Pick your avatar", av_custom: "Make it yours",
+    chip_switch: " — switch child",
+    sheet_title: "Parent area 👋",
+    sheet_hint: "Edit the routines and the wheel, then tap Save.",
+    fam_code: "Family code to share with the other parent:",
+    fam_child: "👧 Switch / add a child",
+    fam_leave: "Leave the family on this device",
+    child_name_label: "Child's first name",
+    days_label: "The days 📅",
+    days_q: "Which days are school days?",
+    days_hint: "Tap a day to change it.",
+    vac_title: "Vacation mode",
+    vac_sub: "Every day becomes a home day.",
+    vac_until: "Until", vac_optional: "optional",
+    prof_school: "School day", prof_home: "Home day",
+    sec_morning: "Morning routine ☀️", sec_afternoon: "Afternoon routine ⛅", sec_evening: "Evening routine 🌙",
+    sec_reminders: "Reminders 🔔",
+    add_step: "+ Add a step",
+    rem_calendar: "📅 Add the reminders to my calendar",
+    rem_notif: "🔔 Turn on app notifications",
+    rem_note: "The calendar is the most reliable reminder: it rings even when the app is closed, on iPhone and Android alike. "+
+              "App notifications only work while the app is open or was used recently. "+
+              "An orange dot appears on the tab when the time has passed and the routine isn't finished. "+
+              "Calendar reminders follow your usual week, not vacation mode.",
+    rem_morning: "Morning routine", rem_afternoon: "Afternoon routine", rem_evening: "Evening routine",
+    rem_generic: "Reminder", rem_toggle: "Turn on",
+    notif_on: "✅ App notifications are on",
+    notif_denied: "🚫 Notifications blocked — turn them back on in your phone's settings",
+    notif_unsupported: "This browser doesn't support notifications. Use the calendar reminder instead, it's more reliable.",
+    notif_ready: "All set! You'll be notified at the times you chose.",
+    notif_body: p => "It's time! Open Petite Routine"+(p.name ? " with "+p.name : "")+".",
+    ics_desc: "Open Petite Routine with your child.",
+    ics_none: "Turn on at least one reminder before adding it to your calendar.",
+    ics_file: "petite-routine-reminders.ics",
+    sec_wheel: "Activity wheel 🎡", add_activity: "+ Add an activity",
+    wheel_on: "✅ On the wheel", wheel_off: "🚫 Removed",
+    freq_1: "Rare", freq_2: "Normal", freq_3: "Often",
+    sec_rewards: "Piggy bank rewards 🐷", add_reward: "+ Add a reward",
+    sec_history: "Latest rewards given 🎁",
+    hist_empty: "No rewards given yet.",
+    refund_title: "Undo / refund",
+    new_reward: "New reward", new_activity: "New activity", new_step: "New step",
+    sec_backup: "Backup 💾",
+    backup_save: "⬇️ Save a backup",
+    backup_restore: "⬆️ Restore a backup",
+    backup_note: "The backup contains everything about this child: routines, stars, "+
+                 "piggy bank and history. Keep it somewhere other than this phone — an email "+
+                 "to yourself is enough. It's what protects you if you lose both "+
+                 "the device and the family code. "+
+                 "Restoring permanently replaces this child's current data.",
+    backup_default_name: "child",
+    backup_saved: p => "✅ Backup saved: "+p.file+" — "+pluriel(p.n,"day","days")+" of history.",
+    backup_unreadable: "❌ The file couldn't be read.",
+    backup_invalid: "❌ This file isn't a Petite Routine backup.",
+    backup_unknown_date: "unknown date", backup_no_name: "no name", backup_active_child: "the current child",
+    backup_confirm: p => "Restore the backup of \""+p.who+"\" from "+p.when+"?\n\n"+
+                         "It will be applied to "+p.target+".\n"+
+                         "All their current data — routines, stars, piggy bank, history — "+
+                         "will be replaced. This can't be undone.",
+    backup_cancelled: "Restore cancelled. Nothing was changed.",
+    backup_restored: p => "✅ Restore complete — "+pluriel(p.n,"day","days")+" of history.",
+    btn_reset: "Reset today", btn_save: "Save",
+    steps_changed: "Today's steps have changed.",
+    storage_note: "⚠️ Preview mode: data isn't saved here. Once the app is installed on your phone, everything will be remembered automatically.",
+    sync_offline: "⚠︎ offline", sync_ok: "✓ synced"
+  }
+};
+
+/* Une clé absente en anglais retombe sur le français, puis sur la clé elle-même :
+   jamais de « undefined » à l'écran. */
+function t(cle, p){
+  const v = (T[LANG] && T[LANG][cle] !== undefined) ? T[LANG][cle] : T.fr[cle];
+  if(v === undefined) return cle;
+  return typeof v === "function" ? v(p || {}) : v;
+}
+
+/* Contenu proposé à une nouvelle famille. Mêmes positions dans les deux langues :
+   c'est ce qui permet de traduire les étapes restées « par défaut » quand on
+   change de langue (voir traduireContenuParDefaut). */
+const CONTENU_DEFAUT = {
+  fr: {
+    morning:   [["🚽","Je vais au pot"],["👕","Je m'habille"],["🥣","Petit-déjeuner"],["🦷","Je brosse mes dents"],["👟","Mes chaussures"]],
+    afternoon: [["🍽️","Le déjeuner"],["😴","La sieste"],["🧃","Le goûter"]],
+    evening:   [["🧸","Je range mes jouets"],["🛁","Le bain"],["🦷","Je brosse mes dents"],["📖","L'histoire"],["😴","Au dodo"]],
+    wheelItems:[["📺","Un épisode de T'choupi",1],["🎨","Dessiner ou colorier",2],["🍪","Faire à manger",2],["🌳","Une activité dehors",2]],
+    rewards:   [["🍬","Une petite surprise",3],["🍦","Une glace",5],["🎠","Un tour de manège",8],["🧸","Un petit jouet",15],["🎁","Un gros cadeau",30]]
+  },
+  en: {
+    morning:   [["🚽","Potty time"],["👕","Get dressed"],["🥣","Breakfast"],["🦷","Brush my teeth"],["👟","Put on my shoes"]],
+    afternoon: [["🍽️","Lunch"],["😴","Nap time"],["🧃","Snack time"]],
+    evening:   [["🧸","Tidy up my toys"],["🛁","Bath time"],["🦷","Brush my teeth"],["📖","Story time"],["😴","Bedtime"]],
+    wheelItems:[["📺","A cartoon episode",1],["🎨","Draw or color",2],["🍪","Cook together",2],["🌳","Play outside",2]],
+    rewards:   [["🍬","A little surprise",3],["🍦","An ice cream",5],["🎠","A merry-go-round ride",8],["🧸","A small toy",15],["🎁","A big present",30]]
+  }
+};
+
 /* ── Données par défaut ── */
 /* ── V6.2 — Profils de journée ──
    Ces constantes doivent rester AVANT le premier appel à loadConfig() :
    déclarées plus bas, elles seraient en zone morte temporelle au chargement. */
 const PROFILS = ["school","home"];
-const PROFIL_META = { school:{ic:"🎒", lb:"Jour d'école"}, home:{ic:"🏠", lb:"Jour de maison"} };
-/* Index 0 = dimanche, comme Date.getDay() */
-const DEFAULT_WEEKMAP = ["home","school","school","home","school","school","home"];
+const PROFIL_META = { school:{ic:"🎒"}, home:{ic:"🏠"} };
+function profilLb(p){ return t(p === "home" ? "prof_home" : "prof_school"); }
+/* Index 0 = dimanche, comme Date.getDay().
+   V6.3 — en France, pas d'école le mercredi ; dans les pays anglophones, du lundi
+   au vendredi. Ne concerne que les nouvelles familles : changer de langue ne
+   touche jamais à une semaine type existante. */
+const WEEKMAP_PAR_LANGUE = {
+  fr: ["home","school","school","home","school","school","home"],
+  en: ["home","school","school","school","school","school","home"]
+};
+function defaultWeekMap(){ return cloneProfond(WEEKMAP_PAR_LANGUE[LANG] || WEEKMAP_PAR_LANGUE.fr); }
 /* Étapes détectées comme scolaires, retirées du profil maison à la migration */
 const MOTS_SCOLAIRES = /(école|ecole|cartable|\bsac\b|crèche|creche|maternelle|cantine|maîtresse|maitresse|classe)/i;
-const DEFAULT_ROUTINES = {
-  morning: [
-    {emoji:"🚽", label:"Je vais au pot"},
-    {emoji:"👕", label:"Je m'habille"},
-    {emoji:"🥣", label:"Petit-déjeuner"},
-    {emoji:"🦷", label:"Je brosse mes dents"},
-    {emoji:"👟", label:"Mes chaussures"}
-  ],
-  afternoon: [
-    {emoji:"🍽️", label:"Le déjeuner"},
-    {emoji:"😴", label:"La sieste"},
-    {emoji:"🧃", label:"Le goûter"}
-  ],
-  evening: [
-    {emoji:"🧸", label:"Je range mes jouets"},
-    {emoji:"🛁", label:"Le bain"},
-    {emoji:"🦷", label:"Je brosse mes dents"},
-    {emoji:"📖", label:"L'histoire"},
-    {emoji:"😴", label:"Au dodo"}
-  ]
-};
+/* V6.3 — fonctions et non plus constantes : le contenu dépend de la langue */
+function defaultRoutine(r){
+  return CONTENU_DEFAUT[LANG][r].map(x => ({emoji:x[0], label:x[1]}));
+}
 const DEFAULT_REMINDERS = {
   school: [ {routine:"morning", time:"07:30", enabled:true},
             {routine:"afternoon", time:"12:00", enabled:true},
@@ -667,42 +992,48 @@ const DEFAULT_REMINDERS = {
 };
 function cloneProfond(x){ return JSON.parse(JSON.stringify(x)); }
 
-const DEFAULT_CONFIG = {
-  name: "",
-  avatar: "🧒",
-  /* Le profil maison démarre identique au profil école : le parent découvre la
-     fonction sans rien perdre, puis retire ce qui ne s'applique pas. */
-  profiles: {
-    school: { label:"Jour d'école",
-      morning: cloneProfond(DEFAULT_ROUTINES.morning), afternoon: cloneProfond(DEFAULT_ROUTINES.afternoon),
-      evening: cloneProfond(DEFAULT_ROUTINES.evening), reminders: cloneProfond(DEFAULT_REMINDERS.school) },
-    home:   { label:"Jour de maison",
-      morning: cloneProfond(DEFAULT_ROUTINES.morning), afternoon: cloneProfond(DEFAULT_ROUTINES.afternoon),
-      evening: cloneProfond(DEFAULT_ROUTINES.evening), reminders: cloneProfond(DEFAULT_REMINDERS.home) }
-  },
-  weekMap: cloneProfond(DEFAULT_WEEKMAP),
-  vacation: { on:false, until:null },
-  /* La roue et les cadeaux restent communs : ils ne dépendent pas du type de journée */
-  wheelItems: [
-    {emoji:"📺", label:"Un épisode de T'choupi", weight:1, enabled:true},
-    {emoji:"🎨", label:"Dessiner ou colorier", weight:2, enabled:true},
-    {emoji:"🍪", label:"Faire à manger", weight:2, enabled:true},
-    {emoji:"🌳", label:"Une activité dehors", weight:2, enabled:true}
-  ],
-  rewards: [
-    {emoji:"🍬", label:"Une petite surprise", cost:3},
-    {emoji:"🍦", label:"Une glace", cost:5},
-    {emoji:"🎠", label:"Un tour de manège", cost:8},
-    {emoji:"🧸", label:"Un petit jouet", cost:15},
-    {emoji:"🎁", label:"Un gros cadeau", cost:30}
-  ]
-};
+function defaultWheelItems(){ return CONTENU_DEFAUT[LANG].wheelItems.map(x => ({emoji:x[0], label:x[1], weight:x[2], enabled:true})); }
+function defaultRewards(){ return CONTENU_DEFAUT[LANG].rewards.map(x => ({emoji:x[0], label:x[1], cost:x[2]})); }
+function defaultConfig(){
+  const profil = nom => ({ label: profilLb(nom),
+    morning: defaultRoutine("morning"), afternoon: defaultRoutine("afternoon"),
+    evening: defaultRoutine("evening"), reminders: cloneProfond(DEFAULT_REMINDERS[nom]) });
+  return {
+    name: "",
+    avatar: "🧒",
+    /* Le profil maison démarre identique au profil école : le parent découvre la
+       fonction sans rien perdre, puis retire ce qui ne s'applique pas. */
+    profiles: { school: profil("school"), home: profil("home") },
+    weekMap: defaultWeekMap(),
+    vacation: { on:false, until:null },
+    /* La roue et les cadeaux restent communs : ils ne dépendent pas du type de journée */
+    wheelItems: defaultWheelItems(),
+    rewards: defaultRewards()
+  };
+}
+
+/* Changement de langue : les étapes, activités et cadeaux que le parent n'a pas
+   modifiés suivent la nouvelle langue ; tout ce qu'il a écrit lui-même reste tel quel.
+   Correspondance par position dans CONTENU_DEFAUT, puis par libellé exact. */
+function traduireContenuParDefaut(c, de, vers){
+  if(!c || de === vers || !CONTENU_DEFAUT[de] || !CONTENU_DEFAUT[vers]) return false;
+  const table = {};
+  Object.keys(CONTENU_DEFAUT[de]).forEach(liste=>{
+    CONTENU_DEFAUT[de][liste].forEach((x,i)=>{ table[x[1]] = CONTENU_DEFAUT[vers][liste][i][1]; });
+  });
+  ["new_step","new_activity","new_reward"].forEach(k=>{ table[T[de][k]] = T[vers][k]; });
+  let change = false;
+  const traduire = l => (l || []).forEach(x=>{
+    if(x && Object.prototype.hasOwnProperty.call(table, x.label)){ x.label = table[x.label]; change = true; }
+  });
+  PROFILS.forEach(p=>{ if(c.profiles && c.profiles[p]) ROUTINES.forEach(r=>traduire(c.profiles[p][r])); });
+  traduire(c.wheelItems);
+  traduire(c.rewards);
+  return change;
+}
 const ROUTINES = ["morning","afternoon","evening"];
-const ROUTINE_META = {
-  morning:{star:"⭐", greet:"Bonjour", sub:"C'est l'heure de la routine du matin", doneMsg:"Routine du matin terminée, tu as gagné ton étoile ! ⭐"},
-  afternoon:{star:"🌈", greet:"Coucou", sub:"C'est l'heure de la routine de l'après-midi", doneMsg:"Routine de l'après-midi terminée, bravo ! 🌈"},
-  evening:{star:"🌟", greet:"Bonsoir", sub:"C'est l'heure de la routine du soir", doneMsg:"Routine du soir terminée, bonne nuit petite étoile ! 🌟"}
-};
+/* Les textes (salutation, sous-titre, message de fin) sont dans T : greet_*, sub_*, done_* */
+const ROUTINE_META = { morning:{star:"⭐"}, afternoon:{star:"🌈"}, evening:{star:"🌟"} };
 const SEG_COLORS = ["#ffd66b","#8ed0ff","#ffb3c9","#a8e6b8","#d9c2ff","#ffd1a1","#b3ecec","#ffc2b3"];
 
 let config = loadConfig();
@@ -726,22 +1057,22 @@ function defaultView(){
    Une seule fonction désormais, appelée des deux côtés. */
 function normaliserProfil(pr, nom){
   if(!pr || typeof pr !== "object") pr = {};
-  ROUTINES.forEach(r=>{ if(!Array.isArray(pr[r])) pr[r] = cloneProfond(DEFAULT_ROUTINES[r]); });
+  ROUTINES.forEach(r=>{ if(!Array.isArray(pr[r])) pr[r] = defaultRoutine(r); });
   if(!Array.isArray(pr.reminders) || pr.reminders.length !== 3) pr.reminders = cloneProfond(DEFAULT_REMINDERS[nom]);
-  if(typeof pr.label !== "string") pr.label = PROFIL_META[nom].lb;
+  if(typeof pr.label !== "string") pr.label = profilLb(nom);
   return pr;
 }
 function migrateConfig(c){
-  if(!c || typeof c !== "object") return cloneProfond(DEFAULT_CONFIG);
+  if(!c || typeof c !== "object") return defaultConfig();
   /* V6.2 — une configuration d'avant les profils a ses routines à la racine.
      Elles deviennent le profil école, à l'identique : aucune famille ne perd rien.
      Le profil maison en est une copie, moins les étapes manifestement scolaires. */
   if(!c.profiles || typeof c.profiles !== "object"){
-    const ecole = { label: PROFIL_META.school.lb };
-    ROUTINES.forEach(r=>{ ecole[r] = Array.isArray(c[r]) ? c[r] : cloneProfond(DEFAULT_ROUTINES[r]); });
+    const ecole = { label: profilLb("school") };
+    ROUTINES.forEach(r=>{ ecole[r] = Array.isArray(c[r]) ? c[r] : defaultRoutine(r); });
     ecole.reminders = (Array.isArray(c.reminders) && c.reminders.length === 3)
       ? c.reminders : cloneProfond(DEFAULT_REMINDERS.school);
-    const maison = { label: PROFIL_META.home.lb };
+    const maison = { label: profilLb("home") };
     ROUTINES.forEach(r=>{
       const sansEcole = ecole[r].filter(x => !MOTS_SCOLAIRES.test((x && x.label) || ""));
       maison[r] = cloneProfond(sansEcole.length ? sansEcole : ecole[r]);   /* jamais d'écran vide */
@@ -758,8 +1089,9 @@ function migrateConfig(c){
      en V6.1 les a réécrites entre-temps par la synchronisation. */
   ["morning","afternoon","evening","reminders"].forEach(k=>{ delete c[k]; });
   PROFILS.forEach(p=>{ c.profiles[p] = normaliserProfil(c.profiles[p], p); });
-  if(!Array.isArray(c.weekMap) || c.weekMap.length !== 7) c.weekMap = cloneProfond(DEFAULT_WEEKMAP);
-  c.weekMap = c.weekMap.map((p,i)=> PROFILS.indexOf(p) !== -1 ? p : DEFAULT_WEEKMAP[i]);
+  if(!Array.isArray(c.weekMap) || c.weekMap.length !== 7) c.weekMap = defaultWeekMap();
+  const semaineDefaut = defaultWeekMap();
+  c.weekMap = c.weekMap.map((p,i)=> PROFILS.indexOf(p) !== -1 ? p : semaineDefaut[i]);
   if(!c.vacation || typeof c.vacation !== "object") c.vacation = { on:false, until:null };
   c.vacation.on = !!c.vacation.on;
   if(!/^\d{4}-\d{2}-\d{2}$/.test(c.vacation.until || "")) c.vacation.until = null;
@@ -767,12 +1099,12 @@ function migrateConfig(c){
   if(c.vacation.on && c.vacation.until && c.vacation.until < todayKey()){
     c.vacation.on = false; c.vacation.until = null;
   }
-  if(!Array.isArray(c.wheelItems)) c.wheelItems = cloneProfond(DEFAULT_CONFIG.wheelItems);
+  if(!Array.isArray(c.wheelItems)) c.wheelItems = defaultWheelItems();
   c.wheelItems.forEach(x=>{
     if(typeof x.weight !== "number") x.weight = 2;
     if(typeof x.enabled !== "boolean") x.enabled = true;
   });
-  if(!Array.isArray(c.rewards)) c.rewards = cloneProfond(DEFAULT_CONFIG.rewards);
+  if(!Array.isArray(c.rewards)) c.rewards = defaultRewards();
   if(typeof c.name !== "string") c.name = "";
   if(typeof c.avatar !== "string" || !c.avatar) c.avatar = "🧒";
   return c;
@@ -797,9 +1129,9 @@ function routinesAffichees(){ return routinesDe(dayState); }
 function todayReminders(){ return config.profiles[profileFor(todayKey())].reminders; }
 function loadConfig(){
   const raw = sGet(ck("pr_config"));
-  if(!raw) return cloneProfond(DEFAULT_CONFIG);
+  if(!raw) return defaultConfig();
   let brut;
-  try{ brut = JSON.parse(raw); }catch(e){ return cloneProfond(DEFAULT_CONFIG); }
+  try{ brut = JSON.parse(raw); }catch(e){ return defaultConfig(); }
   const avaitProfils = !!(brut && brut.profiles);
   /* V6.2 — pas de try/catch autour de la migration. L'ancien filet avalait toute
      erreur et remplaçait EN SILENCE la configuration par les valeurs par défaut ;
@@ -925,13 +1257,13 @@ function renderAvatarPicker(id){
   const a = avatarActuel(), p = avatarParts(a);
   const etape2 = avatarChoisi();
   w.innerHTML =
-    '<div class="av-label">Choisis ton avatar</div>' +
+    '<div class="av-label">'+esc(t("av_pick"))+'</div>' +
     '<div class="av-pick">' +
       AV_CHOIX.map(b => '<button class="av-btn gros'+(b===p.base?" sel":"")+'" '+
         'onclick="choisirBase(&quot;'+b+'&quot;)">'+b+'</button>').join("") +
     '</div>' +
     (etape2 ?
-      '<div class="av-label">Personnalise-le</div>' +
+      '<div class="av-label">'+esc(t("av_custom"))+'</div>' +
       '<div class="av-pick">' +
         AV_TEINTES.map(t => '<button class="av-btn'+(t===p.teinte?" sel":"")+'" '+
           'onclick="choisirTeinte(&quot;'+t+'&quot;)">'+p.base+t+'</button>').join("") +
@@ -941,21 +1273,15 @@ function renderAvatarPicker(id){
 }
 
 /* ───────────── RENDU ───────────── */
-const DAYS_FR = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
-const DAYS_SHORT = ["D","L","M","M","J","V","S"];
-const MONTHS_FR = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
-
 function render(){
   const d = dateFromOffset(viewDateOffset);
-  document.getElementById("dayLabel").textContent =
-    (isToday() ? "" : "◀ ") + DAYS_FR[d.getDay()]+" "+d.getDate()+" "+MONTHS_FR[d.getMonth()];
+  document.getElementById("dayLabel").textContent = (isToday() ? "" : "◀ ") + t("date_long", d);
   const pb = document.getElementById("pastBanner");
   pb.classList.toggle("show", !isToday());
   if(!isToday()){
-    document.getElementById("pastLabel").textContent =
-      "Tu regardes "+DAYS_FR[d.getDay()].toLowerCase()+" "+d.getDate()+" "+MONTHS_FR[d.getMonth()];
+    document.getElementById("pastLabel").textContent = t("past_label", d);
   }
-  const name = config.name ? " "+config.name : "";
+  const name = {name: config.name};
 
   document.body.className = view;
   ["morning","afternoon","evening","wheel","bank"].forEach(v=>{
@@ -971,18 +1297,17 @@ function render(){
   document.getElementById("bankView").classList.toggle("show", isBank);
 
   if(isWheel){
-    document.getElementById("greeting").textContent = "On joue"+name+" ? 🎉";
-    document.getElementById("subtitle").textContent = "Tourne la roue pour choisir une activité";
+    document.getElementById("greeting").textContent = t("wheel_title", name);
+    document.getElementById("subtitle").textContent = t("wheel_sub");
     renderWheel();
   } else if(isBank){
-    document.getElementById("greeting").textContent = "Ma tirelire"+name+" 🐷";
-    document.getElementById("subtitle").textContent = "Gagne des étoiles et économise pour tes cadeaux !";
+    document.getElementById("greeting").textContent = t("bank_title", name);
+    document.getElementById("subtitle").textContent = t("bank_sub");
     renderBank();
   } else {
-    const meta = ROUTINE_META[view];
-    document.getElementById("greeting").textContent = meta.greet+name+" !";
-    document.getElementById("subtitle").textContent = meta.sub;
-    document.getElementById("progressStar").textContent = meta.star;
+    document.getElementById("greeting").textContent = t("greet_"+view, name);
+    document.getElementById("subtitle").textContent = t("sub_"+view);
+    document.getElementById("progressStar").textContent = ROUTINE_META[view].star;
     renderTasks();
     renderProgress();
   }
@@ -992,8 +1317,8 @@ function render(){
   if(dt){
     if(isRoutine){
       const vac = isToday() && vacationActive(todayKey());
-      const m = PROFIL_META[dayState._p] || PROFIL_META.school;
-      dt.textContent = (config.name ? config.name+" · " : "") + (vac ? "🏖️ Vacances" : m.ic+" "+m.lb);
+      const p = PROFIL_META[dayState._p] ? dayState._p : "school";
+      dt.textContent = (config.name ? config.name+" · " : "") + (vac ? t("day_vacation") : PROFIL_META[p].ic+" "+profilLb(p));
       dt.style.display = "";
     } else dt.style.display = "none";
   }
@@ -1063,7 +1388,7 @@ function renderWeek(){
     if(st.morning) icons += "⭐";
     if(st.afternoon) icons += "🌈";
     if(st.evening) icons += "🌟";
-    cell.innerHTML = '<span class="n">'+DAYS_SHORT[d.getDay()]+'</span><span class="s">'+icons+'</span>';
+    cell.innerHTML = '<span class="n">'+t("days_short")[d.getDay()]+'</span><span class="s">'+icons+'</span>';
     cell.onclick = ()=>selectDay(-i);
     row.appendChild(cell);
   }
@@ -1086,7 +1411,7 @@ function renderWheel(){
   wheelSegments = [];
   if(items.length===0){
     wheel.style.background="#eee";
-    wheel.innerHTML='<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:Nunito,sans-serif;font-weight:700;font-size:13px;color:#999;text-align:center;width:70%">Active des activités dans l\'espace parents 👇</span>';
+    wheel.innerHTML='<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:Nunito,sans-serif;font-weight:700;font-size:13px;color:#999;text-align:center;width:70%">'+esc(t("wheel_empty"))+'</span>';
     return;
   }
   const totalWeight = items.reduce((s,t)=>s+(t.weight||2), 0);
@@ -1167,8 +1492,7 @@ function showModal(emoji, title, text, btn){
 }
 
 function showWheelResult(item){
-  const name = config.name ? " "+config.name : "";
-  showModal(item.emoji, item.label, "La roue a choisi"+name+" ! Amuse-toi bien 🎉", "C'est parti ! 🚀");
+  showModal(item.emoji, item.label, t("wheel_result", {name: config.name}), t("lets_go"));
 }
 
 /* ── Tirelire : rendu + achat ── */
@@ -1188,7 +1512,7 @@ function renderBank(){
       '<span class="r-body">'+
         '<span class="r-label">'+esc(r.label)+'</span>'+
         '<span class="r-progress"><i style="width:'+pct+'%"></i></span>'+
-        '<span class="r-need">'+(can ? "Je peux l'avoir ! 🎉" : "Encore "+need+" ⭐")+'</span>'+
+        '<span class="r-need">'+esc(can ? t("reward_can") : t("reward_need", {n: need}))+'</span>'+
       '</span>'+
       '<span class="r-cost">'+r.cost+' ⭐</span>';
     card.onclick = ()=>openBuy(i);
@@ -1204,10 +1528,10 @@ function openBuy(i){
   document.getElementById("buyEmoji").textContent = r.emoji;
   document.getElementById("buyTitle").textContent = r.label;
   if(balance >= r.cost){
-    document.getElementById("buyText").textContent = "Prix : "+r.cost+" ⭐ — il t'en restera "+(balance-r.cost)+" après";
+    document.getElementById("buyText").textContent = t("buy_price", {cost: r.cost, left: balance-r.cost});
     document.getElementById("buyConfirm").style.display = "inline-block";
   } else {
-    document.getElementById("buyText").textContent = "Il te manque encore "+(r.cost-balance)+" ⭐ — continue tes routines !";
+    document.getElementById("buyText").textContent = t("buy_missing", {n: r.cost-balance});
     document.getElementById("buyConfirm").style.display = "none";
   }
   document.getElementById("buySheet").classList.add("show");
@@ -1227,8 +1551,7 @@ function confirmBuy(){
   bank.purchases.push({emoji:r.emoji, label:r.label, cost:r.cost, date:todayKey()});
   saveBank();
   closeBuy();
-  const name = config.name ? " "+config.name : "";
-  showModal(r.emoji, "Bravo"+name+" !", "Tu as économisé "+r.cost+" ⭐ pour : "+r.label+" 🎉", "Merci ! 💛");
+  showModal(r.emoji, t("bravo", {name: config.name}), t("buy_done", {cost: r.cost, label: r.label}), t("buy_thanks"));
   renderBank();
   const bal = document.querySelector(".piggy-balance");
   bal.classList.remove("spend"); void bal.offsetWidth; bal.classList.add("spend");
@@ -1282,8 +1605,7 @@ function checkComplete(){
 }
 
 function showCelebrate(){
-  const name = config.name ? " "+config.name : "";
-  showModal("🌟", "Bravo"+name+" !", ROUTINE_META[view].doneMsg, "Youpi ! 🎉");
+  showModal("🌟", t("bravo", {name: config.name}), t("done_"+view), t("yay"));
   renderWeek();
 }
 function closeCelebrate(){ document.getElementById("celebrate").classList.remove("show"); }
@@ -1358,17 +1680,16 @@ function renderSelecteurProfil(){
   const m = PROFIL_META[profilEdite];
   /* Rappel du profil dans chaque titre de section : même après avoir fait défiler,
      le parent sait lequel des deux il est en train de modifier. */
-  document.querySelectorAll(".prof-badge").forEach(e=>{ e.textContent = "· "+m.ic+" "+m.lb; });
+  document.querySelectorAll(".prof-badge").forEach(e=>{ e.textContent = "· "+m.ic+" "+profilLb(profilEdite); });
 }
 const ORDRE_SEMAINE = [1,2,3,4,5,6,0];                 /* affichage du lundi au dimanche */
-const JOURS_COURTS  = ["D","L","M","M","J","V","S"];   /* indexés comme getDay() */
 function renderJournees(){
   const w = document.getElementById("weekMapEdit");
   if(!w || !editState) return;
   w.innerHTML = ORDRE_SEMAINE.map(i=>{
     const p = editState.weekMap[i];
-    return '<button class="wm-day '+p+'" onclick="basculerJour('+i+')" aria-label="'+DAYS_FR[i]+' : '+PROFIL_META[p].lb+'">'+
-             '<span>'+JOURS_COURTS[i]+'</span><span class="wm-ic">'+PROFIL_META[p].ic+'</span></button>';
+    return '<button class="wm-day '+p+'" onclick="basculerJour('+i+')" aria-label="'+esc(t("days_long")[i]+" : "+profilLb(p))+'">'+
+             '<span>'+t("days_short")[i]+'</span><span class="wm-ic">'+PROFIL_META[p].ic+'</span></button>';
   }).join("");
   const vac = !!editState.vacation.on;
   w.classList.toggle("off", vac);               /* en vacances, la semaine type est ignorée */
@@ -1408,22 +1729,22 @@ function renderEdit(){
   /* La roue : ligne enrichie avec interrupteur + fréquence */
   const wrap = document.getElementById("edit-wheel");
   wrap.innerHTML = "";
-  editState.wheelItems.forEach((t,i)=>{
+  editState.wheelItems.forEach((it,i)=>{
     const row = document.createElement("div");
-    row.className = "edit-wheel-item"+(t.enabled===false ? " off" : "");
+    row.className = "edit-wheel-item"+(it.enabled===false ? " off" : "");
     row.innerHTML =
       '<div class="edit-row">'+
-        '<input class="em" value="'+esc(t.emoji)+'" maxlength="4" onchange="editState.wheelItems['+i+'].emoji=this.value">'+
-        '<input class="lb" value="'+esc(t.label)+'" onchange="editState.wheelItems['+i+'].label=this.value">'+
+        '<input class="em" value="'+esc(it.emoji)+'" maxlength="4" onchange="editState.wheelItems['+i+'].emoji=this.value">'+
+        '<input class="lb" value="'+esc(it.label)+'" onchange="editState.wheelItems['+i+'].label=this.value">'+
         '<button class="del" onclick="removeTask(\'wheelItems\','+i+')">🗑️</button>'+
       '</div>'+
       '<div class="wheel-opts">'+
-        '<button class="toggle'+(t.enabled!==false ? " on" : "")+'" onclick="toggleWheelItem('+i+')">'+
-          (t.enabled!==false ? "✅ Sur la roue" : "🚫 Retirée")+
+        '<button class="toggle'+(it.enabled!==false ? " on" : "")+'" onclick="toggleWheelItem('+i+')">'+
+          esc(t(it.enabled!==false ? "wheel_on" : "wheel_off"))+
         '</button>'+
         '<div class="freq">'+
-          [1,2,3].map(w=>'<button class="fbtn'+((t.weight||2)===w ? " sel" : "")+'" onclick="setWeight('+i+','+w+')">'+
-            (w===1 ? "Rare" : w===2 ? "Normal" : "Souvent")+'</button>').join("")+
+          [1,2,3].map(w=>'<button class="fbtn'+((it.weight||2)===w ? " sel" : "")+'" onclick="setWeight('+i+','+w+')">'+
+            esc(t("freq_"+w))+'</button>').join("")+
         '</div>'+
       '</div>';
     wrap.appendChild(row);
@@ -1454,7 +1775,7 @@ function renderRewardsEdit(){
   const hist = document.getElementById("purchase-history");
   const purchases = (bank.purchases||[]).slice(-5).reverse();
   if(purchases.length===0){
-    hist.innerHTML = '<div class="hist-empty">Aucun cadeau offert pour l\'instant.</div>';
+    hist.innerHTML = '<div class="hist-empty">'+esc(t("hist_empty"))+'</div>';
   } else {
     hist.innerHTML = "";
     purchases.forEach((p)=>{
@@ -1465,7 +1786,7 @@ function renderRewardsEdit(){
         '<span class="h-emoji">'+esc(p.emoji)+'</span>'+
         '<span class="h-label">'+esc(p.label)+'</span>'+
         '<span class="h-cost">−'+p.cost+' ⭐</span>'+
-        '<button class="h-refund" onclick="refundPurchase('+idx+')" title="Annuler / rembourser">↩️</button>';
+        '<button class="h-refund" onclick="refundPurchase('+idx+')" title="'+esc(t("refund_title"))+'">↩️</button>';
       hist.appendChild(row);
     });
   }
@@ -1479,9 +1800,9 @@ function refundPurchase(idx){
   renderRewardsEdit();
 }
 function addTask(r){
-  if(r==="rewards"){ editState.rewards.push({emoji:"🎁", label:"Nouveau cadeau", cost:10}); }
-  else if(r==="wheelItems"){ listeEditee(r).push({emoji:"🎲", label:"Nouvelle activité", weight:2, enabled:true}); }
-  else { listeEditee(r).push({emoji:"⭐", label:"Nouvelle étape"}); }
+  if(r==="rewards"){ editState.rewards.push({emoji:"🎁", label:t("new_reward"), cost:10}); }
+  else if(r==="wheelItems"){ listeEditee(r).push({emoji:"🎲", label:t("new_activity"), weight:2, enabled:true}); }
+  else { listeEditee(r).push({emoji:"⭐", label:t("new_step")}); }
   renderEdit();
 }
 function removeTask(r,i){ listeEditee(r).splice(i,1); renderEdit(); }
@@ -1500,11 +1821,10 @@ function moveTask(r,i,dir){
    2) Notification web    → app ouverte / récente
    3) Pastille orange     → signal visuel dans l'app
 ═══════════════════════════════════════════ */
-const REM_META = {
-  morning:  {ic:"☀️", lb:"Routine du matin"},
-  afternoon:{ic:"⛅", lb:"Routine de l'après-midi"},
-  evening:  {ic:"🌙", lb:"Routine du soir"}
-};
+const REM_IC = { morning:"☀️", afternoon:"⛅", evening:"🌙" };
+function remMeta(routine){
+  return REM_IC[routine] ? {ic: REM_IC[routine], lb: t("rem_"+routine)} : {ic:"⏰", lb: t("rem_generic")};
+}
 
 function renderReminderEditor(){
   const wrap = document.getElementById("edit-reminders");
@@ -1514,14 +1834,14 @@ function renderReminderEditor(){
   }
   wrap.innerHTML = "";
   editState.profiles[profilEdite].reminders.forEach((r,i)=>{
-    const meta = REM_META[r.routine] || {ic:"⏰", lb:"Rappel"};
+    const meta = remMeta(r.routine);
     const row = document.createElement("div");
     row.className = "rem-row"+(r.enabled ? "" : " off");
     row.innerHTML =
       '<span class="rem-ic">'+meta.ic+'</span>'+
-      '<span class="rem-lb">'+meta.lb+'</span>'+
+      '<span class="rem-lb">'+esc(meta.lb)+'</span>'+
       '<input type="time" value="'+r.time+'" onchange="setReminderTime('+i+', this.value)">'+
-      '<button class="rem-sw'+(r.enabled ? " on" : "")+'" onclick="toggleReminder('+i+')" aria-label="Activer"></button>';
+      '<button class="rem-sw'+(r.enabled ? " on" : "")+'" onclick="toggleReminder('+i+')" aria-label="'+esc(t("rem_toggle"))+'"></button>';
     wrap.appendChild(row);
   });
   refreshRemStatus();
@@ -1540,20 +1860,20 @@ function refreshRemStatus(){
   const el = document.getElementById("remStatus");
   if(!el) return;
   if(!("Notification" in window)){ el.textContent = ""; return; }
-  if(Notification.permission === "granted")      el.textContent = "✅ Notifications de l'app activées";
-  else if(Notification.permission === "denied")  el.textContent = "🚫 Notifications refusées — à réactiver dans les réglages du téléphone";
+  if(Notification.permission === "granted")      el.textContent = t("notif_on");
+  else if(Notification.permission === "denied")  el.textContent = t("notif_denied");
   else                                           el.textContent = "";
 }
 
 function askNotifPermission(){
   if(!("Notification" in window)){
-    alert("Ce navigateur ne gère pas les notifications. Utilisez plutôt le rappel par calendrier, il est plus fiable.");
+    alert(t("notif_unsupported"));
     return;
   }
   Notification.requestPermission().then(()=>{
     refreshRemStatus();
     if(Notification.permission === "granted"){
-      new Notification("Petite Routine ⭐", {body:"C'est prêt ! Vous serez prévenu aux heures choisies."});
+      new Notification("Petite Routine ⭐", {body: t("notif_ready")});
     }
   });
 }
@@ -1580,7 +1900,7 @@ function addRemindersToCalendar(){
     const jourDebut = keyFromDate(debut).replace(/-/g,"");
     const byday = jours.map(i => JOURS_ICS[i]).join(",");
     src.profiles[p].reminders.filter(r => r.enabled).forEach(r=>{
-      const meta = REM_META[r.routine] || {ic:"⏰", lb:"Routine"};
+      const meta = remMeta(r.routine);
       const title = meta.ic+" "+meta.lb+" · "+PROFIL_META[p].ic+(who ? " — "+who : "");
       const [h,m] = r.time.split(":").map(Number);
       const endM = m+15;
@@ -1598,19 +1918,19 @@ function addRemindersToCalendar(){
         "DTEND:"+jourDebut+"T"+endTime+"\r\n"+
         "RRULE:FREQ=WEEKLY;BYDAY="+byday+"\r\n"+
         "SUMMARY:"+title+"\r\n"+
-        "DESCRIPTION:Ouvrez Petite Routine avec votre enfant.\r\n"+
+        "DESCRIPTION:"+t("ics_desc")+"\r\n"+
         "BEGIN:VALARM\r\nTRIGGER:PT0M\r\nACTION:DISPLAY\r\nDESCRIPTION:"+title+"\r\nEND:VALARM\r\n"+
         "END:VEVENT\r\n";
       nb++;
     });
   });
-  if(!nb){ alert("Activez au moins un rappel avant de l'ajouter au calendrier."); return; }
+  if(!nb){ alert(t("ics_none")); return; }
   ics += "END:VCALENDAR\r\n";
   const blob = new Blob([ics], {type:"text/calendar;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "petite-routine-rappels.ics";
+  a.download = t("ics_file");
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -1660,10 +1980,9 @@ function checkReminders(){
     if(now < target || now > target + 10) return;
     if(routineDone(rem.routine)) return;
     if(sGet(ck(firedKey(rem.routine))) === "1") return;
-    const meta = REM_META[rem.routine] || {ic:"⏰", lb:"Routine"};
-    const who = config.name ? " avec "+config.name : "";
+    const meta = remMeta(rem.routine);
     try{
-      new Notification(meta.ic+" "+meta.lb, {body:"C'est l'heure ! Ouvrez Petite Routine"+who+".", tag:"pr-"+rem.routine});
+      new Notification(meta.ic+" "+meta.lb, {body: t("notif_body", {name: config.name}), tag:"pr-"+rem.routine});
       sSet(ck(firedKey(rem.routine)), "1");
     }catch(e){}
   });
@@ -1683,8 +2002,8 @@ function messageSauvegarde(txt){
 
 /* Nom de fichier lisible : "Léa" devient "lea" */
 function motCleFichier(s){
-  return String(s||"enfant").normalize("NFD").replace(/[̀-ͯ]/g,"")
-    .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"") || "enfant";
+  return String(s||t("backup_default_name")).normalize("NFD").replace(/[̀-ͯ]/g,"")
+    .toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"") || t("backup_default_name");
 }
 
 /* On rassemble TOUS les jours connus de cet enfant, pas seulement les 14
@@ -1739,7 +2058,7 @@ function exporterEnfant(){
   setTimeout(()=>URL.revokeObjectURL(url), 4000);
 
   const nbJours = Object.keys(paquet.days).length;
-  messageSauvegarde("✅ Sauvegarde enregistrée : "+nom+" — "+nbJours+" jour"+(nbJours>1?"s":"")+" d'historique.");
+  messageSauvegarde(t("backup_saved", {file: nom, n: nbJours}));
 }
 
 function importerEnfant(champFichier){
@@ -1748,7 +2067,7 @@ function importerEnfant(champFichier){
   const lecteur = new FileReader();
 
   lecteur.onerror = ()=>{
-    messageSauvegarde("❌ Le fichier n'a pas pu être lu.");
+    messageSauvegarde(t("backup_unreadable"));
     champFichier.value = "";
   };
 
@@ -1756,22 +2075,17 @@ function importerEnfant(champFichier){
     let p = null;
     try{ p = JSON.parse(lecteur.result); }catch(e){}
     if(!p || p._format !== "petite-routine" || !p.config){
-      messageSauvegarde("❌ Ce fichier n'est pas une sauvegarde Petite Routine.");
+      messageSauvegarde(t("backup_invalid"));
       champFichier.value = "";
       return;
     }
 
-    const quand = p._exporte_le ? new Date(p._exporte_le).toLocaleDateString("fr-FR") : "date inconnue";
-    const qui   = p.enfant || "sans prénom";
-    const cible = (syncInfo && syncInfo.childName) || config.name || "l'enfant actif";
-    if(!confirm(
-      "Restaurer la sauvegarde de « "+qui+" » du "+quand+" ?\n\n"+
-      "Elle sera appliquée à "+cible+".\n"+
-      "Toutes ses données actuelles — routines, étoiles, tirelire, historique — "+
-      "seront remplacées. C'est définitif."
-    )){
+    const quand = p._exporte_le ? new Date(p._exporte_le).toLocaleDateString(t("locale")) : t("backup_unknown_date");
+    const qui   = p.enfant || t("backup_no_name");
+    const cible = (syncInfo && syncInfo.childName) || config.name || t("backup_active_child");
+    if(!confirm(t("backup_confirm", {who: qui, when: quand, target: cible}))){
       champFichier.value = "";
-      messageSauvegarde("Restauration annulée. Rien n'a été modifié.");
+      messageSauvegarde(t("backup_cancelled"));
       return;
     }
 
@@ -1803,7 +2117,7 @@ function importerEnfant(champFichier){
     editState = null;
     champFichier.value = "";
     const nbJours = Object.keys(remoteDays).length;
-    messageSauvegarde("✅ Restauration effectuée — "+nbJours+" jour"+(nbJours>1?"s":"")+" d'historique.");
+    messageSauvegarde(t("backup_restored", {n: nbJours}));
     setTimeout(()=>{
       document.getElementById("sheet").classList.remove("show");
       render();
@@ -1878,7 +2192,7 @@ function saveParent(){
   const aChange = recalculerAujourdhui();
   document.getElementById("sheet").classList.remove("show");
   render();
-  if(aChange) setTimeout(()=>alert("Les étapes d'aujourd'hui ont changé."), 60);
+  if(aChange) setTimeout(()=>alert(t("steps_changed")), 60);
 }
 
 /* V6.2 — aujourd'hui fait exception à la règle du profil figé : si la semaine type
@@ -1994,7 +2308,7 @@ async function pushChild(){
     .update({ data: snap, updated_at: new Date().toISOString() })
     .eq("id", syncInfo.childId);
   if(error){
-    setSyncDot("⚠︎ hors ligne");
+    setSyncDot(t("sync_offline"));
     if(retriesLeft > 0){
       retriesLeft--;
       clearTimeout(retryTimer);
@@ -2002,7 +2316,7 @@ async function pushChild(){
     }
   } else {
     retriesLeft = 3;
-    setSyncDot("✓ synchro");
+    setSyncDot(t("sync_ok"));
   }
 }
 
@@ -2010,7 +2324,7 @@ async function pullChild(){
   const { data, error } = await sb.from("pr_children")
     .select("id,name,data,pr_families(code)")
     .eq("id", syncInfo.childId).single();
-  if(error || !data){ setSyncDot("⚠︎ hors ligne"); return; }
+  if(error || !data){ setSyncDot(t("sync_offline")); return; }
   syncInfo.childName = data.name;
   if(data.pr_families) syncInfo.code = data.pr_families.code;
   saveSyncInfo();
@@ -2018,13 +2332,13 @@ async function pullChild(){
   if(hasData) hydrate(data.data);
   else { /* enfant tout neuf : on part sur une config vierge à son prénom */
     const avatarChoisi = avatarActuel();   /* choisi pendant l'onboarding */
-    config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+    config = defaultConfig();
     config.avatar = avatarChoisi;
     config.name = data.name || "";
     stars = {}; bank = {spent:0, purchases:[]}; remoteDays = {}; dayState = emptyDay(profileFor(activeKey()));
     saveConfig(); saveStars(); saveBank(); saveDay();
   }
-  setSyncDot("✓ synchro");
+  setSyncDot(t("sync_ok"));
 }
 
 let currentChannel = null;
@@ -2059,9 +2373,9 @@ function skipSync(){ sSet("pr_sync_skip","1"); hideOnboarding(); }
 
 async function createFamily(){
   const childName = document.getElementById("onbChildName").value.trim();
-  if(!childName){ onbMsg("Indique un prénom 🙂"); return; }
+  if(!childName){ onbMsg(t("onb_need_name")); return; }
   document.getElementById("onbCreateBtn").disabled = true;
-  onbMsg("Création…");
+  onbMsg(t("onb_creating"));
   try{
     const code = makeCode();
     const { data: fam, error: e1 } = await sb.from("pr_families")
@@ -2077,20 +2391,20 @@ async function createFamily(){
     document.getElementById("onbCodeDisplay").textContent = code;
     onbShow("done");
   }catch(err){
-    onbMsg("Oups, réessaie (connexion ?)");
+    onbMsg(t("onb_error_conn"));
     document.getElementById("onbCreateBtn").disabled = false;
   }
 }
 
 async function joinFamily(){
   const code = document.getElementById("onbCode").value.trim().toUpperCase();
-  if(code.length < 6){ onbMsg("Code invalide"); return; }
+  if(code.length < 6){ onbMsg(t("onb_bad_code")); return; }
   document.getElementById("onbJoinBtn").disabled = true;
-  onbMsg("Recherche…");
+  onbMsg(t("onb_searching"));
   const { data: fam, error } = await sb.from("pr_families")
     .select("id,code").eq("code", code).single();
   document.getElementById("onbJoinBtn").disabled = false;
-  if(error || !fam){ onbMsg("Code introuvable — vérifie avec l'autre parent"); return; }
+  if(error || !fam){ onbMsg(t("onb_code_unknown")); return; }
   pendingFamily = fam;
   await showChildrenStep();
 }
@@ -2127,7 +2441,7 @@ async function selectChild(k){
   pendingFamily = null;
 
   /* Repartir d'un état vierge avant de charger les données du nouvel enfant */
-  config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  config = defaultConfig();
   stars = {}; bank = {spent:0, purchases:[]}; remoteDays = {};
   dayState = emptyDay(profileFor(todayKey()));   /* état transitoire, remplacé par pullChild() */
   viewDateOffset = 0;
@@ -2140,13 +2454,13 @@ async function selectChild(k){
 
 async function addChild(){
   const name = document.getElementById("onbNewChild").value.trim();
-  if(!name){ onbMsg("Indique un prénom 🙂"); return; }
+  if(!name){ onbMsg(t("onb_need_name")); return; }
   const famId = pendingFamily ? pendingFamily.id : syncInfo.familyId;
-  const fresh = { config: (()=>{ const c = JSON.parse(JSON.stringify(DEFAULT_CONFIG)); c.name = name; return c; })(),
+  const fresh = { config: (()=>{ const c = defaultConfig(); c.name = name; return c; })(),
                   stars: {}, bank: {spent:0,purchases:[]}, days: {} };
   const { data: child, error } = await sb.from("pr_children")
     .insert({ family_id: famId, name: name, data: fresh }).select().single();
-  if(error){ onbMsg("Oups, réessaie"); return; }
+  if(error){ onbMsg(t("onb_error")); return; }
   document.getElementById("onbNewChild").value = "";
   await selectChild(child);
 }
@@ -2175,7 +2489,7 @@ function renderChildChip(){
   if(cloudOn()){
     chip.style.display = "inline-flex";
     document.getElementById("childChipName").textContent =
-      avatarActuel()+" "+(syncInfo.childName || "")+" — changer d'enfant";
+      avatarActuel()+" "+(syncInfo.childName || "")+t("chip_switch");
   } else {
     chip.style.display = "none";
   }
@@ -2206,7 +2520,32 @@ async function initSync(){
   }
 }
 
+/* ── Langue : textes fixes de la page et changement de langue ── */
+function appliquerTextes(){
+  document.documentElement.lang = LANG;
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{ el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll("[data-i18n-title]").forEach(el=>{ el.title = t(el.dataset.i18nTitle); });
+  document.querySelectorAll("[data-i18n-aria]").forEach(el=>{ el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
+  document.querySelectorAll("[data-lang]").forEach(b=>b.classList.toggle("sel", b.dataset.lang === LANG));
+}
+function changerLangue(l){
+  if(LANGUES.indexOf(l) === -1 || l === LANG) return;
+  const avant = LANG;
+  LANG = l;
+  sSet("pr_lang", l);
+  /* Les étapes restées « par défaut » suivent la langue. Elles font partie des
+     données de l'enfant : la traduction part donc aussi chez l'autre parent. */
+  if(traduireContenuParDefaut(config, avant, l)) saveConfig();
+  if(editState){ traduireContenuParDefaut(editState, avant, l); renderEdit(); }
+  appliquerTextes();
+  renderAvatarPicker("avatarPickerOnb");
+  renderAvatarPicker("avatarPickerParent");
+  render();
+}
+
 /* ── Démarrage ── */
+appliquerTextes();
 render();
 initSync();
 

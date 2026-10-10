@@ -17,7 +17,7 @@
    structurellement impossible tant qu'il y a du réseau.
    ═══════════════════════════════════════════════════════════════════ */
 
-const VERSION = "6.2.0";
+const VERSION = "6.3.0";
 const CACHE   = "petite-routine-" + VERSION;
 
 /* Le strict nécessaire pour que l'app s'ouvre : même origine, doit réussir. */
@@ -95,7 +95,9 @@ async function reseauDabord(requete) {
     const secours = await cache.match("./index.html") || await cache.match("./");
     if (secours) return secours;
     return new Response(
-      "<!doctype html><meta charset=utf-8><p>Petite Routine n'a pas encore été enregistrée hors ligne. Ouvre l'app une fois avec du réseau.",
+      /* Le service worker ne connaît pas la langue choisie dans l'app : message bilingue */
+      "<!doctype html><meta charset=utf-8><p>Petite Routine n'a pas encore été enregistrée hors ligne. Ouvre l'app une fois avec du réseau." +
+      "<p lang=en>Petite Routine isn't available offline yet. Open the app once with a connection.",
       { headers: { "Content-Type": "text/html;charset=utf-8" }, status: 503 }
     );
   }
