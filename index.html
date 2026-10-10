@@ -648,7 +648,24 @@ function langueDuTelephone(){
   const l = String((navigator.languages && navigator.languages[0]) || navigator.language || "fr").toLowerCase();
   return l.indexOf("fr") === 0 ? "fr" : "en";
 }
-let LANG = LANGUES.indexOf(sGet("pr_lang")) !== -1 ? sGet("pr_lang") : langueDuTelephone();
+/* Une famille qui utilisait l'app avant la V6.3 l'a toujours connue en français :
+   elle y reste, même si son téléphone est réglé en anglais. Changer reste possible
+   dans l'espace parents. */
+function dejaUtiliseeAvantV63(){
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && (k.indexOf("pr_config") === 0 || k === "pr_sync")) return true;
+    }
+  }catch(e){}
+  return false;
+}
+let LANG = LANGUES.indexOf(sGet("pr_lang")) !== -1 ? sGet("pr_lang")
+         : dejaUtiliseeAvantV63() ? "fr" : langueDuTelephone();
+/* Mémorisée dès la première ouverture : sinon, à la relance suivante, la
+   configuration créée entre-temps ferait passer un nouvel utilisateur anglais
+   pour une famille d'avant la V6.3, et l'app basculerait en français. */
+sSet("pr_lang", LANG);
 
 /* Le prénom s'insère différemment selon la langue : « Bonjour Léa ! » / « Good morning, Léa! » */
 const nomFr = p => p.name ? " "+p.name : "";
