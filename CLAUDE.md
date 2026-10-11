@@ -68,6 +68,10 @@ synchronisées entre les téléphones des parents par un **code famille**
 | V6.3.1 | `e4c151f` | Synchro fiable, passage de minuit, drapeaux 🇫🇷 / 🇬🇧 |
 | V6.3.2 | `7ac4c6c` | Fin de l'audit V6.2, croix pour fermer l'espace parents |
 | Tests | `1346e9f` | Dossier `tests/` : 57 vérifications automatiques |
+| CLAUDE.md | `f02ade1` | Ce fichier, versionné dans le repo |
+
+Dernière vérification : 11/10/2026, 57 / 57 tests au vert sur `main`
+(`f02ade1`). Aucune tâche en cours.
 
 ## LANGUES — FRANÇAIS ET ANGLAIS (V6.3)
 
@@ -141,7 +145,8 @@ rien.
   `fermerEspaceParents()`). Une croix flottant seule tombait sur les
   corbeilles.
 - **Le cron se désactive après 60 jours sans commit** (GitHub envoie un mail
-  de réactivation). Un ping ne réveille pas un projet déjà en pause : il faut
+  de réactivation). Dernier commit au 11/10/2026 : échéance vers le
+  **10 décembre 2026**, repoussée par chaque nouveau commit. Un ping ne réveille pas un projet déjà en pause : il faut
   « Restore project » dans le tableau de bord Supabase.
 - **Le code famille est la seule clé de récupération** des données
   synchronisées, avec la sauvegarde JSON de l'espace parents.
@@ -190,9 +195,14 @@ est poussée, lancer
 `git config --add remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"`
 puis `git fetch`.
 
-## DOCUMENTS HORS REPO
+## CE FICHIER ET LES DOCUMENTS HORS REPO
 
-Le PRD et la version de travail de ce fichier vivent sur le Mac du
-propriétaire, dans le dossier `V6/`. Si les deux versions de CLAUDE.md
-divergent, celle-ci (dans le repo) est la référence pour les sessions cloud ;
-la fusionner avec celle du Mac au besoin.
+- **Ce CLAUDE.md est la référence.** Il est versionné dans le repo depuis le
+  11/10/2026 (`f02ade1`) et chargé automatiquement par chaque session cloud.
+  Le mettre à jour à la fin de chaque session de travail, par une branche
+  comme le reste du code.
+- Il a été rédigé à partir du code et de l'historique. Une ancienne version
+  de travail existe sur le Mac du propriétaire (dossier `V6/`) : si elle
+  contient des règles absentes d'ici (direction artistique détaillée, renvois
+  au PRD), les reporter ici puis abandonner la copie du Mac.
+- Le PRD reste hors repo, sur le Mac.
