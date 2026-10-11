@@ -70,8 +70,11 @@ synchronisées entre les téléphones des parents par un **code famille**
 | Tests | `1346e9f` | Dossier `tests/` : 57 vérifications automatiques |
 | CLAUDE.md | `f02ade1` | Ce fichier, versionné dans le repo |
 
-Dernière vérification : 11/10/2026, 57 / 57 tests au vert sur `main`
-(`f02ade1`). Aucune tâche en cours.
+Dernière vérification : 11/10/2026, 57 / 57 tests au vert. Le code de l'app
+(`index.html`, `sw.js`) n'a pas changé depuis la V6.3.2 (`7ac4c6c`) ; les
+commits suivants ne touchent que `tests/` et ce fichier. Aucune tâche en cours.
+(Ne pas citer ici le dernier commit : mettre ce fichier à jour en crée un
+nouveau, et la mention serait périmée aussitôt.)
 
 ## LANGUES — FRANÇAIS ET ANGLAIS (V6.3)
 
