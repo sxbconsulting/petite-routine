@@ -51,6 +51,61 @@ synchronisées entre les téléphones des parents par un **code famille**
 - Commentaires du code en français, qui expliquent le *pourquoi* (surtout
   l'historique d'un bug corrigé : « AUDIT V6.2 #1 — … »).
 
+## CONTRAINTES NON NÉGOCIABLES
+
+1. **Aucun framework.** Pas de React, Vue, Svelte. JavaScript vanilla.
+2. **Aucune chaîne de build pour l'app.** Ce que GitHub Pages sert doit rester
+   du HTML/CSS/JS tel quel. Un découpage éventuel se ferait en modules ES
+   natifs (`<script type="module">`), jamais avec un bundler.
+3. **Chemins relatifs partout.** Le site est servi sur `/petite-routine/`, pas
+   à la racine du domaine : un chemin absolu (`/icon.png`) casse tout. Vaut
+   aussi pour le service worker, dont la portée dépend de son emplacement.
+4. **La clé anon Supabase reste dans le code.** Elle est publique par
+   conception, la protection vient de la RLS. Ne pas proposer de la « sécuriser »
+   par des variables d'environnement : GitHub Pages n'en a pas.
+5. **Pas de dépendance npm dans l'app.** Supabase est chargé par CDN. Seul le
+   dossier `tests/` a des dépendances, et il n'est jamais servi.
+6. **Pas d'authentification par compte.** Le code famille `PR-XXXX` est un
+   choix assumé : l'inscription tuerait l'adoption sur une app familiale.
+
+## DIRECTION ARTISTIQUE
+
+Ne pas y toucher sans demande explicite.
+
+| Élément | Valeur |
+|---|---|
+| Titres, boutons | **Fredoka** |
+| Libellés, texte courant | **Nunito** |
+| Encre | `#3a2e52` · encre douce `#7a6f96` |
+| Or | `#ffb830` · menthe `#4ecb8f` · corail `#ff6e5c` |
+| Rayon des angles | 28 px |
+
+- **Les ciels animés sont la signature du produit** : matin doré avec nuages,
+  après-midi bleu, soir indigo avec lune et étoiles, roue rose avec ballons,
+  tirelire dorée avec pièces. Ne jamais les simplifier au nom de la performance.
+- **Avatar de l'enfant**, en deux temps : « Choisis ton avatar » propose garçon
+  ou fille en gros boutons, la rangée des carnations n'apparaît qu'ensuite sous
+  « Personnalise-le ». **Ne jamais nommer le genre ni la couleur de peau dans
+  l'interface** — les emoji portent l'information. Le 🧒 neutre n'est plus
+  proposé mais reste la valeur par défaut, et reste reconnu au chargement.
+  Cibles tactiles larges, quitte à passer sur deux lignes en petit écran.
+- **Cheveux et yeux sont impossibles** : les emoji enfants n'acceptent pas les
+  composants cheveux (`🧒‍🦱` se rend en deux glyphes) et aucun emoji Unicode
+  n'encode la couleur des yeux. Vérifié au canvas — ne pas réessayer.
+- Le 🐷 est réservé à la tirelire, à ses quatre emplacements.
+
+## PRINCIPES UX
+
+1. **Une action par écran.** L'enfant ne doit jamais choisir entre deux choses.
+2. **Aucun texte indispensable.** Emoji, couleur et mouvement portent le sens :
+   l'app s'adresse à des enfants qui ne lisent pas encore.
+3. **Feedback en moins de 100 ms.**
+4. **La découvrabilité prime sur la protection.** Seul l'achat d'un cadeau est
+   derrière un appui long. Ne rien cacher d'autre derrière un geste : trois
+   testeurs avaient cru que le bouton parents « ne marchait pas ».
+5. **Jamais d'écran vide.** Enfant neuf, jour sans étoile, famille sans cadeau :
+   tous doivent afficher quelque chose de compréhensible.
+
 ## ÉTAT D'AVANCEMENT
 
 **En production : V6.3.2.** Tous les points de l'audit V6.2 sont corrigés.
@@ -75,6 +130,30 @@ Dernière vérification : 11/10/2026, 57 / 57 tests au vert. Le code de l'app
 commits suivants ne touchent que `tests/` et ce fichier. Aucune tâche en cours.
 (Ne pas citer ici le dernier commit : mettre ce fichier à jour en crée un
 nouveau, et la mention serait périmée aussitôt.)
+
+## CE QUI EST GELÉ
+
+Rien de tout cela ne se lance sans accord explicite du propriétaire.
+
+- **V7 « Sorties »** (organisateur de rencontres entre familles, tables
+  `pr_friendships` / `pr_events`, code `PRS-XXXX`). La spec existe. Elle
+  changerait la nature du produit — d'un outil familial à un réseau — et
+  doublerait la surface de maintenance.
+- **Découpage de `index.html`** en modules ES. Le fichier est long, mais sa
+  longueur n'a bloqué aucune des tâches livrées jusqu'ici.
+- **App native et App Store.** Un projet Xcode exploratoire existe hors repo
+  (Swift + `WKWebView`, sans Capacitor ni npm). Obstacles connus : 99 $/an,
+  catégorie Enfants très stricte, politique de confidentialité obligatoire
+  (un prénom d'enfant est stocké, donc RGPD), et risque de rejet sous la
+  règle 4.2 « fonctionnalité minimale », qui vise précisément les sites web
+  empaquetés.
+  **Leçon technique à ne pas réapprendre** : avec `loadFileURL`, l'app
+  s'affiche mais `localStorage` ne persiste pas — WebKit refuse le stockage
+  aux origines `file://`. Il faut servir les fichiers embarqués par un
+  `WKURLSchemeHandler` sous un schéma maison, qui donne une vraie origine.
+- **Ces trois chantiers attendent la validation de la rétention**, telle que
+  définie dans le PRD : 3 familles sur 5 qui rouvrent l'app entre J+5 et J+7.
+  Ne pas construire de nouvelle fonctionnalité sans le rappeler d'abord.
 
 ## LANGUES — FRANÇAIS ET ANGLAIS (V6.3)
 
@@ -153,6 +232,39 @@ rien.
   « Restore project » dans le tableau de bord Supabase.
 - **Le code famille est la seule clé de récupération** des données
   synchronisées, avec la sauvegarde JSON de l'espace parents.
+- **Cloisonnement par enfant** : toute clé localStorage passe par `ck()`, qui
+  la suffixe par l'identifiant de l'enfant. Bug critique deux fois — une clé
+  oubliée, puis un ordre de déclaration.
+- **Anti-écho** : chaque envoi porte un marqueur `_rev` unique, comparé au
+  retour. **Ne jamais revenir à une comparaison de `JSON.stringify`** : la
+  colonne `data` est de type `jsonb` et Postgres réordonne les clés au
+  stockage, donc deux textes ne sont jamais égaux à donnée identique.
+- **Service worker** : `index.html` est servi réseau d'abord, avec
+  `cache:"reload"`. GitHub Pages envoie le HTML en `max-age=600` ; un `fetch`
+  ordinaire rendrait la copie du navigateur, vieille de dix minutes. Ne jamais
+  passer `index.html` en cache-d'abord.
+- **Appui long d'achat** : écouter `touchcancel` autant que `touchend`. Sur
+  iPhone, une notification ou un début de défilement annulent le toucher sans
+  le terminer — le cadeau partait doigt levé.
+- **Texte inséré dans du HTML** : tout libellé ou emoji passe par `esc()` avant
+  un `innerHTML`. Les données arrivent aussi par la synchronisation, donc
+  d'ailleurs que du clavier du parent.
+- **Réordonnancement** : le marqueur `_oi`, posé à l'ouverture de l'espace
+  parents, remappe les coches. `saveParent()` réaligne les jours du serveur
+  **et** ceux gardés seulement sur l'appareil (`clesJoursLocaux()`) — sinon une
+  famille sans synchronisation voit ses coches passées glisser.
+- **Une seule `migrateConfig()`**, appelée par `loadConfig()` **et** par
+  `hydrate()`. Deux copies avaient divergé et une fonctionnalité entière
+  disparaissait en silence.
+- **Aucun `try/catch` autour de `migrateConfig()`** dans `loadConfig()` :
+  l'ancien filet avalait toute erreur et remplaçait la configuration par les
+  valeurs par défaut, aussitôt sauvegardée. La configuration d'avant la V6.2
+  est conservée sous `pr_config_avant_v62`.
+- **Après un import JSON**, `editState` est remis à `null` et l'espace parents
+  se ferme : il contient l'ancienne configuration, et « Enregistrer »
+  annulerait la restauration d'un clic.
+- **L'export JSON rassemble les jours depuis localStorage**, pas depuis
+  `remoteDays` : le serveur n'en garde que quatorze.
 
 ## TESTS AUTOMATIQUES
 
@@ -200,12 +312,19 @@ puis `git fetch`.
 
 ## CE FICHIER ET LES DOCUMENTS HORS REPO
 
-- **Ce CLAUDE.md est la référence.** Il est versionné dans le repo depuis le
-  11/10/2026 (`f02ade1`) et chargé automatiquement par chaque session cloud.
-  Le mettre à jour à la fin de chaque session de travail, par une branche
-  comme le reste du code.
-- Il a été rédigé à partir du code et de l'historique. Une ancienne version
-  de travail existe sur le Mac du propriétaire (dossier `V6/`) : si elle
-  contient des règles absentes d'ici (direction artistique détaillée, renvois
-  au PRD), les reporter ici puis abandonner la copie du Mac.
-- Le PRD reste hors repo, sur le Mac.
+- **Ce CLAUDE.md est la référence.** Versionné dans le repo depuis le
+  11/10/2026 (`f02ade1`), chargé automatiquement par chaque session.
+  Le mettre à jour en fin de session de travail, par une branche comme le
+  reste du code.
+- **L'ancienne copie du Mac (`V6/CLAUDE.md`) a été fusionnée ici puis
+  supprimée** le 16/10/2026. Direction artistique, principes UX, contraintes,
+  pièges et chantiers gelés en proviennent. Le dossier `V6/files/` du Mac est
+  figé à la V6.2 : **ne jamais y repartir pour déployer**, il écraserait la
+  V6.3. Le repo est la seule source de vérité.
+- **Rien de personnel ici : le repo est public.** Le contexte propre au
+  propriétaire — sa façon de travailler, ses priorités, les codes famille des
+  testeurs, les chiffres de la bêta — vit dans un fichier privé sur son Mac,
+  à la racine du dossier de travail, hors repo.
+- Le **PRD** (`PRD_PETITE_ROUTINE.html`) reste hors repo, sur le Mac :
+  personas, métriques, périmètre, 43 specs fonctionnelles, modèle de données,
+  risques et décisions actées. À lire avant toute proposition d'architecture.
