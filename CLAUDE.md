@@ -125,9 +125,10 @@ Ne pas y toucher sans demande explicite.
 | Tests | `1346e9f` | Dossier `tests/` : 57 vérifications automatiques |
 | CLAUDE.md | `f02ade1` | Ce fichier, versionné dans le repo |
 
-Dernière vérification : 11/10/2026, 57 / 57 tests au vert. Le code de l'app
-(`index.html`, `sw.js`) n'a pas changé depuis la V6.3.2 (`7ac4c6c`) ; les
-commits suivants ne touchent que `tests/` et ce fichier. Aucune tâche en cours.
+Dernière vérification : 17/10/2026, 57 / 57 tests au vert, lancés sur le Mac.
+Le code de l'app (`index.html`, `sw.js`) n'a pas changé depuis la V6.3.2
+(`7ac4c6c`) ; les commits suivants ne touchent que `tests/` et ce fichier.
+Aucune tâche en cours.
 (Ne pas citer ici le dernier commit : mettre ce fichier à jour en crée un
 nouveau, et la mention serait périmée aussitôt.)
 
@@ -227,8 +228,8 @@ rien.
   `fermerEspaceParents()`). Une croix flottant seule tombait sur les
   corbeilles.
 - **Le cron se désactive après 60 jours sans commit** (GitHub envoie un mail
-  de réactivation). Dernier commit au 11/10/2026 : échéance vers le
-  **10 décembre 2026**, repoussée par chaque nouveau commit. Un ping ne réveille pas un projet déjà en pause : il faut
+  de réactivation). Dernier commit au 17/10/2026 : échéance vers le
+  **16 décembre 2026**, repoussée par chaque nouveau commit. Un ping ne réveille pas un projet déjà en pause : il faut
   « Restore project » dans le tableau de bord Supabase.
 - **Le code famille est la seule clé de récupération** des données
   synchronisées, avec la sauvegarde JSON de l'espace parents.
@@ -280,8 +281,20 @@ node tests/lancer-tout.js synchro    # un seul fichier
 
 - Session cloud Claude Code : rien à installer. Mac, la première fois :
   `cd tests && npm install && npx playwright install chromium`.
+- **Sur ce Mac, `playwright install` n'extrait pas les navigateurs.** L'archive
+  se télécharge entière, puis l'extraction se fige vers 38 fichiers, processus
+  inerte et sans aucune entrée/sortie : c'est son décompresseur interne, pas une
+  vérification de sécurité de macOS. Contournement vérifié le 17/10/2026 :
+  récupérer les archives sous
+  `https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/<révision>/`,
+  les extraire avec `ditto -x -k` dans `~/Library/Caches/ms-playwright/`, puis y
+  poser un fichier vide `INSTALLATION_COMPLETE`. `ditto` fait en une seconde ce
+  qui bloquait plus d'une heure. **Il faut deux paquets, pas un** :
+  `chromium-<révision>` et `chromium_headless_shell-<révision>` — c'est le
+  second que les tests lancent. La révision se lit dans
+  `tests/node_modules/playwright-core/browsers.json`.
 - **Avant chaque mise en ligne : tout doit être vert** (57 / 57 au
-  11/10/2026).
+  17/10/2026).
 - Une correction de bug s'accompagne d'un test qui échoue sur l'ancienne
   version et passe sur la nouvelle : `PR_APP=<dossier> node tests/lancer-tout.js`
   teste une autre copie de l'app.
