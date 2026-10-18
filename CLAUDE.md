@@ -142,16 +142,28 @@ Rien de tout cela ne se lance sans accord explicite du propriétaire.
   doublerait la surface de maintenance.
 - **Découpage de `index.html`** en modules ES. Le fichier est long, mais sa
   longueur n'a bloqué aucune des tâches livrées jusqu'ici.
-- **App native et App Store.** Un projet Xcode exploratoire existe hors repo
-  (Swift + `WKWebView`, sans Capacitor ni npm). Obstacles connus : 99 $/an,
-  catégorie Enfants très stricte, politique de confidentialité obligatoire
-  (un prénom d'enfant est stocké, donc RGPD), et risque de rejet sous la
-  règle 4.2 « fonctionnalité minimale », qui vise précisément les sites web
-  empaquetés.
-  **Leçon technique à ne pas réapprendre** : avec `loadFileURL`, l'app
-  s'affiche mais `localStorage` ne persiste pas — WebKit refuse le stockage
-  aux origines `file://`. Il faut servir les fichiers embarqués par un
-  `WKURLSchemeHandler` sous un schéma maison, qui donne une vraie origine.
+- **App native et App Store.** Un projet Xcode existe hors repo (Swift +
+  `WKWebView`, sans Capacitor ni npm). Depuis le 18/10/2026 il embarque la
+  V6.3.2, compile et tourne, avec un **widget d'écran d'accueil** et des
+  **rappels locaux programmés** — vérifiés en simulateur. Rien n'est soumis.
+  Obstacles inchangés : 99 $/an, catégorie Enfants très stricte, politique de
+  confidentialité obligatoire (un prénom d'enfant est stocké, donc RGPD), et
+  risque de rejet sous la règle 4.2 « fonctionnalité minimale », qui vise
+  précisément les sites web empaquetés.
+  **Trois leçons techniques à ne pas réapprendre :**
+  1. Avec `loadFileURL`, l'app s'affiche mais `localStorage` ne persiste pas —
+     WebKit refuse le stockage aux origines `file://`. Il faut servir les
+     fichiers embarqués par un `WKURLSchemeHandler` sous un schéma maison,
+     qui donne une vraie origine.
+  2. **La notification n'est pas l'argument qu'on croit.** Depuis iOS 16.4 une
+     PWA ajoutée à l'écran d'accueil reçoit des notifications web push. Ce que
+     le web ne sait pas faire, c'est en *programmer* une à heure fixe sans
+     serveur. Le widget, lui, est hors de portée du web — c'est le seul
+     argument solide face à la règle 4.2.
+  3. **L'App Group exige le compte développeur sur un appareil réel.** En
+     simulateur la signature ad hoc suffit ; sur iPhone, sans profil de
+     provisionnement, le widget s'affiche vide. Les rappels, eux, n'ont besoin
+     d'aucun compte.
 - **Ces trois chantiers attendent la validation de la rétention**, telle que
   définie dans le PRD : 3 familles sur 5 qui rouvrent l'app entre J+5 et J+7.
   Ne pas construire de nouvelle fonctionnalité sans le rappeler d'abord.
@@ -266,6 +278,13 @@ rien.
   annulerait la restauration d'un clic.
 - **L'export JSON rassemble les jours depuis localStorage**, pas depuis
   `remoteDays` : le serveur n'en garde que quatorze.
+- **Les noms des globales d'`index.html` sont un contrat avec l'app native.**
+  Le projet Xcode hors repo n'injecte aucun code dans la page : il la *lit*,
+  via `config`, `dayState`, `ROUTINES`, `routinesDe()`, `todayReminders()`,
+  `remMeta()` et `t()`. Renommer l'une d'elles ne cassera rien ici — le pont
+  est défensif et renvoie `nil` — mais **le widget et les rappels deviendront
+  muets en silence, sans erreur visible**. Si tu touches à l'une de ces sept
+  globales, préviens le pont (`ios/PetiteRoutine/PontWeb.swift`).
 
 ## TESTS AUTOMATIQUES
 
