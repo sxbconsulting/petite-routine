@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Petite Routine — Confidentialité</title>
+<meta name="description" content="Ce que Petite Routine collecte, où c'est stocké, et comment le faire supprimer.">
+<!-- Aucune police distante ici, volontairement : cette page explique
+     justement que les polices de l'app passent par Google. -->
+<style>
+  :root{
+    --encre:#3a2e52;
+    --encre-douce:#4a4060;
+    --or:#ffb830;
+    --papier:#ffffff;
+    --trait:#d8d2e4;
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0 auto;
+    max-width:44rem;
+    padding-left:max(18px,env(safe-area-inset-left,0px));
+    padding-right:max(18px,env(safe-area-inset-right,0px));
+    padding-block:2rem 5rem;
+    background:var(--papier);
+    color:var(--encre);
+    font:17px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  header{border-bottom:4px solid var(--or);padding-bottom:1rem;margin-bottom:.5rem}
+  h1{font-size:1.9rem;line-height:1.2;margin:0 0 .2rem;text-wrap:balance}
+  h2{font-size:1.25rem;margin:2.4rem 0 .4rem;padding-bottom:.3rem;
+     border-bottom:1px solid var(--trait);text-wrap:balance}
+  h3{font-size:1.05rem;margin:1.5rem 0 .3rem}
+  p,li{margin:.6rem 0}
+  ul{padding-left:1.4rem}
+  .date{color:var(--encre-douce);font-size:.95rem;margin:0}
+  .resume{border:2px solid var(--encre);border-radius:14px;padding:1rem 1.2rem;margin:1.6rem 0}
+  .resume p:first-child{margin-top:0}
+  .resume p:last-child{margin-bottom:0}
+  .avertir{border-left:5px solid var(--or);padding:.2rem 0 .2rem 1rem;margin:1.4rem 0}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em;
+       background:#f3f0f8;border-radius:4px;padding:.05em .35em}
+  table{border-collapse:collapse;width:100%;margin:1rem 0;font-size:.95rem}
+  th,td{border:1px solid var(--trait);padding:.5rem .6rem;text-align:left;vertical-align:top}
+  th{background:#f7f5fb;font-weight:700}
+  .scroll{overflow-x:auto}
+  a{color:var(--encre)}
+  .langues{margin:1rem 0 0;font-size:.95rem}
+  footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--trait);
+         color:var(--encre-douce);font-size:.9rem}
+  @media (max-width:600px){ body{font-size:16px} h1{font-size:1.6rem} }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🐷⭐ Petite Routine — Confidentialité</h1>
+  <p class="date">Dernière mise à jour : 18 octobre 2026</p>
+</header>
+
+<p class="langues"><a href="#english">English version below</a></p>
+
+<div class="resume">
+<p><strong>En une phrase :</strong> Petite Routine enregistre le prénom de votre
+enfant et ce que vous écrivez dans ses routines. Rien d'autre. Pas de compte,
+pas de publicité, pas de mesure d'audience, pas de revente.</p>
+</div>
+
+<h2>Qui est responsable</h2>
+
+<p>Petite Routine est éditée par <strong>SXB Consulting</strong>. Pour toute
+question ou demande concernant vos données, écrivez à :
+<strong>[ADRESSE DE CONTACT À COMPLÉTER]</strong>.</p>
+
+<h2>Ce qui est enregistré</h2>
+
+<div class="scroll">
+<table>
+<tr><th>Donnée</th><th>D'où elle vient</th></tr>
+<tr><td>Le <strong>prénom de l'enfant</strong></td><td>Vous le saisissez</td></tr>
+<tr><td>L'avatar choisi (un emoji)</td><td>Vous le choisissez</td></tr>
+<tr><td>Les étapes des routines</td><td>Fournies par défaut, modifiables par vous</td></tr>
+<tr><td>Les étoiles gagnées, jour par jour</td><td>Produites par l'usage de l'app</td></tr>
+<tr><td>Les cadeaux de la tirelire et leur coût</td><td>Vous les définissez</td></tr>
+<tr><td>Les activités de la roue</td><td>Fournies par défaut, modifiables par vous</td></tr>
+<tr><td>Les réglages : heures de rappel, profils école et maison, semaine type, mode vacances</td><td>Vous les réglez</td></tr>
+<tr><td>Le <strong>code famille</strong> (<code>PR-XXXX</code>)</td><td>Engendré par l'app</td></tr>
+</table>
+</div>
+
+<h3>Ce qui n'est jamais demandé ni collecté</h3>
+
+<ul>
+  <li>Aucun nom, prénom, adresse ou e-mail de parent</li>
+  <li>Aucun mot de passe : il n'y a pas de compte</li>
+  <li>Aucune localisation, aucun carnet d'adresses, aucune photo</li>
+  <li>Aucun identifiant publicitaire, aucun traceur, aucune mesure d'audience</li>
+</ul>
+
+<p>Le <strong>code famille est la seule clé</strong> qui relie les téléphones
+d'un même foyer. Il n'y a ni inscription, ni identifiant, ni mot de passe.</p>
+
+<h2>Où c'est stocké</h2>
+
+<h3>Sur votre téléphone, toujours</h3>
+<p>Tout est d'abord enregistré dans la mémoire locale du navigateur, sur
+l'appareil que vous utilisez. Ces données y restent tant que vous ne les
+supprimez pas, et elles ne quittent jamais l'appareil si vous n'activez pas la
+synchronisation.</p>
+
+<h3>Sur un serveur, seulement si vous synchronisez</h3>
+<p>La synchronisation entre les téléphones des deux parents est
+<strong>facultative</strong> : l'app propose « Essayer sans synchronisation ».
+Si vous créez ou rejoignez une famille, les données listées ci-dessus sont
+alors enregistrées chez notre hébergeur de base de données,
+<strong>Supabase</strong>.</p>
+
+<div class="avertir">
+<p><strong>Région d'hébergement : [À CONFIRMER DANS LE TABLEAU DE BORD
+SUPABASE].</strong> Si le projet est hébergé hors de l'Union européenne, ce
+paragraphe doit préciser le pays et la base juridique du transfert.</p>
+</div>
+
+<h2>Les services tiers</h2>
+
+<p>Ouvrir Petite Routine fait contacter trois serveurs qui ne nous
+appartiennent pas. Chacun reçoit, au minimum, <strong>l'adresse IP</strong> de
+l'appareil — c'est inhérent au fonctionnement du web.</p>
+
+<div class="scroll">
+<table>
+<tr><th>Service</th><th>À quoi il sert</th><th>Ce qu'il reçoit</th></tr>
+<tr><td><strong>Supabase</strong></td><td>Héberge la base de données</td>
+    <td>Les données de la famille, si la synchronisation est activée</td></tr>
+<tr><td><strong>GitHub Pages</strong></td><td>Héberge le site de l'app</td>
+    <td>L'adresse IP, à chaque chargement</td></tr>
+<tr><td><strong>Google Fonts</strong></td><td>Fournit les polices d'écriture</td>
+    <td>L'adresse IP, à chaque chargement</td></tr>
+<tr><td><strong>jsDelivr</strong></td><td>Fournit la bibliothèque technique de Supabase</td>
+    <td>L'adresse IP, à chaque chargement</td></tr>
+</table>
+</div>
+
+<p>Aucun de ces services ne reçoit le prénom de votre enfant, à l'exception de
+Supabase, qui le stocke pour permettre la synchronisation.</p>
+
+<h2>Combien de temps</h2>
+
+<ul>
+  <li><strong>Sur le serveur :</strong> seuls les <strong>quatorze derniers
+      jours</strong> d'historique sont conservés. Au-delà, les journées
+      anciennes sont écartées.</li>
+  <li><strong>Sur votre téléphone :</strong> aussi longtemps que vous gardez
+      l'app installée et que vous n'effacez pas les données du navigateur.</li>
+  <li><strong>Si vous cessez d'utiliser l'app :</strong> les données du serveur
+      restent jusqu'à ce que vous en demandiez la suppression.</li>
+</ul>
+
+<h2>Vos droits</h2>
+
+<p>Vous pouvez demander à consulter, corriger ou supprimer les données de votre
+famille.</p>
+
+<ul>
+  <li><strong>Supprimer vous-même :</strong> effacer les données du site dans
+      les réglages de votre navigateur supprime tout ce qui est sur l'appareil.
+      L'espace parents permet aussi d'exporter une sauvegarde avant d'effacer.</li>
+  <li><strong>Supprimer côté serveur :</strong> écrivez-nous en indiquant votre
+      code famille <code>PR-XXXX</code>.</li>
+</ul>
+
+<div class="avertir">
+<p><strong>Une limite qu'il faut connaître.</strong> Comme il n'existe aucun
+compte, nous n'avons aucun moyen de vérifier qui vous êtes autrement que par le
+code famille. Toute personne qui connaît ce code peut accéder aux données de la
+famille, et en demander la suppression. Gardez-le comme vous garderiez une clé.</p>
+</div>
+
+<h2>Les enfants</h2>
+
+<p>Petite Routine est conçue pour être utilisée par un enfant
+<strong>accompagné de son parent</strong>. C'est le parent qui installe l'app,
+saisit le prénom et décide d'activer ou non la synchronisation. Nous ne
+collectons aucune donnée auprès de l'enfant directement, et l'app ne contient
+ni publicité, ni achat, ni lien vers l'extérieur.</p>
+
+<h2>Changements</h2>
+
+<p>Si cette politique change, la date en haut de page est mise à jour. Les
+versions précédentes restent consultables dans l'historique public du code, à
+l'adresse <code>github.com/sxbconsulting/petite-routine</code>.</p>
+
+<hr style="border:none;border-top:4px solid var(--or);margin:3rem 0 2rem">
+
+<h1 id="english">🐷⭐ Petite Routine — Privacy</h1>
+<p class="date">Last updated: 18 October 2026</p>
+
+<div class="resume">
+<p><strong>In one sentence:</strong> Petite Routine stores your child's first
+name and whatever you write into their routines. Nothing else. No account, no
+advertising, no analytics, no resale.</p>
+</div>
+
+<h2>Who is responsible</h2>
+<p>Petite Routine is published by <strong>SXB Consulting</strong>. For any
+question or request about your data, write to:
+<strong>[CONTACT ADDRESS TO BE COMPLETED]</strong>.</p>
+
+<h2>What is stored</h2>
+<p>Your child's first name, the chosen avatar emoji, the routine steps, the
+stars earned each day, the piggy-bank rewards and their cost, the activity
+wheel, your settings (reminder times, school and home profiles, typical week,
+holiday mode), and the family code <code>PR-XXXX</code>.</p>
+
+<h3>What is never asked for or collected</h3>
+<ul>
+  <li>No parent name, address or email</li>
+  <li>No password: there is no account</li>
+  <li>No location, no contacts, no photos</li>
+  <li>No advertising identifier, no tracker, no analytics</li>
+</ul>
+
+<h2>Where it is stored</h2>
+<p><strong>On your phone, always.</strong> Everything is saved in the browser's
+local storage first, and never leaves the device unless you turn on syncing.</p>
+<p><strong>On a server, only if you sync.</strong> Syncing between both parents'
+phones is optional — the app offers “Try without syncing”. If you create or
+join a family, the data above is stored with our database host,
+<strong>Supabase</strong>. Hosting region: <strong>[TO BE CONFIRMED]</strong>.</p>
+
+<h2>Third-party services</h2>
+<p>Opening Petite Routine contacts three servers we do not own:
+<strong>GitHub Pages</strong> (hosts the site), <strong>Google Fonts</strong>
+(provides the typefaces) and <strong>jsDelivr</strong> (provides Supabase's
+technical library). Each receives the device's <strong>IP address</strong>.
+None of them receives your child's name — only Supabase stores it, and only to
+make syncing possible.</p>
+
+<h2>How long</h2>
+<p>The server keeps only the <strong>last fourteen days</strong> of history.
+Data on your phone stays as long as the app is installed and you do not clear
+the browser's site data. Server data remains until you ask us to delete it.</p>
+
+<h2>Your rights</h2>
+<p>You may ask to see, correct or delete your family's data. You can delete
+everything on the device by clearing site data in your browser settings; the
+parent area also lets you export a backup first. To delete server-side data,
+write to us with your family code <code>PR-XXXX</code>.</p>
+<p><strong>One limitation to know:</strong> since there is no account, we have
+no way to verify who you are other than the family code. Anyone who knows that
+code can reach the family's data and request its deletion. Keep it as you would
+keep a key.</p>
+
+<h2>Children</h2>
+<p>Petite Routine is designed to be used by a child <strong>together with their
+parent</strong>. The parent installs the app, enters the first name and decides
+whether to turn syncing on. We collect no data from the child directly, and the
+app contains no advertising, no purchases and no links out.</p>
+
+<footer>
+<p>Petite Routine — SXB Consulting · <a href="./">Retour à l'app</a></p>
+</footer>
+
+</body>
+</html>
