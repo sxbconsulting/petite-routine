@@ -665,7 +665,7 @@ function esc(s){
    par défaut d'une nouvelle famille sont écrites dans la langue choisie.
 ═══════════════════════════════════════════ */
 /* Version affichée dans les sauvegardes. À tenir alignée sur VERSION dans sw.js. */
-const VERSION_APP = "6.3.2";
+const VERSION_APP = "6.4.0";
 const LANGUES = ["fr","en"];
 function langueDuTelephone(){
   const l = String((navigator.languages && navigator.languages[0]) || navigator.language || "fr").toLowerCase();
@@ -2411,13 +2411,12 @@ async function pushChild(){
   const envoyees = modifsNonEnvoyees;
   setSyncDot("⟳");
   const maj = majEnfant(snap);
-  let { error } = await sb.from("pr_children").update(maj).eq("id", syncInfo.childId);
-  /* Filet : si la base refusait le prénom (contrainte inconnue d'ici), le reste
-     doit passer quand même — les étoiles comptent plus que l'étiquette. */
-  if(error && maj.name){
-    delete maj.name;
-    ({ error } = await sb.from("pr_children").update(maj).eq("id", syncInfo.childId));
-  }
+  /* SÉCURITÉ 29/10/2026 — plus aucune écriture directe dans la table. La
+     fonction pr_maj_enfant est la seule porte, et elle exige l'UUID de l'enfant.
+     Un prénom vide y laisse l'ancien en place : c'est ce qui remplace le filet
+     « renvoyer sans le prénom » d'avant, devenu sans objet. */
+  let { error } = await sb.rpc("pr_maj_enfant", {
+    p_enfant: syncInfo.childId, p_data: maj.data, p_nom: maj.name || null });
   if(error){
     setSyncDot(t("sync_offline"));
     if(retriesLeft > 0){
@@ -2430,6 +2429,8 @@ async function pushChild(){
     /* Une modification faite pendant l'aller-retour n'est pas dans cet envoi : elle reste à envoyer */
     if(modifsNonEnvoyees === envoyees) modifsNonEnvoyees = 0;
     setSyncDot(t("sync_ok"));
+    /* L'autre téléphone n'écoute plus la table : on lui pousse la donnée. */
+    diffuserMaj(snap);
   }
 }
 
@@ -2461,14 +2462,12 @@ async function rattraperServeur(){
    remettra le serveur à jour. Renvoie true si la réponse a été appliquée. */
 async function pullChild(siRienEnAttente){
   const enfant = syncInfo.childId;
-  const { data, error } = await sb.from("pr_children")
-    .select("id,name,data,pr_families(code)")
-    .eq("id", enfant).single();
+  const { data, error } = await sb.rpc("pr_lire_enfant", { p_enfant: enfant }).single();
   if(error || !data){ setSyncDot(t("sync_offline")); return false; }
   if(!syncInfo || syncInfo.childId !== enfant) return false;   /* enfant changé entre-temps */
   if(siRienEnAttente && modifsNonEnvoyees > 0) return false;
   syncInfo.childName = data.name;
-  if(data.pr_families) syncInfo.code = data.pr_families.code;
+  if(data.code) syncInfo.code = data.code;
   saveSyncInfo();
   const hasData = data.data && (data.data.config || data.data.stars || data.data.days);
   if(hasData) hydrate(data.data);
@@ -2485,18 +2484,31 @@ async function pullChild(siRienEnAttente){
 }
 
 let currentChannel = null;
+/* SÉCURITÉ 29/10/2026 — l'abonnement aux changements de table est mort avec la
+   RLS : Supabase n'envoie plus rien à un client qui n'a pas le droit de lire.
+   On passe au Broadcast — le téléphone qui enregistre pousse lui-même la donnée
+   sur un canal nommé par l'UUID de l'enfant. Même secret qu'avant, et plus
+   aucune lecture de table. */
 function subscribeChild(){
-  currentChannel = sb.channel("child-"+syncInfo.childId)
-    .on("postgres_changes",
-      { event:"UPDATE", schema:"public", table:"pr_children", filter:"id=eq."+syncInfo.childId },
-      (payload)=>{
-        const d = payload.new && payload.new.data;
-        /* AUDIT #1 — écho de notre propre envoi, reconnu par son marqueur */
-        if(d && d._rev && revsEnvoyees.indexOf(d._rev) !== -1) return;
-        hydrate(d);
-        render();
-      })
+  currentChannel = sb.channel("child-"+syncInfo.childId, { config:{ broadcast:{ self:false } } })
+    .on("broadcast", { event:"maj" }, ({ payload })=>{
+      const d = payload && payload.data;
+      if(!d) return;
+      /* AUDIT #1 — l'anti-écho reste indispensable : « self:false » ne couvre
+         pas un second onglet du même parent, le marqueur _rev si. */
+      if(d._rev && revsEnvoyees.indexOf(d._rev) !== -1) return;
+      hydrate(d);
+      render();
+    })
     .subscribe();
+}
+
+/* La diffusion est un confort : si elle échoue, l'envoi a déjà réussi et
+   rattraperServeur() remettra l'autre téléphone à jour à sa prochaine ouverture. */
+function diffuserMaj(snap){
+  if(!currentChannel) return;
+  try{ currentChannel.send({ type:"broadcast", event:"maj", payload:{ data: snap } }); }
+  catch(e){}
 }
 
 function setSyncDot(t){
@@ -2521,14 +2533,11 @@ async function createFamily(){
   onbMsg(t("onb_creating"));
   try{
     const code = makeCode();
-    const { data: fam, error: e1 } = await sb.from("pr_families")
-      .insert({ code: code }).select().single();
+    config.name = config.name || childName;
+    const { data: cree, error: e1 } = await sb.rpc("pr_creer_famille", {
+      p_code: code, p_nom: childName, p_data: localSnapshot() }).single();
     if(e1) throw e1;
-    const { data: child, error: e2 } = await sb.from("pr_children")
-      .insert({ family_id: fam.id, name: childName, data: (config.name = config.name || childName, localSnapshot()) })
-      .select().single();
-    if(e2) throw e2;
-    syncInfo = { familyId: fam.id, code: code, childId: child.id, childName: childName };
+    syncInfo = { familyId: cree.family_id, code: cree.code, childId: cree.child_id, childName: childName };
     saveSyncInfo(); saveConfig();
     subscribeChild();
     document.getElementById("onbCodeDisplay").textContent = code;
@@ -2544,18 +2553,16 @@ async function joinFamily(){
   if(code.length < 6){ onbMsg(t("onb_bad_code")); return; }
   document.getElementById("onbJoinBtn").disabled = true;
   onbMsg(t("onb_searching"));
-  const { data: fam, error } = await sb.from("pr_families")
-    .select("id,code").eq("code", code).single();
+  const { data: trouve, error } = await sb.rpc("pr_rejoindre", { p_code: code }).single();
   document.getElementById("onbJoinBtn").disabled = false;
-  if(error || !fam){ onbMsg(t("onb_code_unknown")); return; }
-  pendingFamily = fam;
+  if(error || !trouve){ onbMsg(t("onb_code_unknown")); return; }
+  pendingFamily = { id: trouve.family_id, code: trouve.code };
   await showChildrenStep();
 }
 
 async function showChildrenStep(){
   const famId = pendingFamily ? pendingFamily.id : syncInfo.familyId;
-  const { data: kids } = await sb.from("pr_children")
-    .select("id,name").eq("family_id", famId).order("created_at");
+  const { data: kids } = await sb.rpc("pr_enfants", { p_famille: famId });
   const list = document.getElementById("onbChildList");
   list.innerHTML = "";
   (kids||[]).forEach(k=>{
@@ -2603,8 +2610,8 @@ async function addChild(){
   const famId = pendingFamily ? pendingFamily.id : syncInfo.familyId;
   const fresh = { config: (()=>{ const c = defaultConfig(); c.name = name; return c; })(),
                   stars: {}, bank: {spent:0,purchases:[]}, days: {} };
-  const { data: child, error } = await sb.from("pr_children")
-    .insert({ family_id: famId, name: name, data: fresh }).select().single();
+  const { data: child, error } = await sb.rpc("pr_ajouter_enfant", {
+    p_famille: famId, p_nom: name, p_data: fresh }).single();
   if(error){ onbMsg(t("onb_error")); return; }
   document.getElementById("onbNewChild").value = "";
   await selectChild(child);
