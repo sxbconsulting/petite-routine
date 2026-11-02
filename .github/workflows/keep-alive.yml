@@ -29,9 +29,11 @@ jobs:
     steps:
       - name: Requête sur pr_families
         run: |
-          URL="https://xkdymodyzktowuixpbzo.supabase.co/rest/v1/pr_families?select=id&limit=1"
+          URL="https://xkdymodyzktowuixpbzo.supabase.co/rest/v1/rpc/pr_ping"
           # Clé anonyme : publique par conception, déjà visible dans index.html.
-          # La protection vient de la RLS, pas du secret. Voir PRD §15.
+          # Depuis le 29/10/2026 la RLS est réellement active : les tables sont
+          # fermées et seules les fonctions pr_* répondent. D'où l'appel à pr_ping
+          # plutôt qu'une lecture de table, qui échouerait désormais.
           KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhrZHltb2R5emt0b3d1aXhwYnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5NTk4MzIsImV4cCI6MjEwMDUzNTgzMn0.P7_hvtsU9xlxvQr1399IzdTsmRunV6aQM8pQG5KjcJ0"
 
           # Trois tentatives : un incident réseau passager ne doit pas

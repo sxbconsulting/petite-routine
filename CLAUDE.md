@@ -28,6 +28,7 @@ synchronisées entre les téléphones des parents par un **code famille**
 | `icon-*.png`, `apple-touch-icon.png`, `favicon.png` | Icônes |
 | `.github/workflows/keep-alive.yml` | Cron qui empêche Supabase de se mettre en veille |
 | `tests/` | Tests automatiques (voir plus bas) |
+| `supabase/` | La migration qui ferme les tables. À exécuter à la main, jamais servie |
 
 **Supabase** : tables `pr_families` (code) et `pr_children` (nom + colonne
 `data` en jsonb : config, étoiles, tirelire, 14 derniers jours). Projet
@@ -61,8 +62,12 @@ synchronisées entre les téléphones des parents par un **code famille**
    à la racine du domaine : un chemin absolu (`/icon.png`) casse tout. Vaut
    aussi pour le service worker, dont la portée dépend de son emplacement.
 4. **La clé anon Supabase reste dans le code.** Elle est publique par
-   conception, la protection vient de la RLS. Ne pas proposer de la « sécuriser »
-   par des variables d'environnement : GitHub Pages n'en a pas.
+   conception. Ne pas proposer de la « sécuriser » par des variables
+   d'environnement : GitHub Pages n'en a pas.
+   **Depuis la V6.4.0, la protection ne vient pas de la RLS seule** : les droits
+   d'`anon` sur les deux tables sont retirés, et seules les fonctions `pr_*`
+   (`SECURITY DEFINER`) répondent. Chacune exige un identifiant que seul un
+   membre de la famille possède. Voir `supabase/verrouillage-rls.sql`.
 5. **Pas de dépendance npm dans l'app.** Supabase est chargé par CDN. Seul le
    dossier `tests/` a des dépendances, et il n'est jamais servi.
 6. **Pas d'authentification par compte.** Le code famille `PR-XXXX` est un
@@ -108,7 +113,7 @@ Ne pas y toucher sans demande explicite.
 
 ## ÉTAT D'AVANCEMENT
 
-**En production : V6.3.2.** Tous les points de l'audit V6.2 sont corrigés.
+**En production : V6.4.0.** Tous les points de l'audit V6.2 sont corrigés.
 
 | Version | Commit | Contenu |
 |---|---|---|
@@ -124,10 +129,13 @@ Ne pas y toucher sans demande explicite.
 | V6.3.2 | `7ac4c6c` | Fin de l'audit V6.2, croix pour fermer l'espace parents |
 | Tests | `1346e9f` | Dossier `tests/` : 57 vérifications automatiques |
 | CLAUDE.md | `f02ade1` | Ce fichier, versionné dans le repo |
+| V6.4.0 | `ca0eba1` | Accès direct aux tables fermé, temps réel en Broadcast |
 
-Dernière vérification : 17/10/2026, 57 / 57 tests au vert, lancés sur le Mac.
-Le code de l'app (`index.html`, `sw.js`) n'a pas changé depuis la V6.3.2
-(`7ac4c6c`) ; les commits suivants ne touchent que `tests/` et ce fichier.
+Dernière vérification : 02/11/2026, 64 / 64 tests au vert, lancés sur le Mac.
+La V6.4.0 a modifié `index.html` et `sw.js` : la couche de données passe
+désormais par des fonctions, et le temps réel par Broadcast. La migration
+correspondante a été appliquée en production le 02/11/2026, en deux temps —
+création des fonctions, puis fermeture des tables.
 Aucune tâche en cours.
 (Ne pas citer ici le dernier commit : mettre ce fichier à jour en crée un
 nouveau, et la mention serait périmée aussitôt.)
@@ -285,6 +293,23 @@ rien.
   est défensif et renvoie `nil` — mais **le widget et les rappels deviendront
   muets en silence, sans erreur visible**. Si tu touches à l'une de ces sept
   globales, préviens le pont (`ios/PetiteRoutine/PontWeb.swift`).
+- **« La RLS est activée » ne prouve rien. Lis les politiques.** Pendant des
+  mois ce fichier affirmait que la protection venait de la RLS. Elle était bien
+  active sur les deux tables — avec, sur chacune, une politique
+  `PERMISSIVE / ALL / anon / using(true)` qui laissait tout passer : lecture,
+  écriture **et** suppression, pour quiconque disposait de la clé publique.
+  Relevé le 02/11/2026, jamais testé jusque-là.
+  La vérification tient en une requête :
+  `select tablename, policyname, roles, cmd, qual from pg_policies where schemaname='public';`
+  Une condition `true` sur le rôle `anon` est une porte ouverte, quel que soit
+  l'état de `relrowsecurity`. **Et ne jamais laisser une telle politique en
+  place « au cas où » : un simple `grant` ultérieur la réactive d'un coup.**
+- **Toute nouvelle requête serveur passe par une fonction `pr_*`.** Les tables
+  ne sont plus accessibles depuis le client. Ajouter un `.from("pr_…")` dans
+  l'app ne renverra qu'un 401 : il faut créer la fonction dans
+  `supabase/verrouillage-rls.sql`, l'appliquer, puis l'appeler par `.rpc()`.
+  `test-securite.js` vérifie que chaque fonction appelée existe bien dans la
+  migration.
 
 ## TESTS AUTOMATIQUES
 
@@ -312,8 +337,8 @@ node tests/lancer-tout.js synchro    # un seul fichier
   `chromium-<révision>` et `chromium_headless_shell-<révision>` — c'est le
   second que les tests lancent. La révision se lit dans
   `tests/node_modules/playwright-core/browsers.json`.
-- **Avant chaque mise en ligne : tout doit être vert** (57 / 57 au
-  17/10/2026).
+- **Avant chaque mise en ligne : tout doit être vert** (64 / 64 au
+  02/11/2026).
 - Une correction de bug s'accompagne d'un test qui échoue sur l'ancienne
   version et passe sur la nouvelle : `PR_APP=<dossier> node tests/lancer-tout.js`
   teste une autre copie de l'app.

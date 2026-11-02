@@ -82,7 +82,7 @@ async function telephone(navigateur, url, o = {}){
    éveillé, émetteur compris (c'est l'écho, que l'app doit reconnaître). */
 const MOCK = fs.readFileSync(path.join(__dirname, "mock-supabase.js"), "utf8");
 async function famille(navigateur, url){
-  const serveurFaux = { row: { id: "c1", name: "Léa", data: null, pr_families: { code: "PR-TEST" } },
+  const serveurFaux = { row: { id: "c1", name: "Léa", data: null, code: "PR-TEST" },
                         enfants: null, refuseNom: false };
   const phones = {};
   async function phone(nom){
@@ -94,23 +94,41 @@ async function famille(navigateur, url){
       const st = JSON.parse(json);
       const rep = (data, error) => JSON.stringify({ data, error });
       if (ph.offline) return rep(null, { message: "hors ligne" });
-      if (st.table === "pr_children" && st.op === "select" && st.filters.family_id)
-        return rep(serveurFaux.enfants || [{ id: "c1", name: serveurFaux.row.name }], null);
-      if (st.table === "pr_children" && st.op === "select")
-        return rep(JSON.parse(JSON.stringify(serveurFaux.row)), null);
-      if (st.table === "pr_children" && st.op === "update") {
-        if (st.values.name !== undefined) {
-          if (serveurFaux.refuseNom) return rep(null, { message: "contrainte" });
-          serveurFaux.row.name = st.values.name;
-        }
-        serveurFaux.row.data = st.values.data;
-        for (const p of Object.values(phones)) {
-          if (p.offline || p.endormi) continue;
-          const livrer = () => p.page.evaluate(d => { window.__rtcb && window.__rtcb({ new: { data: d } }); }, st.values.data).catch(() => {});
+
+      /* V6.4.0 — Broadcast : relayé aux AUTRES téléphones, jamais à l'émetteur,
+         comme le fait la configuration « self:false » du vrai client. */
+      if (st.broadcast) {
+        for (const [n, p] of Object.entries(phones)) {
+          if (n === nom || p.offline || p.endormi) continue;
+          const livrer = () => p.page.evaluate(m => { window.__rtcb && window.__rtcb(m); }, st.msg).catch(() => {});
           if (p.retardEcho) setTimeout(livrer, p.retardEcho); else livrer();
         }
         return rep(null, null);
       }
+
+      if (st.rpc === "pr_lire_enfant")
+        return rep(JSON.parse(JSON.stringify(serveurFaux.row)), null);
+
+      if (st.rpc === "pr_enfants")
+        return rep(serveurFaux.enfants || [{ id: "c1", name: serveurFaux.row.name }], null);
+
+      if (st.rpc === "pr_rejoindre")
+        return rep({ family_id: "f1", code: st.params.p_code }, null);
+
+      if (st.rpc === "pr_creer_famille")
+        return rep({ family_id: "f1", child_id: "c1", code: st.params.p_code }, null);
+
+      if (st.rpc === "pr_ajouter_enfant")
+        return rep({ id: "c2", name: st.params.p_nom }, null);
+
+      if (st.rpc === "pr_maj_enfant") {
+        /* Le coalesce du SQL : un prénom que la base ne peut pas stocker laisse
+           l'ancien en place, sans faire échouer l'envoi des étoiles. */
+        if (st.params.p_nom && !serveurFaux.refuseNom) serveurFaux.row.name = st.params.p_nom;
+        serveurFaux.row.data = st.params.p_data;
+        return rep(null, null);
+      }
+
       return rep(null, { message: "requête non simulée" });
     });
     await ctx.addInitScript(() => { try {
