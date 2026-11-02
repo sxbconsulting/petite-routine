@@ -135,6 +135,15 @@ $$;
 --  Les fonctions ci-dessus ne sont pas concernées, leur propriétaire traverse
 --  la RLS.
 
+-- Relevé le 02/11/2026 : la RLS était DÉJÀ active, mais deux politiques
+-- « PERMISSIVE / ALL / anon / using(true) » laissaient tout passer — lecture,
+-- écriture ET suppression. Ce n'était donc pas un oubli d'activation, mais une
+-- politique ouverte. On les retire : le retrait des droits ci-dessous suffirait
+-- à bloquer l'accès, mais laisser une telle politique en place serait une arme
+-- chargée — un simple grant ultérieur rouvrirait tout d'un coup.
+drop policy if exists anon_enfants  on public.pr_children;
+drop policy if exists anon_familles on public.pr_families;
+
 alter table public.pr_families enable row level security;
 alter table public.pr_children enable row level security;
 
