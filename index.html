@@ -358,6 +358,7 @@
   .rem-btn.ghost{background:#f0ecfa;color:#3a2e52}
   .rem-btn:active{transform:scale(.97)}
   .rem-note{font-family:'Nunito',sans-serif;font-size:12px;color:#7a6f96;line-height:1.5;margin-top:9px}
+  .rem-note a{color:var(--ink);font-weight:800}   /* sinon le bleu du navigateur casse la DA */
   .rem-status{font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;margin-top:8px;color:#4ecb8f}
   /* Pastille orange sur l'onglet quand l'heure est passée et la routine pas finie */
   .tab{position:relative}
@@ -477,6 +478,9 @@
       <button class="onb-btn" onclick="onbShow('join')" data-i18n="onb_join_btn">🔑 J'ai un code famille</button>
       <button class="onb-link" onclick="skipSync()" data-i18n="onb_skip">Essayer sans synchronisation</button>
       <br><button class="onb-link" onclick="changerLangue(LANG === 'fr' ? 'en' : 'fr')" data-i18n="onb_other_lang">🇬🇧 English version</button>
+      <!-- RGPD : l'information doit être accessible AVANT la collecte, donc avant
+           que le parent saisisse le prénom de son enfant. -->
+      <br><a class="onb-link" href="confidentialite.html" target="_blank" rel="noopener" data-i18n="onb_confid">Confidentialité</a>
     </div>
     <div class="onb-step" id="onb-create" style="display:none">
       <h2 data-i18n="onb_create_title">Créer la famille 🏠</h2>
@@ -615,6 +619,10 @@
         Restaurer remplace définitivement les données actuelles de cet enfant.
       </div>
     </div>
+    <div class="rem-note">
+      <span data-i18n="confid_note">Ce que l'app enregistre, où c'est stocké et comment le faire supprimer :</span>
+      <a href="confidentialite.html" target="_blank" rel="noopener" data-i18n="confid_lien">politique de confidentialité</a>
+    </div>
     <div class="sheet-actions">
       <button class="btn-reset" onclick="resetToday()" data-i18n="btn_reset">Remettre à zéro aujourd'hui</button>
       <button class="btn-save" onclick="saveParent()" data-i18n="btn_save">Enregistrer</button>
@@ -665,7 +673,7 @@ function esc(s){
    par défaut d'une nouvelle famille sont écrites dans la langue choisie.
 ═══════════════════════════════════════════ */
 /* Version affichée dans les sauvegardes. À tenir alignée sur VERSION dans sw.js. */
-const VERSION_APP = "6.4.0";
+const VERSION_APP = "6.4.1";
 const LANGUES = ["fr","en"];
 function langueDuTelephone(){
   const l = String((navigator.languages && navigator.languages[0]) || navigator.language || "fr").toLowerCase();
@@ -744,6 +752,9 @@ const T = {
     onb_create_btn: "🏠 Créer notre famille",
     onb_join_btn: "🔑 J'ai un code famille",
     onb_skip: "Essayer sans synchronisation",
+    onb_confid: "Confidentialité",
+    confid_note: "Ce que l'app enregistre, où c'est stocké et comment le faire supprimer :",
+    confid_lien: "politique de confidentialité",
     onb_other_lang: "🇬🇧 English version",
     onb_create_title: "Créer la famille 🏠",
     onb_create_sub: "Prénom (ou surnom) de votre enfant :",
@@ -881,6 +892,9 @@ const T = {
     onb_create_btn: "🏠 Create our family",
     onb_join_btn: "🔑 I have a family code",
     onb_skip: "Try without syncing",
+    onb_confid: "Privacy",
+    confid_note: "What the app stores, where it is kept and how to have it deleted:",
+    confid_lien: "privacy policy",
     onb_other_lang: "🇫🇷 Version française",
     onb_create_title: "Create your family 🏠",
     onb_create_sub: "Your child's first name (or nickname):",
